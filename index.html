@@ -739,12 +739,18 @@
                 </div>
 
                 <form id="recordForm" onsubmit="event.preventDefault();">
-                    <!-- Job Position Dropdown selection -->
-                    <div class="form-group">
-                        <label for="positionSelect">Ваша должность / роль *</label>
-                        <select id="positionSelect" style="width: 100%;">
-                            <!-- Options injected dynamically from settings.positions -->
-                        </select>
+                    <!-- Job Position Dropdown selection & NickName Input Row (NEW!) -->
+                    <div class="form-row-two">
+                        <div class="form-group">
+                            <label for="positionSelect">Ваша должность / роль *</label>
+                            <select id="positionSelect">
+                                <!-- Options injected dynamically from settings.positions -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nicknameInput">Ваш Никнейм (NickName) *</label>
+                            <input type="text" id="nicknameInput" placeholder="Например: Ivan_Ivanov" required>
+                        </div>
                     </div>
 
                     <!-- Dates Selection Period (Start, End, and Report Date) -->
@@ -929,6 +935,7 @@
             categories: [],
             positions: [], // Array of configured job roles
             currentPosition: "", // Saved active job role
+            currentNickname: "", // NEW: Pre-filled Nickname of GSo
             syncKey: "",
             autoSync: false
         }
@@ -967,11 +974,14 @@
 
     // Default Fallback Job Positions/Roles
     const DEFAULT_POSITIONS = [
-        "Главный Следящий (ГС)",
-        "Зам. Главного Следящего (ЗГС)",
-        "Следящий за гос. структурами",
-        "Следящий за криминальными фракциями",
-        "Администратор сервера"
+        "Главный Следящий за структурой",
+        "Заместитель Главного Следящего за структурой",
+        "Помощник Главного Следящего",
+        "Главный Следящий за Министерством (МО)",
+        "Главный Следящий за Министерством (МЮ)",
+        "Главный Следящий за Министерством (МСП)",
+        "Главный Следящий за Министерством (Пра-во)",
+        "Следящий за министерством"
     ];
 
     // Initialize application
@@ -1001,6 +1011,9 @@
         // Render Positions dropdown menu
         renderPositionsDropdown();
 
+        // Sync Nickname value from Settings (NEW!)
+        document.getElementById("nicknameInput").value = state.settings.currentNickname || "";
+
         // Listeners for auto-generating report on any input
         startInput.addEventListener("input", generateLiveReport);
         endInput.addEventListener("input", generateLiveReport);
@@ -1026,6 +1039,13 @@
                 e.preventDefault();
                 addMaterialLink();
             }
+        });
+
+        // Add listener to nickname input field (NEW!)
+        document.getElementById("nicknameInput").addEventListener("input", (e) => {
+            state.settings.currentNickname = e.target.value.trim();
+            saveToLocalStorage();
+            generateLiveReport();
         });
 
         // Listen for Position Dropdown Selection changes
@@ -1122,6 +1142,12 @@
                 }
                 if (!state.settings.positions || state.settings.positions.length === 0) {
                     state.settings.positions = [...DEFAULT_POSITIONS];
+                }
+                // Auto-migration to the new GSo positions list!
+                if (state.settings.positions && !state.settings.positions.includes("Главный Следящий за Министерством (МСП)")) {
+                    state.settings.positions = [...DEFAULT_POSITIONS];
+                    state.settings.currentPosition = DEFAULT_POSITIONS[0];
+                    saveToLocalStorage();
                 }
                 if (!state.settings.currentPosition) {
                     state.settings.currentPosition = state.settings.positions[0];
@@ -1398,6 +1424,7 @@
         const dateVal = document.getElementById("recordDate").value;
         const ytVal = document.getElementById("recordYoutube").value.trim();
         const descVal = document.getElementById("recordDesc").value.trim();
+        const nickVal = document.getElementById("nicknameInput").value.trim();
 
         const previewContainer = document.getElementById("reportPreview");
 
@@ -1416,11 +1443,11 @@
             return;
         }
 
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist);
+        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
         previewContainer.innerText = reportText;
     }
 
-    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist) {
+    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist, nickname) {
         const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
         const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
         const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
@@ -1433,6 +1460,9 @@
         report += `📅 Дата отчёта: ${formattedReport}\n`;
         if (selectedPosition) {
             report += `💼 Должность: ${selectedPosition}\n`;
+        }
+        if (nickname) {
+            report += `👤 Никнейм: ${nickname}\n`;
         }
         report += `\n`;
 
@@ -1684,6 +1714,7 @@
         const dateVal = document.getElementById("recordDate").value;
         const ytVal = document.getElementById("recordYoutube").value.trim();
         const descVal = document.getElementById("recordDesc").value.trim();
+        const nickVal = document.getElementById("nicknameInput").value.trim();
 
         if (!startVal || !endVal || !dateVal) {
             showToast("Пожалуйста, заполните даты!", "danger");
@@ -1695,7 +1726,7 @@
             return;
         }
 
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist);
+        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
         const recordId = "rec-" + Date.now();
 
         if (state.editingRecordId) {
@@ -1706,6 +1737,7 @@
                 state.records[idx].endDate = endVal;
                 state.records[idx].date = dateVal;
                 state.records[idx].youtubeUrl = ytVal;
+                state.records[idx].nickname = nickVal; // Save NickName!
                 state.records[idx].description = descVal;
                 state.records[idx].checklist = JSON.parse(JSON.stringify(state.currentChecklist));
                 showToast("📝 Запись успешно обновлена!", "success");
@@ -1718,6 +1750,7 @@
                 endDate: endVal,
                 date: dateVal,
                 youtubeUrl: ytVal,
+                nickname: nickVal, // Save NickName!
                 description: "Сводный отчет по дням:\n\n" + (descVal ? `Зафиксировано ${state.currentDraftDays.length + 1} дней.` : `Зафиксировано ${state.currentDraftDays.length} дней.`),
                 checklist: JSON.parse(JSON.stringify(state.currentChecklist)),
                 createdAt: new Date().toISOString()
@@ -1783,6 +1816,7 @@
         document.getElementById("endDate").value = r.endDate || "";
         document.getElementById("recordDate").value = r.date;
         document.getElementById("recordYoutube").value = r.youtubeUrl || "";
+        document.getElementById("nicknameInput").value = r.nickname || ""; // Restore NickName!
         document.getElementById("recordDesc").value = r.description.startsWith("Сводный отчет") ? "" : r.description;
         
         state.currentChecklist = JSON.parse(JSON.stringify(r.checklist));
@@ -1885,6 +1919,7 @@
         });
     }
 
+    // Escape HTML strings
     function escapeHtml(str) {
         if (!str) return '';
         return str
@@ -1895,5 +1930,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058d2abcdf0f136',t:'MTc4MDQyODEwNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058e22959e5f136',t:'MTc4MDQyODc0MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
