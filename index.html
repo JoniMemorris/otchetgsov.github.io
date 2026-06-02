@@ -1111,11 +1111,8 @@
             const savedState = localStorage.getItem("reportcraft_state_updated");
             if (savedState) {
                 const parsed = JSON.parse(savedState);
-                if (parsed.records && parsed.records.length > 0) {
+                if (parsed.records) {
                     state = parsed;
-                } else {
-                    state.records = [...MOCK_RECORDS];
-                    saveToLocalStorage();
                 }
                 
                 if (!state.settings) state.settings = {};
@@ -1130,17 +1127,18 @@
                     state.settings.currentPosition = state.settings.positions[0];
                 }
             } else {
-                state.records = [...MOCK_RECORDS];
+                // CLEAN START WITH ZERO DEMO RECORDS (AS REQUESTED!)
+                state.records = []; 
                 state.settings.theme = "deep-space";
                 state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
                 state.settings.positions = [...DEFAULT_POSITIONS];
                 state.settings.currentPosition = DEFAULT_POSITIONS[0];
                 saveToLocalStorage();
-                showToast("🎉 Добро пожаловать! Загружены демо-данные.", "info");
+                showToast("✨ База данных успешно инициализирована. Начните работу!", "info");
             }
         } catch (e) {
             console.error("Ошибка при чтении localStorage, загружаем чистый шаблон", e);
-            state.records = [...MOCK_RECORDS];
+            state.records = [];
         }
     }
 
@@ -1414,7 +1412,7 @@
         }
 
         if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0) && (!state.currentMaterials || state.currentMaterials.length === 0)) {
-            previewContainer.innerText = "Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени...";
+            previewContainer.innerText = "Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени......";
             return;
         }
 
@@ -1697,6 +1695,9 @@
             return;
         }
 
+        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist);
+        const recordId = "rec-" + Date.now();
+
         if (state.editingRecordId) {
             // Edit mode
             const idx = state.records.findIndex(r => r.id === state.editingRecordId);
@@ -1711,9 +1712,8 @@
             }
         } else {
             // Save mode
-            const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist);
             const newRecord = {
-                id: "rec-" + Date.now(),
+                id: recordId,
                 startDate: startVal,
                 endDate: endVal,
                 date: dateVal,
@@ -1726,12 +1726,32 @@
             showToast("🎉 Отчёт успешно сохранён в Архив!", "success");
         }
 
+        // --- NEW: AUTO SAVE TO PHYSICAL LOCAL reports/ FOLDER ---
+        const cleanDate = dateVal.replace(/-/g, '_');
+        const filename = `report_${cleanDate}_${state.editingRecordId || recordId}.txt`;
+        
+        fetch('http://localhost:3000/api/save-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: filename, content: reportText })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log("[Auto-Sync] Saved to folder: " + data.path);
+                showToast("🎉 Отчет сохранен и записан в папку reports/!", "success");
+            }
+        })
+        .catch(err => {
+            console.log("[Auto-Sync] Local folder server offline, saved only to browser localStorage.");
+        });
+
         // Reset drafts and materials on save
         state.currentDraftDays = [];
         state.currentMaterials = [];
         updateDraftButtonsVisibility();
 
-        // Trigger team cloud background push if enabled! (NEW!)
+        // Trigger team cloud background push if enabled!
         if (state.settings && state.settings.syncKey && state.settings.autoSync) {
             pushToCloudInBackground();
         }
@@ -1742,7 +1762,7 @@
         clearForm();
     }
 
-    // NEW: Background silent push to team cloud
+    // Background silent push to team cloud
     function pushToCloudInBackground() {
         const key = state.settings.syncKey;
         if (!key) return;
@@ -1875,5 +1895,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058ba90cd5d9db5',t:'MTc4MDQyNzExOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058d2abcdf0f136',t:'MTc4MDQyODEwNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
