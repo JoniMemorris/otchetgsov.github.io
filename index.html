@@ -756,6 +756,10 @@
             <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem; font-weight:700;">
                 <!-- Content injected dynamically -->
             </button>
+            <!-- Admin Panel Link -->
+            <a href="admin.html" class="btn btn-secondary" id="headerAdminLink" style="font-weight: 700; display: none; border-color: var(--warning); color: var(--warning); gap: 0.3rem;">
+                👑 Админ-Панель
+            </a>
             <!-- Settings button link -->
             <a href="settings.html" class="btn btn-secondary" style="font-weight: 700;">
                 ⚙️ Настройки
@@ -965,7 +969,7 @@
     </div>
 </div>
 
-<!-- Login Modal Overlay (D1/D2 Authorizer) -->
+<!-- Login Modal Overlay (Admin Authorizer) -->
 <div class="modal-overlay" id="loginModal">
     <div class="modal" style="max-width: 400px; text-align: center;">
         <div id="loginFormBlock">
@@ -976,22 +980,22 @@
                     <path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
                 </svg>
             </div>
-            <div class="modal-title">Повышение доступа до D2</div>
+            <div class="modal-title">Вход администратора</div>
             <div class="modal-body">
                 <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: center; line-height: 1.5;">
-                    Настройка интеграции ВК, изменение списка должностей и кастомизация чек-листов требуют прав уровня <b>D2 (Администратор)</b>.
+                    Настройка интеграции ВК, изменение списка должностей и кастомизация чек-листов требуют прав <b>Администратора</b>.
                 </p>
                 <div class="form-group" style="text-align: left;">
-                    <label for="adminPasswordInput">Введите Пароль доступа D2</label>
+                    <label for="adminPasswordInput">Введите пароль администратора</label>
                     <div class="password-field-wrap">
                         <svg class="key-mini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11.5 11.5 21 2"></path><path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
                         </svg>
-                        <input type="password" id="adminPasswordInput" placeholder="Пароль администратора... (демо: admin)" style="font-size: 0.95rem; padding: 0.7rem 0.95rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();attemptAdminLogin();}">
+                        <input type="password" id="adminPasswordInput" placeholder="Пароль администратора..." style="font-size: 0.95rem; padding: 0.7rem 0.95rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();attemptAdminLogin();}">
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary" onclick="attemptAdminLogin()" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem; font-weight:700;">
-                    🔑 Авторизовать доступ D2
+                    🔑 Войти как Администратор
                 </button>
             </div>
         </div>
@@ -1001,11 +1005,11 @@
                     <path d="M20 6 9 17l-5-5"></path>
                 </svg>
             </div>
-            <div class="modal-title">Уровень доступа: D2 👑</div>
+            <div class="modal-title">Администратор 👑</div>
             <div class="modal-body">
-                Вы успешно авторизованы с правами доступа <b>D2 (Администратор)</b>. Все настройки разблокированы.
+                Вы вошли как <b>Администратор</b>. Все настройки разблокированы.
                 <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; font-weight:700;">
-                    🔒 Понизить доступ до D1
+                    🔒 Выйти из профиля
                 </button>
             </div>
         </div>
@@ -1321,13 +1325,16 @@
     function applyRolePermissionsUI() {
         const role = state.settings.userRole || "user";
         const badge = document.getElementById("roleBadgeBtn");
+        const adminLink = document.getElementById("headerAdminLink");
         
         if (role === "admin") {
             badge.className = "btn btn-success btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; filter:drop-shadow(0 0 4px #10b981);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D2</span>`;
+            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; filter:drop-shadow(0 0 4px #10b981);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Администратор</span>`;
+            if (adminLink) adminLink.style.display = "inline-flex";
         } else {
             badge.className = "btn btn-secondary btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D1</span>`;
+            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Пользователь</span>`;
+            if (adminLink) adminLink.style.display = "none";
         }
     }
 
@@ -1355,14 +1362,14 @@
 
     function attemptAdminLogin() {
         const pass = document.getElementById("adminPasswordInput").value;
-        if (pass === "admin" || pass === "admin123") {
+        if (pass === "R3Zfd-75eU") {
             state.settings.userRole = "admin";
             saveToLocalStorage();
             applyRolePermissionsUI();
             closeLoginModal();
-            showToast("🔑 Уровень доступа успешно повышен до D2!", "success");
+            showToast("🔑 Вы вошли как Администратор!", "success");
         } else {
-            showToast("❌ Неверный пароль администратора!", "danger");
+            showToast("❌ Неверный пароль!", "danger");
         }
     }
 
@@ -1373,7 +1380,7 @@
         saveToLocalStorage();
         applyRolePermissionsUI();
         closeLoginModal();
-        showToast("🔒 Доступ понижен до уровня D1.", "info");
+        showToast("🔒 Вы вышли из профиля Администратора.", "info");
     }
 
     // --- Toast Notification Component ---
@@ -2099,65 +2106,8 @@
             .replace(/'/g, "&#039;");
     }
 
-    // --- ACCESS ROLE CONTROLLER FOR INDEX.HTML (NEW!) ---
-    function applyRolePermissionsUI() {
-        const role = state.settings.userRole || "user";
-        const badge = document.getElementById("roleBadgeBtn");
-        
-        if (role === "admin") {
-            badge.className = "btn btn-success btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; filter:drop-shadow(0 0 4px #10b981);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D2</span>`;
-        } else {
-            badge.className = "btn btn-secondary btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D1</span>`;
-        }
-    }
-
-    function openLoginModal() {
-        const modal = document.getElementById("loginModal");
-        const formBlock = document.getElementById("loginFormBlock");
-        const logoutBlock = document.getElementById("logoutFormBlock");
-
-        const role = state.settings.userRole || "user";
-        if (role === "admin") {
-            formBlock.style.display = "none";
-            logoutBlock.style.display = "block";
-        } else {
-            formBlock.style.display = "block";
-            logoutBlock.style.display = "none";
-            document.getElementById("adminPasswordInput").value = "";
-        }
-
-        modal.classList.add("active");
-    }
-
-    function closeLoginModal() {
-        document.getElementById("loginModal").classList.remove("active");
-    }
-
-    function attemptAdminLogin() {
-        const pass = document.getElementById("adminPasswordInput").value;
-        if (pass === "admin" || pass === "admin123") {
-            state.settings.userRole = "admin";
-            saveToLocalStorage();
-            applyRolePermissionsUI();
-            closeLoginModal();
-            showToast("👑 Уровень доступа успешно повышен до D2!", "success");
-        } else {
-            showToast("❌ Неверный пароль администратора!", "danger");
-        }
-    }
-
-    function executeLogout() {
-        state.settings.userRole = "user";
-        state.settings.autoSync = false; // Disable autosync on logout for safety
-        
-        saveToLocalStorage();
-        applyRolePermissionsUI();
-        closeLoginModal();
-        showToast("🔒 Доступ понижен до уровня D1.", "info");
-    }
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05946a599419d9a',t:'MTc4MDQzMjg1NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
