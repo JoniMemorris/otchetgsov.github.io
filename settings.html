@@ -101,13 +101,14 @@
         /* Header Style */
         header {
             display: flex;
-            justify-content: space-between;
+            justify-space-between: space-between;
             align-items: center;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
+            justify-content: space-between;
         }
 
         .header-title-container h1 {
@@ -343,7 +344,7 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 0.2rem;
+            padding: 0.2;
             border-radius: 4px;
             display: flex;
             align-items: center;
@@ -353,43 +354,6 @@
         .position-delete-btn:hover {
             color: var(--danger);
             background-color: var(--danger-bg);
-        }
-
-        /* Checklist categories editor styles */
-        .category-item-box {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .category-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 0.5rem;
-            gap: 1rem;
-        }
-
-        .category-editor-list {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 1rem;
-        }
-
-        .category-editor-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.4rem;
-            font-size: 0.85rem;
         }
 
         /* Switch toggle wrapper */
@@ -467,57 +431,6 @@
             transform: translateX(24px);
         }
 
-        /* Modal / Confirmation Popup styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 480px;
-            padding: 1.75rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: translateY(20px);
-            transition: transform 0.25s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: translateY(0);
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
         /* Toast notifications container */
         .toast-container {
             position: fixed;
@@ -577,11 +490,11 @@
     <header>
         <div class="header-title-container">
             <h1>⚙️ Настройки Системы</h1>
-            <p>Конфигурация тем оформления, должностей и командной синхронизации</p>
+            <p>Конфигурация тем оформления и командной синхронизации</p>
         </div>
         <div class="header-actions">
             <!-- Access Role Badge / Toggle (NEW!) -->
-            <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem;">
+            <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem; font-weight:700;">
                 <!-- Content injected dynamically -->
             </button>
             <!-- Go Back to index -->
@@ -625,74 +538,48 @@
         </div>
     </div>
 
-    <!-- SECTION 2: CHECKLIST CATEGORIES EDITOR (RESTRICTED TO ADMIN) -->
-    <div class="card" id="categoriesEditorCard">
+    <!-- SECTION 2: TEAM CLOUD SYNC -->
+    <div class="card">
         <div class="card-header">
             <h2 class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                Шаблоны категорий Чек-листов
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-.01M12 10h.01M8 10h.01M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2z"></path><path d="M4.34 16.24s1.66-1.24 1.66-2.24V11a6 6 0 0 1 12 0v3c0 1 1.66 2.24 1.66 2.24H4.34z"></path></svg>
+                ☁️ Облачная командная синхронизация
             </h2>
-            <span class="card-badge blue">Кастомизация</span>
+            <span class="card-badge blue">Команда</span>
         </div>
 
-        <div class="locked-badge-overlay" id="categoriesLockedBadge">
-            🔒 Доступ заблокирован. Пожалуйста, войдите в профиль Администратора для настройки шаблонов задач!
+        <div style="margin-bottom: 1.25rem; font-size: 0.875rem; color: var(--text-secondary);">
+            Синхронизируйте историю отчётов между разными пользователями и устройствами! Придумайте секретный командный код (например, <i>gso-team-secret-555</i>) и введите его на всех компьютерах.
         </div>
 
-        <div class="admin-only-content" id="categoriesEditorContent">
-            <div style="margin-bottom: 1.25rem; font-size: 0.875rem; color: var(--text-secondary);">
-                Создавайте категории для различных видов работ. Каждая категория содержит готовый набор шаблонов задач. Нажмите на категорию в Конструкторе, чтобы мгновенно загрузить её пункты.
-            </div>
+        <div class="form-group">
+            <label for="syncKeyInput">Секретный код совместного доступа (Ключ команды)</label>
+            <input type="text" id="syncKeyInput" placeholder="Введите секретное кодовое слово..." oninput="saveSyncKey()">
+        </div>
 
-            <!-- Add Category Form -->
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;" class="admin-action-field">
-                <input type="text" id="newCategoryName" placeholder="Новая категория (например: 🎨 Дизайн макетов)..." style="flex-grow: 1;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="addNewCategory()">➕ Создать</button>
+        <!-- Automatic Background cloud synchronization switch -->
+        <div class="switch-container" style="position:relative;">
+            <div class="switch-label-box">
+                <span class="switch-title">Авто-синхронизация при сохранении <span style="font-size:0.75rem; color:var(--danger);" id="autoSyncAdminOnlyText">(Только для D2)</span></span>
+                <span class="switch-desc">При сохранении нового отчета, база будет автоматически выгружаться в облако.</span>
             </div>
+            <label class="switch" id="autoSyncSwitchLabel">
+                <input type="checkbox" id="autoSyncSwitch" onchange="saveSyncKey()">
+                <span class="slider"></span>
+            </label>
+        </div>
 
-            <!-- Categories Editor list container -->
-            <div id="categoriesListContainer">
-                <!-- Categories injected dynamically -->
-            </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem;">
+            <button class="btn btn-secondary" id="pushCloudBtn" onclick="pushToCloud()" style="font-size:0.85rem; padding: 0.7rem 0.5rem;" title="Выгрузить ваши локальные отчеты в облако (Доступно только D2)">
+                📤 Выгрузить в облако
+            </button>
+            <button class="btn btn-primary" onclick="pullAndMergeFromCloud()" style="font-size:0.85rem; padding: 0.7rem 0.5rem; gap: 0.3rem;" title="Загрузить отчеты коллег и слить их со своими без потери данных (Доступно всем!)">
+                🔄 Слить базы (Умный импорт)
+            </button>
         </div>
     </div>
 
-    <!-- SECTION 3: ROLES / POSITIONS MANAGER (RESTRICTED TO ADMIN) -->
-    <div class="card" id="positionsEditorCard">
-        <div class="card-header">
-            <h2 class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                Список должностей (для ГСов / Следящих)
-            </h2>
-            <span class="card-badge blue">Кабинет</span>
-        </div>
-
-        <div class="locked-badge-overlay" id="positionsLockedBadge">
-            🔒 Доступ заблокирован. Войдите как Администратор для редактирования списка доступных должностей.
-        </div>
-
-        <div class="admin-only-content" id="positionsEditorContent">
-            <div style="margin-bottom: 1.25rem; font-size: 0.875rem; color: var(--text-secondary);">
-                Настройте список должностей/ролей. Выбранная вами должность будет автоматически выводиться в шапке вашего сгенерированного отчёта прямо под строкой даты.
-            </div>
-
-            <!-- Add Position form -->
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;" class="admin-action-field">
-                <input type="text" id="newPositionInput" placeholder="Добавить должность (например: ГС ГОСС, Следящий за Мафиями)..." style="flex-grow: 1;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="addNewPosition()">➕ Добавить</button>
-            </div>
-
-            <!-- Active positions list -->
-            <div class="position-manager-container">
-                <label style="margin-bottom: 0.75rem; display:block;">Ваш список должностей:</label>
-                <div id="positionsListContainer">
-                    <!-- Injected dynamically -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECTION 4: VK BOT INTEGRATION (RESTRICTED TO ADMIN) -->
+    <!-- SECTION 3: VK BOT INTEGRATION (LOCKED TO D2) -->
     <div class="card" id="vkCard">
         <div class="card-header">
             <h2 class="card-title">
@@ -703,7 +590,7 @@
         </div>
 
         <div class="locked-badge-overlay" id="vkLockedBadge">
-            🔒 Настройка бота заблокирована. Войдите как Администратор для редактирования токена и ID чата VK.
+            🔒 Настройка заблокирована. Пожалуйста, повысьте уровень доступа до D2 (Администратор) для настройки VK-бота.
         </div>
 
         <div class="admin-only-content" id="vkEditorContent">
@@ -724,76 +611,38 @@
             </button>
         </div>
     </div>
-
-    <!-- SECTION 5: TEAM CLOUD SYNC (PUBLIC READ, ADMIN WRITE) -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-.01M12 10h.01M8 10h.01M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2z"></path><path d="M4.34 16.24s1.66-1.24 1.66-2.24V11a6 6 0 0 1 12 0v3c0 1 1.66 2.24 1.66 2.24H4.34z"></path></svg>
-                ☁️ Облачная командная синхронизация
-            </h2>
-            <span class="card-badge blue">Команда</span>
-        </div>
-
-        <div style="margin-bottom: 1.25rem; font-size: 0.875rem; color: var(--text-secondary);">
-            Синхронизируйте историю отчётов между разными пользователями и устройствами! Придумайте секретный командный код (например, <i>gso-team-secret-555</i>) и введите его на всех компьютерах.
-        </div>
-
-        <div class="form-group">
-            <label for="syncKeyInput">Секретный код совместного доступа (Ключ команды)</label>
-            <input type="text" id="syncKeyInput" placeholder="Введите секретное кодовое слово..." oninput="saveSyncKey()">
-        </div>
-
-        <!-- Automatic Background cloud synchronization switch (LOCKED TO ADMIN) -->
-        <div class="switch-container" style="position:relative;">
-            <div class="switch-label-box">
-                <span class="switch-title">Авто-синхронизация при сохранении <span style="font-size:0.75rem; color:var(--danger);" id="autoSyncAdminOnlyText">(Только для Админа)</span></span>
-                <span class="switch-desc">При сохранении нового отчета, база будет автоматически выгружаться в облако.</span>
-            </div>
-            <label class="switch" id="autoSyncSwitchLabel">
-                <input type="checkbox" id="autoSyncSwitch" onchange="saveSyncKey()">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem;">
-            <button class="btn btn-secondary" id="pushCloudBtn" onclick="pushToCloud()" style="font-size:0.85rem; padding: 0.7rem 0.5rem;" title="Выгрузить ваши локальные отчеты в облако (Только для Админа)">
-                📤 Выгрузить в облако
-            </button>
-            <button class="btn btn-primary" onclick="pullAndMergeFromCloud()" style="font-size:0.85rem; padding: 0.7rem 0.5rem; gap: 0.3rem;" title="Загрузить отчеты коллег и слить их со своими без потери данных (Доступно всем!)">
-                🔄 Слить базы (Умный импорт)
-            </button>
-        </div>
-    </div>
 </div>
 
-<!-- Login Modal Overlay (NEW!) -->
+<!-- Login Modal Overlay (D1/D2 Authorizer) -->
 <div class="modal-overlay" id="loginModal">
-    <div class="modal" style="max-width: 380px;">
-        <div class="modal-title" id="loginModalTitle">Вход в систему</div>
-        <div class="modal-body">
-            <div id="loginFormBlock">
+    <div class="modal" style="max-width: 380px; text-align: center;">
+        <div id="loginFormBlock">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔓</div>
+            <div class="modal-title">Повышение доступа до D2</div>
+            <div class="modal-body">
                 <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
-                    Редактирование категорий чек-листов, интеграция VK и изменение должностей доступны только Администратору.
+                    Настройка интеграции ВК, изменение должностей и кастомизация чек-листов требуют прав уровня <b>D2 (Администратор)</b>.
                 </p>
                 <div class="form-group" style="text-align: left;">
-                    <label for="adminPasswordInput">Пароль Администратора</label>
-                    <input type="password" id="adminPasswordInput" placeholder="Введите пароль... (демо: admin)" style="font-size: 0.95rem; padding: 0.7rem 0.95rem;">
+                    <label for="adminPasswordInput">Введите Пароль доступа D2</label>
+                    <input type="password" id="adminPasswordInput" placeholder="Пароль администратора... (демо: admin)" style="font-size: 0.95rem; padding: 0.7rem 0.95rem;">
                 </div>
                 <button type="button" class="btn btn-primary" onclick="attemptAdminLogin()" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; font-weight:700;">
-                    🔓 Авторизоваться как Админ
-                </button>
-            </div>
-            <div id="logoutFormBlock" style="display: none; text-align: center;">
-                <p style="margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4;">
-                    Вы успешно авторизованы как <b>Администратор (👑)</b> и имеете полные права доступа!
-                </p>
-                <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; padding: 0.75rem; font-weight:700;">
-                    🔒 Выйти из профиля
+                    🔓 Авторизовать доступ D2
                 </button>
             </div>
         </div>
-        <div style="display:flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+        <div id="logoutFormBlock" style="display: none;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">👑</div>
+            <div class="modal-title">Уровень доступа: D2</div>
+            <div class="modal-body">
+                Вы успешно авторизованы с правами доступа <b>D2 (Администратор)</b>. Настройки разблокированы.
+                <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-weight:700;">
+                    🔒 Понизить доступ до D1
+                </button>
+            </div>
+        </div>
+        <div style="display:flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
             <button class="btn btn-secondary btn-sm" onclick="closeLoginModal()">Отмена</button>
         </div>
     </div>
@@ -812,56 +661,11 @@
             theme: "deep-space",
             vkToken: "",
             vkPeerId: "",
-            positions: [],
-            categories: [], // Checklist categories templates
             syncKey: "",
             autoSync: false,
-            userRole: "user" // NEW: Access role ('user' or 'admin')
+            userRole: "user" // Role level: 'user' (D1) or 'admin' (D2)
         }
     };
-
-    // Default Fallback Job Positions/Roles
-    const DEFAULT_POSITIONS = [
-        "Главный Следящий за структурой",
-        "Заместитель Главного Следящего за структурой",
-        "Помощник Главного Следящего",
-        "Главный Следящий за Министерством (МО)",
-        "Главный Следящий за Министерством (МЮ)",
-        "Главный Следящий за Министерством (МСП)",
-        "Главный Следящий за Министерством (Пра-во)",
-        "Следящий за министерством"
-    ];
-
-    // Default Fallback Categories
-    const DEFAULT_CATEGORIES = [
-        {
-            name: "💻 Разработка",
-            items: [
-                "Написать программный код",
-                "Провести рефакторинг",
-                "Проверить консоль на наличие ошибок",
-                "Закоммитить изменения в Git"
-            ]
-        },
-        {
-            name: "🧪 Тестирование",
-            items: [
-                "Проверить граничные значения",
-                "Протестировать адаптивность верстки",
-                "Проверить во всех целевых браузерах",
-                "Провести ручной тест пользовательских сценариев"
-            ]
-        },
-        {
-            name: "🚀 Деплой",
-            items: [
-                "Собрать продакшн-бандл проекта",
-                "Запустить автотесты на сервере сборки",
-                "Выполнить деплой на стейджинг/прод",
-                "Проверить логи ошибок после запуска"
-            ]
-        }
-    ];
 
     document.addEventListener("DOMContentLoaded", () => {
         loadFromLocalStorage();
@@ -878,28 +682,8 @@
         document.getElementById("syncKeyInput").value = state.settings.syncKey || "";
         document.getElementById("autoSyncSwitch").checked = state.settings.autoSync || false;
 
-        // Render positions manager
-        renderPositionsList();
-
-        // Render categories list manager
-        renderCategoriesManager();
-
-        // Apply access role permissions instantly on load
+        // Apply access role permissions instantly (NEW!)
         applyRolePermissionsUI();
-
-        // Bind enter key to positions input
-        document.getElementById("newPositionInput").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                addNewPosition();
-            }
-        });
-
-        // Bind enter key to positions input
-        document.getElementById("newCategoryName").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                addNewCategory();
-            }
-        });
     });
 
     function loadFromLocalStorage() {
@@ -909,25 +693,15 @@
                 state = JSON.parse(savedState);
                 if (!state.settings) state.settings = {};
                 if (!state.settings.theme) state.settings.theme = "deep-space";
-                if (!state.settings.userRole) state.settings.userRole = "user"; // default is user role
-                if (!state.settings.positions || state.settings.positions.length === 0) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                }
-                if (!state.settings.categories || state.settings.categories.length === 0) {
-                    state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-                }
+                if (!state.settings.userRole) state.settings.userRole = "user";
             } else {
                 state.settings.theme = "deep-space";
                 state.settings.userRole = "user";
-                state.settings.positions = [...DEFAULT_POSITIONS];
-                state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
             }
         } catch (e) {
             console.error("Ошибка при чтении localStorage", e);
             state.settings.theme = "deep-space";
             state.settings.userRole = "user";
-            state.settings.positions = [...DEFAULT_POSITIONS];
-            state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
         }
     }
 
@@ -951,16 +725,6 @@
     function applyTheme() {
         const root = document.documentElement;
         root.setAttribute("data-theme", state.settings.theme);
-
-        const themeIcon = document.getElementById("themeIcon");
-        if (state.settings.theme === "pure-light") {
-            themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
-        } else {
-            themeIcon.innerHTML = `
-                <circle cx="12" cy="12" r="5"></circle>
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
-            `;
-        }
     }
 
     function highlightActiveThemeCard() {
@@ -978,31 +742,21 @@
         saveToLocalStorage();
     }
 
-    // --- ACCESS ROLE CONTROLLERS (MOCK-PROOF SECURITY) ---
+    // --- ACCESS ROLE CONTROLLERS (🔑 D1 & D2 DYNAMIC PERMISSIONS) ---
     function applyRolePermissionsUI() {
         const role = state.settings.userRole || "user";
         const badge = document.getElementById("roleBadgeBtn");
         
-        // Render Header Role Badge
+        // Render Header Access Role Badge
         if (role === "admin") {
             badge.className = "btn btn-success btn-sm";
-            badge.innerHTML = `👑 Администратор <span style="font-size:0.7rem; opacity:0.8;">(Выйти)</span>`;
+            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; filter:drop-shadow(0 0 4px #10b981);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D2</span>`;
             
             // Unlock VK card
             document.getElementById("vkLockedBadge").style.display = "none";
             document.getElementById("vkEditorContent").style.opacity = "1";
             document.getElementById("vkTokenInput").removeAttribute("disabled");
             document.getElementById("vkPeerIdInput").removeAttribute("disabled");
-
-            // Unlock Positions Card
-            document.getElementById("positionsLockedBadge").style.display = "none";
-            document.getElementById("positionsEditorContent").style.opacity = "1";
-            document.getElementById("newPositionInput").removeAttribute("disabled");
-
-            // Unlock Categories Card
-            document.getElementById("categoriesLockedBadge").style.display = "none";
-            document.getElementById("categoriesEditorContent").style.opacity = "1";
-            document.getElementById("newCategoryName").removeAttribute("disabled");
 
             // Unlock Cloud Sync features
             document.getElementById("autoSyncAdminOnlyText").style.display = "none";
@@ -1013,23 +767,13 @@
             document.getElementById("pushCloudBtn").style.cursor = "pointer";
         } else {
             badge.className = "btn btn-secondary btn-sm";
-            badge.innerHTML = `👤 Пользователь <span style="font-size:0.7rem; opacity:0.8;">(Войти)</span>`;
+            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Доступ: D1</span>`;
 
             // Lock VK card
             document.getElementById("vkLockedBadge").style.display = "flex";
             document.getElementById("vkEditorContent").style.opacity = "0.2";
             document.getElementById("vkTokenInput").setAttribute("disabled", "true");
             document.getElementById("vkPeerIdInput").setAttribute("disabled", "true");
-
-            // Lock Positions Card
-            document.getElementById("positionsLockedBadge").style.display = "flex";
-            document.getElementById("positionsEditorContent").style.opacity = "0.2";
-            document.getElementById("newPositionInput").setAttribute("disabled", "true");
-
-            // Lock Categories Card
-            document.getElementById("categoriesLockedBadge").style.display = "flex";
-            document.getElementById("categoriesEditorContent").style.opacity = "0.2";
-            document.getElementById("newCategoryName").setAttribute("disabled", "true");
 
             // Lock Cloud Sync features (Read-only pull allowed, but push and autoSync are blocked!)
             document.getElementById("autoSyncAdminOnlyText").style.display = "inline";
@@ -1039,10 +783,6 @@
             document.getElementById("pushCloudBtn").style.opacity = "0.4";
             document.getElementById("pushCloudBtn").style.cursor = "not-allowed";
         }
-
-        // Re-render categories manager to disable delete/add buttons dynamically
-        renderCategoriesManager();
-        renderPositionsList();
     }
 
     function openLoginModal() {
@@ -1074,7 +814,7 @@
             saveToLocalStorage();
             applyRolePermissionsUI();
             closeLoginModal();
-            showToast("👑 Доступ Администратора успешно предоставлен!", "success");
+            showToast("🔑 Уровень доступа успешно повышен до D2!", "success");
         } else {
             showToast("❌ Неверный пароль администратора!", "danger");
         }
@@ -1088,200 +828,7 @@
         saveToLocalStorage();
         applyRolePermissionsUI();
         closeLoginModal();
-        showToast("🔒 Вы вышли из профиля Администратора. Режим Пользователя.", "info");
-    }
-
-    // --- POSITIONS MANAGER CONTROLLERS ---
-    function renderPositionsList() {
-        const container = document.getElementById("positionsListContainer");
-        container.innerHTML = "";
-
-        const isAdmin = (state.settings.userRole === "admin");
-
-        if (!state.settings.positions || state.settings.positions.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted); padding: 1rem 0; font-size: 0.85rem;">
-                    Список должностей пуст. Пожалуйста, добавьте свою первую должность выше!
-                </div>
-            `;
-            return;
-        }
-
-        state.settings.positions.forEach((pos, idx) => {
-            const row = document.createElement("div");
-            row.className = "position-row";
-            
-            // Delete button is only functional for admin
-            const deleteBtnHtml = isAdmin 
-                ? `<button type="button" class="position-delete-btn" onclick="deletePosition(${idx})" title="Удалить должность">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                   </button>`
-                : "";
-
-            row.innerHTML = `
-                <span>${escapeHtml(pos)}</span>
-                ${deleteBtnHtml}
-            `;
-            container.appendChild(row);
-        });
-    }
-
-    function addNewPosition() {
-        if (state.settings.userRole !== "admin") return;
-        const input = document.getElementById("newPositionInput");
-        const val = input.value.trim();
-        if (!val) return;
-
-        if (!state.settings.positions) state.settings.positions = [];
-        state.settings.positions.push(val);
-        input.value = "";
-
-        saveToLocalStorage();
-        renderPositionsList();
-        showToast("Должность добавлена в список!", "success");
-    }
-
-    function deletePosition(idx) {
-        if (state.settings.userRole !== "admin") return;
-        state.settings.positions.splice(idx, 1);
-        saveToLocalStorage();
-        renderPositionsList();
-        showToast("Должность удалена из списка", "danger");
-    }
-
-    // --- CHECKLIST CATEGORIES MANAGER CONTROLLERS ---
-    function renderCategoriesManager() {
-        const container = document.getElementById("categoriesListContainer");
-        container.innerHTML = "";
-
-        const isAdmin = (state.settings.userRole === "admin");
-
-        if (!state.settings.categories || state.settings.categories.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
-                    Вы удалили все категории. Создайте новую категорию выше!
-                </div>
-            `;
-            return;
-        }
-
-        state.settings.categories.forEach((cat, catIdx) => {
-            const catBox = document.createElement("div");
-            catBox.className = "category-item-box";
-
-            // If not admin, the category inputs are disabled
-            const disabledAttr = isAdmin ? "" : "disabled='true'";
-
-            let deleteCategoryBtn = isAdmin 
-                ? `<button class="btn btn-danger btn-sm" onclick="deleteEntireCategory(${catIdx})" style="padding: 0.25rem 0.5rem; font-size:0.75rem;">
-                        🗑️ Удалить категорию
-                    </button>`
-                : "";
-
-            let headerHtml = `
-                <div class="category-item-header">
-                    <input type="text" value="${escapeHtml(cat.name)}" ${disabledAttr} onchange="updateCategoryName(${catIdx}, this.value)" style="font-weight:700; font-size: 1rem; width: auto; flex-grow:1; background:transparent; border:none; border-bottom:1px solid transparent; padding: 0.2rem 0.5rem; border-radius:0;" onfocus="this.style.borderBottomColor='var(--primary)'" onblur="this.style.borderBottomColor='transparent'">
-                    ${deleteCategoryBtn}
-                </div>
-            `;
-
-            let listHtml = `<ul class="category-editor-list">`;
-            if (cat.items.length === 0) {
-                listHtml += `<li style="text-align:center; font-size:0.8rem; color:var(--text-muted); padding: 0.5rem 0;">В этой категории пока нет шаблонов задач. Добавьте их ниже!</li>`;
-            } else {
-                cat.items.forEach((item, itemIdx) => {
-                    const deleteItemBtn = isAdmin 
-                        ? `<button class="preset-delete-btn" onclick="deleteCategoryItem(${catIdx}, ${itemIdx})" title="Удалить задачу">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                           </button>`
-                        : "";
-
-                    listHtml += `
-                        <li class="category-editor-row">
-                            <span>${escapeHtml(item)}</span>
-                            ${deleteItemBtn}
-                        </li>
-                    `;
-                });
-            }
-            listHtml += `</ul>`;
-
-            let addInputHtml = isAdmin 
-                ? `
-                <div style="display:flex; gap:0.4rem;">
-                    <input type="text" id="add-item-input-${catIdx}" placeholder="Добавить пункт в эту категорию..." style="font-size:0.8rem; padding: 0.5rem 0.75rem;">
-                    <button class="btn btn-secondary btn-sm" onclick="addCategoryItem(${catIdx})" style="font-size:0.8rem; padding: 0.5rem 0.75rem;">➕ Добавить</button>
-                </div>`
-                : "";
-
-            catBox.innerHTML = headerHtml + listHtml + addInputHtml;
-            container.appendChild(catBox);
-
-            if (isAdmin) {
-                document.getElementById(`add-item-input-${catIdx}`).addEventListener("keypress", (e) => {
-                    if (e.key === "Enter") {
-                        addCategoryItem(catIdx);
-                    }
-                });
-            }
-        });
-    }
-
-    function addNewCategory() {
-        if (state.settings.userRole !== "admin") return;
-        const input = document.getElementById("newCategoryName");
-        const val = input.value.trim();
-        if (!val) return;
-
-        state.settings.categories.push({
-            name: val,
-            items: []
-        });
-
-        input.value = "";
-        saveToLocalStorage();
-        renderCategoriesManager();
-        showToast(`Категория "${val}" успешно создана!`, "success");
-    }
-
-    function updateCategoryName(catIdx, newName) {
-        if (state.settings.userRole !== "admin") return;
-        newName = newName.trim();
-        if (!newName) return;
-        state.settings.categories[catIdx].name = newName;
-        saveToLocalStorage();
-        showToast("Название категории обновлено", "success");
-    }
-
-    function deleteEntireCategory(catIdx) {
-        if (state.settings.userRole !== "admin") return;
-        const deletedName = state.settings.categories[catIdx].name;
-        state.settings.categories.splice(catIdx, 1);
-        saveToLocalStorage();
-        renderCategoriesManager();
-        showToast(`Категория "${deletedName}" удалена`, "danger");
-    }
-
-    function addCategoryItem(catIdx) {
-        if (state.settings.userRole !== "admin") return;
-        const input = document.getElementById(`add-item-input-${catIdx}`);
-        const text = input.value.trim();
-        if (!text) return;
-
-        state.settings.categories[catIdx].items.push(text);
-        input.value = "";
-        
-        saveToLocalStorage();
-        renderCategoriesManager();
-        showToast("Задача добавлена в шаблон категории!", "success");
-    }
-
-    function deleteCategoryItem(catIdx, itemIdx) {
-        if (state.settings.userRole !== "admin") return;
-        state.settings.categories[catIdx].items.splice(itemIdx, 1);
-        saveToLocalStorage();
-        renderCategoriesManager();
-        showToast("Задача удалена из шаблона категории", "danger");
+        showToast("🔒 Доступ понижен до уровня D1.", "info");
     }
 
     // --- CLOUD SYNCHRONIZATION CONTROLLERS (WITH SANDBOX OFFLINE FALLBACK SIMULATION) ---
@@ -1327,6 +874,7 @@
         })
         .catch(err => {
             console.warn(err);
+            // SANDBOX OFFLINE CAPTURE & SIMULATION REDIRECT!
             const confirmPushSim = confirm(
                 `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальная выгрузка в облако блокируется.\n\n` +
                 `При скачивании файлов на ваш компьютер и открытии в обычном браузере выгрузка по вашему ключу "${key}" работает на 100% без дополнительных настроек!\n\n` +
@@ -1390,7 +938,7 @@
                     state.records = mergedArray;
                     saveToLocalStorage();
 
-                    showToast(`🔄 Базы слиты! Добавлено новые отчёты от коллег.`, "success");
+                    showToast("🔄 Базы слиты! Добавлено новые отчёты от коллег.", "success");
 
                     // Re-push merged DB back if admin
                     if (state.settings.userRole === "admin") {
@@ -1422,7 +970,6 @@
                         endDate: "2026-05-29",
                         date: "2026-06-02",
                         youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        nickname: "Alex_Smi",
                         description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
                         checklist: [
                             { text: "Проверить отчеты лидеров фракций", completed: true },
@@ -1436,7 +983,6 @@
                         endDate: "2026-05-28",
                         date: "2026-06-01",
                         youtubeUrl: "",
-                        nickname: "Dmitry_K",
                         description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
                         checklist: [
                             { text: "Провести обзвон кандидатов на Армию", completed: true },
@@ -1482,62 +1028,6 @@
         }).catch(err => console.warn("Background push failed", err));
     }
 
-    // --- VK Connections test using JSONP script injection ---
-    function sendVkMessageViaJsonp(token, peerId, message, onComplete) {
-        const randomId = Math.floor(Math.random() * 1000000000);
-        const callbackName = 'vk_callback_settings_' + Math.floor(Math.random() * 1000000);
-        const scriptId = 'vk_script_settings_' + Date.now();
-
-        window[callbackName] = function(response) {
-            delete window[callbackName];
-            const scriptNode = document.getElementById(scriptId);
-            if (scriptNode) scriptNode.remove();
-            if (onComplete) onComplete(response);
-        };
-
-        const script = document.createElement('script');
-        script.id = scriptId;
-        
-        const encodedMessage = encodeURIComponent(message);
-        script.src = `https://api.vk.com/method/messages.send?peer_id=${peerId}&message=${encodedMessage}&random_id=${randomId}&access_token=${token}&v=5.131&callback=${callbackName}`;
-        
-        document.body.appendChild(script);
-
-        setTimeout(() => {
-            if (window[callbackName]) {
-                delete window[callbackName];
-                const node = document.getElementById(scriptId);
-                if (node) node.remove();
-                if (onComplete) onComplete({ error: { error_msg: "Таймаут запроса. Проверьте сеть или токен." } });
-            }
-        }, 8000);
-    }
-
-    function testVkConnection() {
-        if (state.settings.userRole !== "admin") return;
-        const token = document.getElementById("vkTokenInput").value.trim();
-        const peerId = document.getElementById("vkPeerIdInput").value.trim();
-
-        if (!token || !peerId) {
-            showToast("Пожалуйста, сначала заполните поля Токена и ID диалога!", "danger");
-            return;
-        }
-
-        showToast("Проверка связи с ВКонтакте...", "info");
-
-        const msg = "🔌 Тест соединения из раздела настроек Отчетность ГСов!\nБот настроен успешно, интеграция полностью исправна. 👍";
-
-        sendVkMessageViaJsonp(token, peerId, msg, (res) => {
-            if (res.response) {
-                showToast("⚡️ Соединение установлено! Тестовое сообщение отправлено в VK.", "success");
-            } else if (res.error) {
-                showToast("❌ Ошибка соединения VK: " + res.error.error_msg, "danger");
-            } else {
-                showToast("❌ Ошибка при отправке тестового сообщения", "danger");
-            }
-        });
-    }
-
     // Toast alerts helper
     function showToast(message, type = "success") {
         const container = document.getElementById("toastContainer");
@@ -1574,5 +1064,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05913bce85aec31',t:'MTc4MDQzMDc3MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
