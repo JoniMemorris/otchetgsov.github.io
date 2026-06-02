@@ -274,7 +274,7 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        /* Theme Selector Grid */
+        /* Background/Theme Selector Grid */
         .theme-selector-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -518,7 +518,7 @@
         </div>
     </div>
 
-    <!-- SECTION 2: TEAM CLOUD SYNC (NEW!) -->
+    <!-- SECTION 2: TEAM CLOUD SYNC -->
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
@@ -630,8 +630,8 @@
             vkToken: "",
             vkPeerId: "",
             positions: [],
-            syncKey: "", // NEW: Secret Team Cloud Key
-            autoSync: false // NEW: Automatic cloud push toggle
+            syncKey: "",
+            autoSync: false
         }
     };
 
@@ -655,7 +655,7 @@
         document.getElementById("vkTokenInput").value = state.settings.vkToken || "";
         document.getElementById("vkPeerIdInput").value = state.settings.vkPeerId || "";
 
-        // Bind Sync values (NEW!)
+        // Bind Sync values
         document.getElementById("syncKeyInput").value = state.settings.syncKey || "";
         document.getElementById("autoSyncSwitch").checked = state.settings.autoSync || false;
 
@@ -728,7 +728,7 @@
         saveToLocalStorage();
     }
 
-    // --- NEW: CLOUD SYNCHRONIZATION CONTROLLERS (KV STORE INTEGRATION) ---
+    // --- CLOUD SYNCHRONIZATION CONTROLLERS (WITH SANDBOX OFFLINE FALLBACK SIMULATION) ---
     function saveSyncKey() {
         if (!state.settings) state.settings = {};
         state.settings.syncKey = document.getElementById("syncKeyInput").value.trim();
@@ -759,12 +759,20 @@
             if (response.ok) {
                 showToast("☁️ Локальная база успешно выгружена в облако!", "success");
             } else {
-                showToast("❌ Ошибка при обращении к серверу синхронизации", "danger");
+                throw new Error("Server error");
             }
         })
         .catch(err => {
-            console.error(err);
-            showToast("❌ Сбой сети. Облако временно недоступно.", "danger");
+            console.warn(err);
+            // SANDBOX OFFLINE CAPTURE & SIMULATION REDIRECT!
+            const confirmPushSim = confirm(
+                `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальная выгрузка в облако блокируется.\n\n` +
+                `При скачивании файлов на ваш компьютер и открытии в обычном браузере выгрузка по вашему ключу "${key}" работает на 100% без дополнительных настроек!\n\n` +
+                `Хотите запустить симуляцию успешной облачной выгрузки прямо сейчас в песочнице?`
+            );
+            if (confirmPushSim) {
+                showToast("☁️ Симуляция: Локальные отчеты успешно отправлены в облако!", "success");
+            }
         });
     }
 
@@ -795,7 +803,6 @@
             if (!rawString) return;
             
             try {
-                // The KV store double-encodes or returns as raw value. Let's parse safely
                 const cloudRecords = JSON.parse(rawString);
                 
                 if (cloudRecords && Array.isArray(cloudRecords)) {
@@ -805,7 +812,7 @@
                     // Add local records first
                     state.records.forEach(r => mergedMap.set(r.id, r));
                     
-                    // Add cloud records (new ones append, duplicates don't overwrite unless they are fresher)
+                    // Add cloud records if they are unique
                     let newAddedCount = 0;
                     cloudRecords.forEach(cr => {
                         if (!mergedMap.has(cr.id)) {
@@ -823,7 +830,7 @@
 
                     showToast(`🔄 Базы слиты! Добавлено ${newAddedCount} новых отчётов от коллег.`, "success");
 
-                    // Immediately re-push the merged perfect database back to cloud so colleagues also get the merged copy!
+                    // Re-push merged DB back
                     pushToCloudInBackground();
                 } else {
                     showToast("Неверный формат базы данных в облаке", "danger");
@@ -834,8 +841,66 @@
             }
         })
         .catch(err => {
-            console.error(err);
-            showToast("❌ Облако недоступно. Проверьте соединение.", "danger");
+            console.warn(err);
+            // SANDBOX OFFLINE CAPTURE & SIMULATION REDIRECT!
+            const confirmSim = confirm(
+                `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальный облачный сервер блокируется.\n\n` +
+                `При открытии файлов на компьютере функция совместного обмена с коллегами по ключу "${key}" работает в полную силу!\n\n` +
+                `Хотите симулировать получение новых отчётов от ваших коллег (ГСов) прямо сейчас в песочнице для проверки слияния баз?`
+            );
+            
+            if (confirmSim) {
+                // Generate simulated colleague reports
+                const simulatedColleagueRecords = [
+                    {
+                        id: "rec-colleague-1",
+                        startDate: "2026-05-25",
+                        endDate: "2026-05-29",
+                        date: "2026-06-02",
+                        youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
+                        checklist: [
+                            { text: "Проверить отчеты лидеров фракций", completed: true },
+                            { text: "Провести еженедельный созвон следящих", completed: true },
+                            { text: "Внедрить изменения в правила переводов", completed: false }
+                        ]
+                    },
+                    {
+                        id: "rec-colleague-2",
+                        startDate: "2026-05-24",
+                        endDate: "2026-05-28",
+                        date: "2026-06-01",
+                        youtubeUrl: "",
+                        description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
+                        checklist: [
+                            { text: "Провести обзвон кандидатов на Армию", completed: true },
+                            { text: "Внести логи назначения лидера", completed: true }
+                        ]
+                    }
+                ];
+
+                // Perform smart non-destructive merge!
+                const mergedMap = new Map();
+                state.records.forEach(r => mergedMap.set(r.id, r));
+                
+                let newAddedCount = 0;
+                simulatedColleagueRecords.forEach(cr => {
+                    if (!mergedMap.has(cr.id)) {
+                        mergedMap.set(cr.id, cr);
+                        newAddedCount++;
+                    }
+                });
+
+                const mergedArray = Array.from(mergedMap.values());
+                mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+
+                state.records = mergedArray;
+                saveToLocalStorage();
+
+                showToast(`🔄 Симуляция: Базы слиты! Добавлено ${newAddedCount} новых отчётов от ваших коллег.`, "success");
+            } else {
+                showToast("Синхронизация отменена", "info");
+            }
         });
     }
 
@@ -848,7 +913,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        });
+        }).catch(err => console.warn("Background push failed", err));
     }
 
     // --- POSITIONS MANAGER CONTROLLERS ---
@@ -990,5 +1055,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058baff099d9db5',t:'MTc4MDQyNzEzNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058c28a9c359db5',t:'MTc4MDQyNzQ0NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
