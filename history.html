@@ -462,6 +462,10 @@
             <p>Хронологический архив всех сгенерированных вами отчётов</p>
         </div>
         <div class="header-actions">
+            <!-- Team Cloud Sync Button (NEW!) -->
+            <button class="btn btn-success" id="cloudSyncBtn" onclick="pullAndMergeFromCloud()" style="font-weight: 700; display: none; background-color: var(--success); border-color: var(--success);">
+                ☁️ Облачный Синхрон
+            </button>
             <!-- Go Back to index -->
             <a href="index.html" class="btn btn-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -522,6 +526,11 @@
         loadFromLocalStorage();
         applyTheme();
 
+        // Only display team sync button if syncKey is set (NEW!)
+        if (state.settings && state.settings.syncKey) {
+            document.getElementById("cloudSyncBtn").style.display = "inline-flex";
+        }
+
         // Attach theme toggler
         document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
 
@@ -552,6 +561,14 @@
         if (e.key === 'reportcraft_state_updated') {
             loadFromLocalStorage(); // Read new state from localStorage
             applyTheme(); // Restyle background instantly
+            
+            // Toggle Sync Button dynamically
+            if (state.settings && state.settings.syncKey) {
+                document.getElementById("cloudSyncBtn").style.display = "inline-flex";
+            } else {
+                document.getElementById("cloudSyncBtn").style.display = "none";
+            }
+
             filterAndRender(); // Re-filter and re-render history feed in real-time!
         }
     });
@@ -594,6 +611,79 @@
                 <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
             `;
         }
+    }
+
+    // --- NEW: TEAM CLOUD SYNC FOR ARCHIVE FEED ---
+    function pullAndMergeFromCloud() {
+        const key = state.settings.syncKey;
+        if (!key) return;
+
+        showToast("📥 Синхронизация и слияние с облаком...", "info");
+        const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
+
+        fetch(url)
+        .then(response => {
+            if (response.status === 404) {
+                showToast("☁️ Облачное хранилище пусто. Копируем локальную базу наверх...", "warning");
+                pushToCloudInBackground();
+                return null;
+            }
+            if (!response.ok) throw new Error("API Error");
+            return response.json();
+        })
+        .then(rawString => {
+            if (!rawString) return;
+            try {
+                const cloudRecords = JSON.parse(rawString);
+                if (cloudRecords && Array.isArray(cloudRecords)) {
+                    // Smart non-destructive merge logic
+                    const mergedMap = new Map();
+                    
+                    // Add local records first
+                    state.records.forEach(r => mergedMap.set(r.id, r));
+                    
+                    // Add cloud records if they are unique
+                    let newAddedCount = 0;
+                    cloudRecords.forEach(cr => {
+                        if (!mergedMap.has(cr.id)) {
+                            mergedMap.set(cr.id, cr);
+                            newAddedCount++;
+                        }
+                    });
+
+                    // Sort chronologically
+                    const mergedArray = Array.from(mergedMap.values());
+                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+
+                    state.records = mergedArray;
+                    saveToLocalStorage();
+                    filterAndRender(); // Update the chronological feed instantly!
+
+                    showToast(`🔄 Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
+
+                    // Immediately push merged result back
+                    pushToCloudInBackground();
+                }
+            } catch(e) {
+                console.error(e);
+                showToast("Ошибка разбора облачных данных", "danger");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("❌ Облако временно недоступно. Проверьте сеть.", "danger");
+        });
+    }
+
+    function pushToCloudInBackground() {
+        const key = state.settings.syncKey;
+        if (!key) return;
+        const data = JSON.stringify(state.records);
+        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).catch(err => console.warn("Background cloud sync failed", err));
     }
 
     // Filter Logic Engine
@@ -708,10 +798,11 @@
         navigator.clipboard.writeText(text).then(() => {
             showToast("Отчёт скопирован в буфер обмена!", "success");
         }).catch(() => {
-            showToast("Не удалось скопировать", "danger");
+            showToast("Нечего копировать", "danger");
         });
     }
 
+    // Download Single report
     function downloadSingleReport(date, text) {
         const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text);
         const anchor = document.createElement('a');
@@ -741,6 +832,11 @@
             hideConfirmDeleteModal();
             filterAndRender();
             showToast("Отчёт успешно удален из архива", "danger");
+            
+            // If auto-sync is enabled, push background update
+            if (state.settings && state.settings.syncKey && state.settings.autoSync) {
+                pushToCloudInBackground();
+            }
         }
     };
 
@@ -780,11 +876,10 @@
             .replace(/'/g, "&#039;");
     }
 
-    // Escape backticks for JS injection template strings
     function escapeBackticks(str) {
         if (!str) return '';
         return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
     }
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058b511ef5b9db5',t:'MTc4MDQyNjg5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
