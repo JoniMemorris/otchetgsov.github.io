@@ -267,7 +267,8 @@
 
         input[type="text"],
         input[type="date"],
-        textarea {
+        textarea,
+        select {
             width: 100%;
             padding: 0.75rem 1rem;
             background-color: var(--bg-secondary);
@@ -281,7 +282,8 @@
 
         input[type="text"]:focus,
         input[type="date"]:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
@@ -737,6 +739,14 @@
                 </div>
 
                 <form id="recordForm" onsubmit="event.preventDefault();">
+                    <!-- Job Position Dropdown selection -->
+                    <div class="form-group">
+                        <label for="positionSelect">Ваша должность / роль *</label>
+                        <select id="positionSelect" style="width: 100%;">
+                            <!-- Options injected dynamically from settings.positions -->
+                        </select>
+                    </div>
+
                     <!-- Dates Selection Period (Start, End, and Report Date) -->
                     <div class="form-row-three">
                         <div class="form-group">
@@ -763,7 +773,7 @@
                             <label>Добавить материалы (PR, Figma, Документы)</label>
                             <div style="display: flex; gap: 0.5rem;">
                                 <input type="text" id="materialUrlInput" placeholder="Ссылка (http...)" style="flex-grow: 2; font-size: 0.85rem;">
-                                <input type="text" id="materialTitleInput" placeholder="Название (например, Figma)" style="flex-grow: 1; font-size: 0.85rem;">
+                                <input type="text" id="materialTitleInput" placeholder="Название (Figma, GitHub)" style="flex-grow: 1; font-size: 0.85rem;">
                                 <button type="button" class="btn btn-primary btn-sm" onclick="addMaterialLink()" style="padding: 0.5rem 0.75rem;">➕</button>
                             </div>
                         </div>
@@ -910,13 +920,15 @@
         records: [],
         currentChecklist: [],
         currentDraftDays: [], // Stores multi-day recorded logs in progress
-        currentMaterials: [], // NEW: Stores custom links/documents added for the active editing day
+        currentMaterials: [], // Stores custom links/documents added for the active editing day
         editingRecordId: null,
         settings: {
             theme: "deep-space",
             vkToken: "",
             vkPeerId: "",
-            categories: []
+            categories: [],
+            positions: [], // Array of configured job roles
+            currentPosition: "" // Saved active job role
         }
     };
 
@@ -951,6 +963,15 @@
         }
     ];
 
+    // Default Fallback Job Positions/Roles
+    const DEFAULT_POSITIONS = [
+        "Главный Следящий (ГС)",
+        "Зам. Главного Следящего (ЗГС)",
+        "Следящий за гос. структурами",
+        "Следящий за криминальными фракциями",
+        "Администратор сервера"
+    ];
+
     // Initialize application
     document.addEventListener("DOMContentLoaded", () => {
         // Setup dates (start, end and report date)
@@ -974,6 +995,9 @@
 
         // Theme Setup
         applyTheme();
+
+        // Render Positions dropdown menu
+        renderPositionsDropdown();
 
         // Listeners for auto-generating report on any input
         startInput.addEventListener("input", generateLiveReport);
@@ -1002,6 +1026,13 @@
             }
         });
 
+        // Listen for Position Dropdown Selection changes
+        document.getElementById("positionSelect").addEventListener("change", (e) => {
+            state.settings.currentPosition = e.target.value;
+            saveToLocalStorage();
+            generateLiveReport();
+        });
+
         // Initial Renders
         renderCategories();
         renderChecklist();
@@ -1014,6 +1045,21 @@
 
         // Check for URL Parameter to Edit Single Record (seamless linking with history.html!)
         checkEditModeFromQuery();
+    });
+
+    // Native Cross-tab Real-time synchronization (CATCHES ALL CHANGES INSTANTLY!)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'reportcraft_state_updated') {
+            loadFromLocalStorage();
+            applyTheme();
+            renderCategories();
+            renderPositionsDropdown();
+            renderChecklist();
+            renderMaterials();
+            updateTopCountVisuals();
+            generateLiveReport();
+            updateDraftButtonsVisibility();
+        }
     });
 
     // --- Check if URL has ?edit=ID ---
@@ -1084,10 +1130,24 @@
                     state.records = [...MOCK_RECORDS];
                     saveToLocalStorage();
                 }
+                
+                if (!state.settings) state.settings = {};
+                if (!state.settings.theme) state.settings.theme = "deep-space";
+                if (!state.settings.categories || state.settings.categories.length === 0) {
+                    state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+                }
+                if (!state.settings.positions || state.settings.positions.length === 0) {
+                    state.settings.positions = [...DEFAULT_POSITIONS];
+                }
+                if (!state.settings.currentPosition) {
+                    state.settings.currentPosition = state.settings.positions[0];
+                }
             } else {
                 state.records = [...MOCK_RECORDS];
                 state.settings.theme = "deep-space";
                 state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+                state.settings.positions = [...DEFAULT_POSITIONS];
+                state.settings.currentPosition = DEFAULT_POSITIONS[0];
                 saveToLocalStorage();
                 showToast("🎉 Добро пожаловать! Загружены демо-данные.", "info");
             }
@@ -1112,6 +1172,27 @@
         } else {
             root.setAttribute("data-theme", "deep-space");
         }
+    }
+
+    // --- Render Dynamic Positions/Roles Select list ---
+    function renderPositionsDropdown() {
+        const select = document.getElementById("positionSelect");
+        if (!select) return;
+        select.innerHTML = "";
+
+        const positions = (state.settings && state.settings.positions && state.settings.positions.length > 0)
+            ? state.settings.positions
+            : DEFAULT_POSITIONS;
+
+        positions.forEach(pos => {
+            const opt = document.createElement("option");
+            opt.value = pos;
+            opt.innerText = pos;
+            if (state.settings.currentPosition === pos) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
     }
 
     // --- Toast Notification Component ---
@@ -1258,7 +1339,7 @@
         showToast("Пункт удален", "danger");
     }
 
-    // --- NEW: DYNAMIC MATERIALS LINKS MANAGER (FOR ADDING ADDITIONAL MATERIALS/PRs/FIGMAs PER DAY) ---
+    // --- DYNAMIC MATERIALS LINKS MANAGER (FOR ADDING ADDITIONAL MATERIALS/PRs/FIGMAs PER DAY) ---
     function renderMaterials() {
         const container = document.getElementById("materialsListContainer");
         container.innerHTML = "";
@@ -1345,7 +1426,7 @@
             modeBadge.className = "card-badge blue";
         }
 
-        if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0)) {
+        if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0) && (!state.currentMaterials || state.currentMaterials.length === 0)) {
             previewContainer.innerText = "Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени...";
             return;
         }
@@ -1358,11 +1439,17 @@
         const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
         const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
         const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
+        const positionSelect = document.getElementById("positionSelect");
+        const selectedPosition = positionSelect ? positionSelect.value : "";
 
         let report = `📝 ОТЧЁТ О ВЫПОЛНЕННОЙ РАБОТЕ\n\n`;
         report += `С ${formattedStart} по ${formattedEnd}\n\n`;
         report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        report += `📅 Дата отчёта: ${formattedReport}\n\n`;
+        report += `📅 Дата отчёта: ${formattedReport}\n`;
+        if (selectedPosition) {
+            report += `💼 Должность: ${selectedPosition}\n`;
+        }
+        report += `\n`;
 
         // If user is compiling a multi-day draft, display the logged days first!
         if (state.currentDraftDays && state.currentDraftDays.length > 0) {
@@ -1784,6 +1871,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a057034b8c60b4b5',t:'MTc4MDQwOTEyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
