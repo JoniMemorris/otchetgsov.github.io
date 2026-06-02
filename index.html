@@ -695,6 +695,51 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(120%); opacity: 0; }
         }
+
+        /* --- LOGIN / ACCESS KEY MODAL STYLES --- */
+        .login-key-circle {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 1.25rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, var(--primary), var(--primary-hover));
+            box-shadow: 0 0 0 8px var(--primary-glow), 0 10px 25px -5px rgba(0,0,0,0.4);
+            animation: keyPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .login-key-circle.success {
+            background: radial-gradient(circle at 30% 30%, #34d399, #059669);
+            box-shadow: 0 0 0 8px rgba(16,185,129,0.15), 0 10px 25px -5px rgba(0,0,0,0.4);
+        }
+        .login-key-circle svg {
+            width: 40px;
+            height: 40px;
+            stroke: #fff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+        }
+        @keyframes keyPop {
+            0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .password-field-wrap {
+            position: relative;
+        }
+        .password-field-wrap .key-mini {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-secondary);
+            pointer-events: none;
+        }
+        .password-field-wrap input {
+            padding-left: 2.6rem !important;
+        }
+
     </style>
 </head>
 <body>
@@ -922,29 +967,44 @@
 
 <!-- Login Modal Overlay (D1/D2 Authorizer) -->
 <div class="modal-overlay" id="loginModal">
-    <div class="modal" style="max-width: 380px; text-align: center;">
+    <div class="modal" style="max-width: 400px; text-align: center;">
         <div id="loginFormBlock">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔓</div>
+            <div class="login-key-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                    <path d="M11.5 11.5 21 2"></path>
+                    <path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
+                </svg>
+            </div>
             <div class="modal-title">Повышение доступа до D2</div>
             <div class="modal-body">
-                <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
+                <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: center; line-height: 1.5;">
                     Настройка интеграции ВК, изменение списка должностей и кастомизация чек-листов требуют прав уровня <b>D2 (Администратор)</b>.
                 </p>
                 <div class="form-group" style="text-align: left;">
                     <label for="adminPasswordInput">Введите Пароль доступа D2</label>
-                    <input type="password" id="adminPasswordInput" placeholder="Пароль администратора... (демо: admin)" style="font-size: 0.95rem; padding: 0.7rem 0.95rem;">
+                    <div class="password-field-wrap">
+                        <svg class="key-mini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11.5 11.5 21 2"></path><path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
+                        </svg>
+                        <input type="password" id="adminPasswordInput" placeholder="Пароль администратора... (демо: admin)" style="font-size: 0.95rem; padding: 0.7rem 0.95rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();attemptAdminLogin();}">
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="attemptAdminLogin()" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; font-weight:700;">
-                    🔓 Авторизовать доступ D2
+                <button type="button" class="btn btn-primary" onclick="attemptAdminLogin()" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem; font-weight:700;">
+                    🔑 Авторизовать доступ D2
                 </button>
             </div>
         </div>
         <div id="logoutFormBlock" style="display: none;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">👑</div>
-            <div class="modal-title">Уровень доступа: D2</div>
+            <div class="login-key-circle success">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+            </div>
+            <div class="modal-title">Уровень доступа: D2 👑</div>
             <div class="modal-body">
-                Вы успешно авторизованы с правами доступа <b>D2 (Администратор)</b>. Настройки разблокированы.
-                <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-weight:700;">
+                Вы успешно авторизованы с правами доступа <b>D2 (Администратор)</b>. Все настройки разблокированы.
+                <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; font-weight:700;">
                     🔒 Понизить доступ до D1
                 </button>
             </div>
@@ -2098,5 +2158,6 @@
         showToast("🔒 Доступ понижен до уровня D1.", "info");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a059131c6bcfec31',t:'MTc4MDQzMDc0NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
 </html>
