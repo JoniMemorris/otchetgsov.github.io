@@ -236,12 +236,6 @@
             border: 1px solid rgba(14, 165, 233, 0.3);
         }
 
-        .card-badge.orange {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
         /* Forms Elements */
         .form-group {
             margin-bottom: 1.25rem;
@@ -300,119 +294,6 @@
         .theme-option-card.active {
             border-color: var(--primary);
             background-color: var(--primary-glow);
-        }
-
-        /* Positions list item styling */
-        .position-manager-container {
-            border: 1px solid var(--border-color);
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 1.25rem;
-            border-radius: var(--radius-md);
-        }
-
-        .position-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.6rem 0.85rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-        }
-
-        .position-delete-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.2;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .position-delete-btn:hover {
-            color: var(--danger);
-            background-color: var(--danger-bg);
-        }
-
-        /* Switch toggle wrapper */
-        .switch-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            margin-bottom: 1.25rem;
-        }
-
-        .switch-label-box {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-        }
-
-        .switch-title {
-            font-size: 0.925rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .switch-desc {
-            font-size: 0.775rem;
-            color: var(--text-muted);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-            flex-shrink: 0;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--text-muted);
-            transition: .3s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
         }
 
         /* Toast notifications container */
@@ -474,7 +355,7 @@
     <header>
         <div class="header-title-container">
             <h1>⚙️ Настройки Системы</h1>
-            <p>Конфигурация тем оформления, должностей и командной синхронизации</p>
+            <p>Конфигурация тем оформления и командной синхронизации</p>
         </div>
         <div class="header-actions">
             <!-- Go Back to index -->
@@ -559,36 +440,7 @@
         </div>
     </div>
 
-    <!-- SECTION 3: ROLES / POSITIONS MANAGER -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                Список должностей (для ГСов / Следящих)
-            </h2>
-            <span class="card-badge blue">Кабинет</span>
-        </div>
-
-        <div style="margin-bottom: 1.25rem; font-size: 0.875rem; color: var(--text-secondary);">
-            Настройте список должностей/ролей. Выбранная вами должность будет автоматически выводиться в шапке вашего сгенерированного отчёта прямо под строкой даты.
-        </div>
-
-        <!-- Add Position form -->
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
-            <input type="text" id="newPositionInput" placeholder="Добавить должность (например: ГС ГОСС, Следящий за Мафиями)..." style="flex-grow: 1;">
-            <button type="button" class="btn btn-primary btn-sm" onclick="addNewPosition()">➕ Добавить</button>
-        </div>
-
-        <!-- Active positions list -->
-        <div class="position-manager-container">
-            <label style="margin-bottom: 0.75rem; display:block;">Ваш список должностей:</label>
-            <div id="positionsListContainer">
-                <!-- Injected dynamically -->
-            </div>
-        </div>
-    </div>
-
-    <!-- SECTION 4: VK BOT INTEGRATION -->
+    <!-- SECTION 3: VK BOT INTEGRATION -->
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
@@ -629,20 +481,10 @@
             theme: "deep-space",
             vkToken: "",
             vkPeerId: "",
-            positions: [],
             syncKey: "",
             autoSync: false
         }
     };
-
-    // Default Fallback Job Positions/Roles
-    const DEFAULT_POSITIONS = [
-        "Главный Следящий (ГС)",
-        "Зам. Главного Следящего (ЗГС)",
-        "Следящий за гос. структурами",
-        "Следящий за криминальными фракциями",
-        "Администратор сервера"
-    ];
 
     document.addEventListener("DOMContentLoaded", () => {
         loadFromLocalStorage();
@@ -658,16 +500,6 @@
         // Bind Sync values
         document.getElementById("syncKeyInput").value = state.settings.syncKey || "";
         document.getElementById("autoSyncSwitch").checked = state.settings.autoSync || false;
-
-        // Render positions manager
-        renderPositionsList();
-
-        // Bind enter key to positions input
-        document.getElementById("newPositionInput").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                addNewPosition();
-            }
-        });
     });
 
     function loadFromLocalStorage() {
@@ -677,17 +509,12 @@
                 state = JSON.parse(savedState);
                 if (!state.settings) state.settings = {};
                 if (!state.settings.theme) state.settings.theme = "deep-space";
-                if (!state.settings.positions || state.settings.positions.length === 0) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                }
             } else {
                 state.settings.theme = "deep-space";
-                state.settings.positions = [...DEFAULT_POSITIONS];
             }
         } catch (e) {
             console.error("Ошибка при чтении localStorage", e);
             state.settings.theme = "deep-space";
-            state.settings.positions = [...DEFAULT_POSITIONS];
         }
     }
 
@@ -828,7 +655,7 @@
                     state.records = mergedArray;
                     saveToLocalStorage();
 
-                    showToast(`🔄 Базы слиты! Добавлено ${newAddedCount} новых отчётов от коллег.`, "success");
+                    showToast("🔄 Базы слиты! Добавлено новые отчёты от коллег.", "success");
 
                     // Re-push merged DB back
                     pushToCloudInBackground();
@@ -858,6 +685,7 @@
                         endDate: "2026-05-29",
                         date: "2026-06-02",
                         youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        nickname: "Alex_Smi",
                         description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
                         checklist: [
                             { text: "Проверить отчеты лидеров фракций", completed: true },
@@ -871,6 +699,7 @@
                         endDate: "2026-05-28",
                         date: "2026-06-01",
                         youtubeUrl: "",
+                        nickname: "Dmitry_K",
                         description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
                         checklist: [
                             { text: "Провести обзвон кандидатов на Армию", completed: true },
@@ -914,54 +743,6 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }).catch(err => console.warn("Background push failed", err));
-    }
-
-    // --- POSITIONS MANAGER CONTROLLERS ---
-    function renderPositionsList() {
-        const container = document.getElementById("positionsListContainer");
-        container.innerHTML = "";
-
-        if (!state.settings.positions || state.settings.positions.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted); padding: 1rem 0; font-size: 0.85rem;">
-                    Список должностей пуст. Пожалуйста, добавьте свою первую должность выше!
-                </div>
-            `;
-            return;
-        }
-
-        state.settings.positions.forEach((pos, idx) => {
-            const row = document.createElement("div");
-            row.className = "position-row";
-            row.innerHTML = `
-                <span>${escapeHtml(pos)}</span>
-                <button type="button" class="position-delete-btn" onclick="deletePosition(${idx})" title="Удалить должность">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            `;
-            container.appendChild(row);
-        });
-    }
-
-    function addNewPosition() {
-        const input = document.getElementById("newPositionInput");
-        const val = input.value.trim();
-        if (!val) return;
-
-        if (!state.settings.positions) state.settings.positions = [];
-        state.settings.positions.push(val);
-        input.value = "";
-
-        saveToLocalStorage();
-        renderPositionsList();
-        showToast("Должность добавлена в список!", "success");
-    }
-
-    function deletePosition(idx) {
-        state.settings.positions.splice(idx, 1);
-        saveToLocalStorage();
-        renderPositionsList();
-        showToast("Должность удалена из списка", "danger");
     }
 
     // --- VK Connections test using JSONP script injection ---
@@ -1055,5 +836,5 @@
             .replace(/'/g, "&#039;");
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058c28a9c359db5',t:'MTc4MDQyNzQ0NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058e78f0f2cf136',t:'MTc4MDQyODk2MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
