@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчетность ГСов</title>
+    <title>Отчетность ГСов — История отчётов</title>
     <!-- CSS Styles embedded for offline iframe rendering and premium design -->
     <style>
         :root {
@@ -93,9 +93,8 @@
             line-height: 1.5;
         }
 
-        /* Container Layout */
         .container {
-            max-width: 1400px;
+            max-width: 800px; /* Centered, clean single-column max width */
             margin: 0 auto;
         }
 
@@ -132,7 +131,6 @@
             gap: 1rem;
         }
 
-        /* Global Theme Toggle Button */
         .btn-theme-toggle {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -155,145 +153,7 @@
             transform: scale(1.05);
         }
 
-        /* Dashboard Split Layout: Forms on Left, Generated Report on Right */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 1.75rem;
-            align-items: start;
-        }
-
-        @media (max-width: 1100px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Card styles */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 1.75rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
-        }
-
-        .card-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .card-badge.purple {
-            background-color: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-
-        .card-badge.green {
-            background-color: var(--success-bg);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .card-badge.blue {
-            background-color: rgba(14, 165, 233, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(14, 165, 233, 0.3);
-        }
-
-        .card-badge.orange {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        /* Forms Elements */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-row-two {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .form-row-three {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        @media (max-width: 768px) {
-            .form-row-three,
-            .form-row-two {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="date"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* Buttons styles */
+        /* Navigation Button */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -301,7 +161,7 @@
             gap: 0.5rem;
             font-weight: 600;
             font-size: 0.95rem;
-            padding: 0.75rem 1.25rem;
+            padding: 0.7rem 1.25rem;
             border-radius: var(--radius-md);
             cursor: pointer;
             border: 1px solid transparent;
@@ -331,13 +191,27 @@
             transform: translateY(-1px);
         }
 
-        .btn-vk {
-            background-color: #0077ff;
-            color: white !important;
+        .btn-danger {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
-        .btn-vk:hover {
-            background-color: #0062d4;
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success);
+            color: white;
             transform: translateY(-1px);
         }
 
@@ -347,305 +221,159 @@
             border-radius: var(--radius-sm);
         }
 
-        /* Checklist Component styles */
-        .checklist-container {
+        /* Search Input */
+        .search-panel {
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            background-color: rgba(0, 0, 0, 0.05);
             border-radius: var(--radius-md);
-            padding: 1rem;
-            margin-bottom: 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            box-shadow: var(--card-shadow);
         }
 
-        .checklist-input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist-presets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
-            margin-bottom: 1rem;
-        }
-
-        .preset-badge {
-            font-size: 0.75rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .preset-badge:hover {
+        input[type="text"]:focus,
+        input[type="password"]:focus {
             border-color: var(--primary);
-            color: var(--primary);
-            background-color: var(--primary-glow);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        .checklist-items-list {
-            list-style: none;
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 0.25rem;
-        }
-
-        /* Custom Scrollbar */
-        .checklist-items-list::-webkit-scrollbar,
-        textarea::-webkit-scrollbar {
-            width: 6px;
-        }
-        .checklist-items-list::-webkit-scrollbar-thumb,
-        textarea::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 10px;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0.75rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.5rem;
-            gap: 0.5rem;
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        .checklist-item-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-grow: 1;
-        }
-
-        .checkbox-custom {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--text-muted);
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: transparent;
-            transition: all 0.15s ease;
-        }
-
-        .checkbox-custom.checked {
-            border-color: var(--success);
-            background-color: var(--success);
-        }
-
-        .checkbox-custom.checked::after {
-            content: "✓";
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .checklist-item-text {
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            cursor: pointer;
-            word-break: break-all;
-        }
-
-        .checklist-item.checked .checklist-item-text {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .checklist-item-actions {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .btn-action-icon {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-        }
-
-        .btn-action-icon:hover {
-            color: var(--danger);
-            background-color: var(--danger-bg);
-        }
-
-        /* YouTube Preview styling */
-        .youtube-preview-box {
-            background-color: var(--bg-secondary);
-            border: 1px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 0.75rem;
-            margin-top: 0.75rem;
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .youtube-preview-box.active {
-            display: flex;
-        }
-
-        .youtube-thumbnail {
-            width: 100px;
-            height: 60px;
-            border-radius: var(--radius-sm);
-            object-fit: cover;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
-            border: 1px solid var(--border-color);
-        }
-
-        .youtube-info {
-            flex-grow: 1;
-            font-size: 0.85rem;
-        }
-
-        .youtube-info .title {
-            font-weight: 600;
-            color: var(--text-primary);
-            word-break: break-all;
-        }
-
-        .youtube-info .link {
-            color: var(--primary);
-            text-decoration: none;
-            word-break: break-all;
-            display: block;
-        }
-
-        /* Materials added list styling (Pills) */
-        .material-badge {
-            background-color: rgba(99, 102, 241, 0.15);
-            border: 1px solid var(--primary);
-            color: var(--text-primary);
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .material-badge-delete {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85rem;
-            display: inline-flex;
-        }
-
-        .material-badge-delete:hover {
-            color: var(--danger);
-        }
-
-        /* Report Output Generator Style */
-        .report-output-box {
-            background-color: rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            color: #38bdf8;
-            height: 620px; /* Balanced height with left side cards */
-            overflow-y: auto;
-            user-select: all;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .report-output-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            justify-content: flex-end;
-        }
-
-        .report-output-actions .btn {
-            flex-grow: 1;
-        }
-
-        /* Modal Overlay styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
+        /* DB Utilities Card (LOCKED TO ADMIN) */
+        .db-utilities-panel {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 480px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: translateY(20px);
-            transition: transform 0.25s ease;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            display: none; /* Controlled dynamically by role */
         }
 
-        .modal-overlay.active .modal {
-            transform: translateY(0);
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
         }
 
-        .modal-title {
-            font-size: 1.35rem;
+        @media (max-width: 900px) {
+            .db-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 500px) {
+            .db-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Report Feed Layout */
+        .history-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        /* Report Card Styling */
+        .report-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--card-shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .report-card-title {
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .modal-body {
-            font-size: 0.95rem;
+        .card-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-badge.purple {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Full report text box */
+        .report-text-block {
+            background-color: rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            font-family: monospace;
+            font-size: 0.925rem;
+            color: #38bdf8;
+            max-height: 380px;
+            overflow-y: auto;
+            margin-bottom: 1.25rem;
+            white-space: pre-wrap;
+            user-select: all;
+        }
+
+        /* Action bar for single card */
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.25rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 1rem;
+            background-color: var(--bg-card);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-lg);
             color: var(--text-secondary);
-            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
         }
 
-        /* Notifications Toast */
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            stroke: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Toast notifications container */
         .toast-container {
             position: fixed;
             bottom: 2rem;
@@ -678,8 +406,8 @@
         .toast.info { border-left-color: var(--info); }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideInRight {
@@ -695,6 +423,63 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(120%); opacity: 0; }
         }
+
+        /* Modal Overlay styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 480px;
+            padding: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -703,224 +488,73 @@
     <!-- Header -->
     <header>
         <div class="header-title-container">
-            <h1>📋 Отчетность ГСов</h1>
-            <p>Генератор отчётов и трекер задач разработчика</p>
+            <h1>📂 История отчётов</h1>
+            <p>Хронологический архив всех сгенерированных вами отчётов</p>
         </div>
         <div class="header-actions">
-            <!-- Access Role Badge / Toggle -->
+            <!-- Access Role Badge / Toggle (NEW!) -->
             <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem; font-weight:700;">
                 <!-- Content injected dynamically -->
             </button>
-            <!-- Settings button link -->
-            <a href="settings.html" class="btn btn-secondary" style="font-weight: 700;">
+            <!-- Team Cloud Sync Button -->
+            <button class="btn btn-success" id="cloudSyncBtn" onclick="pullAndMergeFromCloud()" style="font-weight: 700; display: none; background-color: var(--success); border-color: var(--success);">
+                ☁️ Облачный Синхрон
+            </button>
+            <!-- Local Folder Sync Button -->
+            <button class="btn btn-primary" id="folderSyncBtn" onclick="syncWithLocalFolder()" style="font-weight: 700; display: none; background-color: var(--primary); border-color: var(--primary);">
+                📂 Выгрузить в папку
+            </button>
+            <!-- Go Back to index -->
+            <a href="index.html" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Вернуться к Конструктору
+            </a>
+            <!-- Go to settings -->
+            <a href="settings.html" class="btn btn-secondary">
                 ⚙️ Настройки
             </a>
-            <!-- Full Archive Button on separate site -->
-            <a href="history.html" class="btn btn-secondary" style="font-weight: 700; border-color: var(--primary); color: var(--primary);">
-                📂 Архив отчётов
-            </a>
-            <!-- Fast Stat Badges -->
-            <div id="topStatsBadge" class="card-badge purple" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                Всего записей: <span id="topStatsCount">0</span>
-            </div>
+            <!-- Theme Toggle -->
+            <button class="btn-theme-toggle" id="themeToggleBtn" title="Переключить тему">
+                <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+            </button>
         </div>
     </header>
 
-    <!-- Main Grid Dashboard: Separated Cards -->
-    <div class="dashboard-grid">
-
-        <!-- LEFT COLUMN: INPUT FORM CARDS -->
-        <div class="left-column">
-            
-            <!-- CARD 1: NEW RECORD CARD (FORM INPUTS) -->
-            <div class="card" id="block1">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        Новая запись
-                    </h2>
-                    <span class="card-badge purple" id="constructorStatus">Новый отчёт</span>
-                </div>
-
-                <form id="recordForm" onsubmit="event.preventDefault();">
-                    <!-- Job Position Dropdown selection & NickName Input Row -->
-                    <div class="form-row-two">
-                        <div class="form-group">
-                            <label for="positionSelect">Ваша должность / роль *</label>
-                            <select id="positionSelect">
-                                <!-- Options injected dynamically from settings.positions -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="nicknameInput">Ваш Никнейм (NickName) *</label>
-                            <input type="text" id="nicknameInput" placeholder="Например: Ivan_Ivanov" required>
-                        </div>
-                    </div>
-
-                    <!-- Dates Selection Period (Start, End, and Report Date) -->
-                    <div class="form-row-three">
-                        <div class="form-group">
-                            <label for="startDate">Период С *</label>
-                            <input type="date" id="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="endDate">Период ПО *</label>
-                            <input type="date" id="endDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recordDate">Дата отчёта *</label>
-                            <input type="date" id="recordDate" required>
-                        </div>
-                    </div>
-
-                    <!-- YouTube Embed link and Materials & Documents Adder (PRs, Figma layouts) -->
-                    <div class="form-row-two">
-                        <div class="form-group">
-                            <label for="recordYoutube">Ссылка YouTube (демонстрация)</label>
-                            <input type="text" id="recordYoutube" placeholder="https://www.youtube.com/watch?v=...">
-                        </div>
-                        <div class="form-group">
-                            <label>Добавить материалы (PR, Figma, Документы)</label>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <input type="text" id="materialUrlInput" placeholder="Ссылка (http...)" style="flex-grow: 2; font-size: 0.85rem;">
-                                <input type="text" id="materialTitleInput" placeholder="Название (Figma, GitHub)" style="flex-grow: 1; font-size: 0.85rem;">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="addMaterialLink()" style="padding: 0.5rem 0.75rem;">➕</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Render added materials list pills -->
-                    <div id="materialsListContainer" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;">
-                        <!-- Injected dynamic tags of materials -->
-                    </div>
-
-                    <!-- YouTube Live Preview -->
-                    <div class="youtube-preview-box" id="ytPreview">
-                        <div class="youtube-thumbnail" id="ytThumbnail">
-                            🎥 YT
-                        </div>
-                        <div class="youtube-info">
-                            <div class="title" id="ytTitle">Видео готово к добавлению в отчёт</div>
-                            <a href="#" target="_blank" class="link" id="ytLink">Проверить ссылку</a>
-                        </div>
-                    </div>
-
-                    <!-- Description Textarea -->
-                    <div class="form-group">
-                        <label for="recordDesc">Описание выполненной работы *</label>
-                        <textarea id="recordDesc" placeholder="Что было сделано за этот день?..." required></textarea>
-                    </div>
-
-                    <!-- Multi-Day Compiler Action Row (Record Day, Rollback Day & Reset Draft) -->
-                    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 1.25rem;">
-                        <button type="button" class="btn btn-success" onclick="commitCurrentDayAndIncrement()" style="flex-grow: 3; padding: 0.85rem; font-weight: 700; background-color: var(--success); border-color: var(--success); gap: 0.4rem;" title="Сохраняет введенные данные в сводный отчет и переключает календарь на следующий день">
-                            📅 Зафиксировать день и перейти к следующему →
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" id="rollbackDayBtn" onclick="rollbackLastCommittedDay()" style="display: none; padding: 0.6rem 0.85rem; font-size: 0.85rem; flex-grow: 1;" title="Возвращает последний зафиксированный день обратно в форму для продолжения работы">
-                            ↩️ Вернуть день на доработку
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm" id="resetDraftBtn" onclick="resetMultiDayDraft()" style="display: none; padding: 0.6rem 0.85rem; font-size: 0.85rem; flex-grow: 1;" title="Сбросить все накопленные по дням тексты">
-                            🗑️ Сбросить сводный отчет
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- CARD 2: WORK CHECKLIST (DEDICATED SEPARATE CARD BELOW) -->
-            <div class="card" id="checklistBlock">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        Чек-лист работы
-                    </h2>
-                    <span class="card-badge blue">Задачи</span>
-                </div>
-
-                <div class="checklist-container">
-                    <!-- Categories (rendered dynamically based on settings) -->
-                    <label style="margin-bottom: 0.5rem; display: block; font-size: 0.8rem; font-weight:700; text-transform: uppercase; color: var(--text-muted);">
-                        📁 Выберите категорию для загрузки задач:
-                    </label>
-                    <div class="checklist-presets" id="categoriesContainer" style="margin-bottom: 1.25rem;">
-                        <!-- Injected dynamically -->
-                    </div>
-
-                    <!-- Input to add item -->
-                    <div class="checklist-input-group">
-                        <input type="text" id="newCheckItem" placeholder="Добавить свой пункт задачи... (Enter)">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="addChecklistItem()">Добавить</button>
-                    </div>
-
-                    <!-- Interactive List -->
-                    <ul class="checklist-items-list" id="checklistItems">
-                        <!-- Appended dynamically -->
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- RIGHT SIDE: LIVE GENERATED REPORT CARD (OUTPUT & EXPORTS) -->
-        <div class="card animate-fade-in" id="previewBlock">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Сгенерированный отчёт
-                </h2>
-                <span class="card-badge blue" id="previewModeBadge">Предпросмотр</span>
-            </div>
-
-            <!-- Live Output box -->
-            <div class="report-output-box" id="reportPreview">
-                Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени...
-            </div>
-
-            <!-- Report Operations -->
-            <div class="report-output-actions">
-                <button type="button" class="btn btn-secondary" onclick="clearForm()" title="Сбросить форму">
-                    ❌ Очистить
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="copyReportToClipboard()" title="Скопировать в буфер обмена">
-                    📋 Скопировать
-                </button>
-                <button type="button" class="btn btn-primary" onclick="saveRecord()" id="saveRecordBtn">
-                    💾 Сохранить в архив
-                </button>
-            </div>
-
-            <!-- VK Sending Action -->
-            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
-                <button type="button" class="btn btn-vk" onclick="sendReportToVk()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; padding: 0.85rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M22.28 5.3c.16-.54 0-.94-.77-.94h-2.54c-.65 0-.95.34-1.11.72 0 0-1.29 3.15-3.13 5.2-.6.59-.86.78-1.19.78-.16 0-.4-.19-.4-.73V5.3c0-.65-.18-.94-.74-.94H12c-.41 0-.66.3-.66.6 0 .61.92.75 1.01 2.46v3.71c0 .81-.15.96-.47.96-.86 0-2.95-3.17-4.19-6.81-.25-.72-.5-1.02-1.15-1.02H4c-.73 0-.88.34-.88.72 0 .68.87 4.07 4.05 8.52C9.29 17.5 12.3 19 15.02 19c1.63 0 1.83-.37 1.83-1V15.7c0-.73.15-.88.66-.88.38 0 1.03.19 2.54 1.65 1.73 1.73 2.01 2.53 2.99 2.53h2.54c.73 0 1.09-.37.88-1.1-.23-.72-1.06-1.77-1.44-2.22-.2-.25-.51-.51-.6-.64-.13-.16-.1-.23.08-.51.02-.02 1.82-2.57 2-3.48z"/></svg>
-                    Отправить отчёт в ВКонтакте
-                </button>
-            </div>
-
-        </div>
-
+    <!-- Simple Search Bar -->
+    <div class="search-panel">
+        <input type="text" id="searchKeyword" placeholder="🔍 Быстрый поиск в истории по дате, никнейму, роли или описанию..." oninput="filterAndRender()">
     </div>
-</div>
 
-<!-- Success Saved Modal PopUp -->
-<div class="modal-overlay" id="successModal">
-    <div class="modal" style="text-align: center; max-width: 440px;">
-        <div style="font-size: 3.5rem; margin-bottom: 0.75rem; animation: popScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🎉</div>
-        <div class="modal-title">Отчёт успешно сохранён!</div>
-        <div class="modal-body">
-            Ваш отчёт записан в базу данных и добавлен в архив. Вы можете в любой момент просмотреть, экспортировать или скопировать его на странице архива.
+    <!-- DB Utilities / Backup / Restore Panel (RESTRICTED TO ADMIN) -->
+    <div class="db-utilities-panel" id="dbAdminPanel">
+        <div class="filter-title" style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Администрирование & Управление базой данных
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
-            <button class="btn btn-primary" onclick="closeSuccessModal()">
-                ✍️ Написать новый отчёт
+        <div class="db-grid">
+            <button class="btn btn-secondary btn-sm" onclick="exportDataToJSON()">
+                💾 Скачать копию (JSON)
             </button>
-            <a href="history.html" class="btn btn-secondary">
-                📂 Перейти в архив отчётов
-            </a>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">
+                📂 Импортировать из JSON
+            </button>
+            <input type="file" id="importFile" accept=".json" onchange="importDataFromJSON(event)" style="display: none;">
+            <button class="btn btn-success btn-sm" onclick="loadMockDataAndRefresh()">
+                🔄 Загрузить демо-данные
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="showConfirmResetModal()">
+                ⚠️ Очистить всю базу
+            </button>
         </div>
+    </div>
+
+    <!-- History feed lists -->
+    <div class="history-feed" id="historyFeedContainer">
+        <!-- Injected dynamically -->
     </div>
 </div>
 
-<!-- Login Modal Overlay (NEW!) -->
+<!-- Login Modal Overlay -->
 <div class="modal-overlay" id="loginModal">
     <div class="modal" style="max-width: 380px; text-align: center;">
         <div id="loginFormBlock">
@@ -928,7 +562,7 @@
             <div class="modal-title">Авторизация Администратора</div>
             <div class="modal-body">
                 <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
-                    Редактирование категорий задач, изменение списка должностей и настроек ВК-бота требуют прав Администратора.
+                    Удаление отчетов, сброс базы данных и загрузка демо-данных требуют прав Администратора.
                 </p>
                 <div class="form-group" style="text-align: left;">
                     <label for="adminPasswordInput">Введите Пароль Администратора</label>
@@ -958,264 +592,93 @@
 <!-- Notification Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Core Javascript Logic -->
+<!-- Confirmation Delete Modal -->
+<div class="modal-overlay" id="confirmDeleteModal">
+    <div class="modal">
+        <div class="modal-title">Удалить этот отчёт?</div>
+        <div class="modal-body">
+            Вы уверены, что хотите удалить выбранный отчёт из истории? Это действие необратимо.
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="hideConfirmDeleteModal()">Отмена</button>
+            <button class="btn btn-danger btn-sm" id="confirmDeleteBtn">Да, удалить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Reset Modal -->
+<div class="modal-overlay" id="confirmResetModal">
+    <div class="modal">
+        <div class="modal-title">Сбросить всю базу данных?</div>
+        <div class="modal-body">
+            Это действие безвозвратно удалит все сохранённые отчёты и настройки во всей системе. Восстановление будет невозможно. Вы уверены?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="hideConfirmDeleteModal()">Отмена</button>
+            <button class="btn btn-danger btn-sm" onclick="resetAllDataAndClose()">Да, удалить всё</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Global Application State
+    // Local application state synced with main site
     let state = {
         records: [],
-        currentChecklist: [],
-        currentDraftDays: [], // Stores multi-day recorded logs in progress
-        currentMaterials: [], // Stores custom links/documents added for the active editing day
-        editingRecordId: null,
         settings: {
             theme: "deep-space",
+            userRole: "user",
             vkToken: "",
             vkPeerId: "",
-            categories: [],
-            positions: [], // Array of configured job roles
-            currentPosition: "", // Saved active job role
-            currentNickname: "", // Pre-filled Nickname of GSo
-            syncKey: "",
-            autoSync: false,
-            userRole: "user" // Active role ('user' or 'admin')
+            syncKey: ""
         }
     };
 
-    // Default Fallback Categories
-    const DEFAULT_CATEGORIES = [
-        {
-            name: "💻 Разработка",
-            items: [
-                "Написать программный код",
-                "Провести рефакторинг",
-                "Проверить консоль на наличие ошибок",
-                "Закоммитить изменения в Git"
-            ]
-        },
-        {
-            name: "🧪 Тестирование",
-            items: [
-                "Проверить граничные значения",
-                "Протестировать адаптивность верстки",
-                "Проверить во всех целевых браузерах",
-                "Провести ручной тест пользовательских сценариев"
-            ]
-        },
-        {
-            name: "🚀 Деплой",
-            items: [
-                "Собрать продакшн-бандл проекта",
-                "Запустить автотесты на сервере сборки",
-                "Выполнить деплой на стейджинг/прод",
-                "Проверить логи ошибок после запуска"
-            ]
-        }
-    ];
+    let filteredRecords = [];
+    let recordToDeleteId = null;
 
-    // Default Fallback Job Positions/Roles
-    const DEFAULT_POSITIONS = [
-        "Главный Следящий за структурой",
-        "Заместитель Главного Следящего за структурой",
-        "Помощник Главного Следящего",
-        "Главный Следящий за Министерством (МО)",
-        "Главный Следящий за Министерством (МЮ)",
-        "Главный Следящий за Министерством (МСП)",
-        "Главный Следящий за Министерством (Пра-во)",
-        "Следящий за министерством"
-    ];
-
-    // Initialize application
     document.addEventListener("DOMContentLoaded", () => {
-        // Setup dates (start, end and report date)
-        const dateInput = document.getElementById("recordDate");
-        const startInput = document.getElementById("startDate");
-        const endInput = document.getElementById("endDate");
-        
-        const todayObj = new Date();
-        const todayStr = todayObj.toISOString().split('T')[0];
-        
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(todayObj.getDate() - 7);
-        const startStr = sevenDaysAgo.toISOString().split('T')[0];
-
-        startInput.value = startStr;
-        endInput.value = todayStr;
-        dateInput.value = todayStr;
-
-        // Load storage or insert premium demo records if empty
         loadFromLocalStorage();
-
-        // Theme Setup
         applyTheme();
 
-        // Render Positions dropdown menu
-        renderPositionsDropdown();
+        // Sync team cloud button
+        if (state.settings && state.settings.syncKey) {
+            document.getElementById("cloudSyncBtn").style.display = "inline-flex";
+        }
 
-        // Render Access Badge in header (NEW!)
+        // Apply access role permissions instantly (NEW!)
         applyRolePermissionsUI();
 
-        // Sync Nickname value from Settings
-        document.getElementById("nicknameInput").value = state.settings.currentNickname || "";
+        // Check if local Node.js folder sync server is alive to show button!
+        fetch('http://localhost:3000/api/save-file', { method: 'OPTIONS' })
+        .then(() => {
+            document.getElementById("folderSyncBtn").style.display = "inline-flex";
+        })
+        .catch(() => {});
 
-        // Listeners for auto-generating report on any input
-        startInput.addEventListener("input", generateLiveReport);
-        endInput.addEventListener("input", generateLiveReport);
-        dateInput.addEventListener("input", generateLiveReport);
-        document.getElementById("recordYoutube").addEventListener("input", handleYoutubeInput);
-        document.getElementById("recordDesc").addEventListener("input", generateLiveReport);
-        document.getElementById("newCheckItem").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addChecklistItem();
-            }
-        });
+        // Automatically and silently pull/sync from cloud on load! (NO MANUAL CLICK REQUIRED!)
+        if (state.settings && state.settings.syncKey) {
+            pullAndMergeFromCloud(true); // silent pull
 
-        // Add Enter key trigger on Material inputs
-        document.getElementById("materialUrlInput").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addMaterialLink();
-            }
-        });
-        document.getElementById("materialTitleInput").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addMaterialLink();
-            }
-        });
+            // Poll background pull every 10 seconds silently!
+            setInterval(() => {
+                pullAndMergeFromCloud(true);
+            }, 10000);
+        }
 
-        // Add listener to nickname input field
-        document.getElementById("nicknameInput").addEventListener("input", (e) => {
-            state.settings.currentNickname = e.target.value.trim();
-            saveToLocalStorage();
-            generateLiveReport();
-        });
+        // Attach theme toggler
+        document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
 
-        // Listen for Position Dropdown Selection changes
-        document.getElementById("positionSelect").addEventListener("change", (e) => {
-            state.settings.currentPosition = e.target.value;
-            saveToLocalStorage();
-            generateLiveReport();
-        });
-
-        // Initial Renders
-        renderCategories();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        updateTopCountVisuals();
-
-        // Check draft buttons visibility on launch (handles refreshes)
-        updateDraftButtonsVisibility();
-
-        // Check for URL Parameter to Edit Single Record (seamless linking with history.html!)
-        checkEditModeFromQuery();
+        filterAndRender();
     });
-
-    // --- Check if URL has ?edit=ID ---
-    function checkEditModeFromQuery() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const editId = urlParams.get('edit');
-        if (editId) {
-            loadRecordToForm(editId);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }
-
-    // --- Mock Data Setup ---
-    const MOCK_RECORDS = [
-        {
-            id: "mock-1",
-            startDate: "2026-05-25",
-            endDate: "2026-06-01",
-            date: "2026-06-02",
-            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            description: "Разработка ядра системы аутентификации на основе JWT. Написал миграции базы данных для таблицы пользователей, создал сервис генерации токенов с шифрованием SHA-256 и покрыл интеграционными тестами методы авторизации.",
-            checklist: [
-                { text: "Создать миграции таблиц users", completed: true },
-                { text: "Разработать модуль JWT и шифрования", completed: true },
-                { text: "Реализовать Refresh & Access токены", completed: true },
-                { text: "Написать интеграционные тесты API", completed: false }
-            ],
-            createdAt: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-            id: "mock-2",
-            startDate: "2026-05-18",
-            endDate: "2026-05-22",
-            date: "2026-05-22",
-            youtubeUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-            description: "Интеграция API платежного эквайринга Stripe. Реализовал создание сессий оплаты, отслеживание вебхуков успешного заверления транзакции и автоматическую отправку чеков пользователям по электронной почте.",
-            checklist: [
-                { text: "Настроить SDK Stripe/эквайринга", completed: true },
-                { text: "Обработка вебхуков от банка", completed: true },
-                { text: "Провести успешную тестовую транзакцию", completed: true }
-            ],
-            createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
-        },
-        {
-            id: "mock-3",
-            startDate: "2026-05-11",
-            endDate: "2026-05-15",
-            date: "2026-05-15",
-            youtubeUrl: "",
-            description: "Оптимизация производительности интерфейса панели управления. Реализовал ленивую загрузку (lazy loading) тяжелых аналитических графиков, оптимизировал размер бандла JS и исправил триггеры повторного рендеринга списков.",
-            checklist: [
-                { text: "Запустить профайлер React/Chrome", completed: true },
-                { text: "Внедрить React.memo и ленивые компоненты", completed: true },
-                { text: "Сократить размер бандла на 15%", completed: false }
-            ],
-            createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
-        }
-    ];
 
     function loadFromLocalStorage() {
         try {
             const savedState = localStorage.getItem("reportcraft_state_updated");
             if (savedState) {
-                const parsed = JSON.parse(savedState);
-                if (parsed.records) {
-                    state = parsed;
-                }
-                
-                if (!state.settings) state.settings = {};
-                if (!state.settings.theme) state.settings.theme = "deep-space";
-                if (!state.settings.userRole) state.settings.userRole = "user"; // default is user role
-                if (!state.settings.positions || state.settings.positions.length === 0) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                }
-                if (!state.settings.categories || state.settings.categories.length === 0) {
-                    state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-                }
-                if (!state.settings.syncKey) {
-                    state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED KEY FOR COLLABORATIVE TEAM CLOUD! (NEW!)
-                    state.settings.autoSync = true; // Auto background push enabled by default!
-                }
-                // Auto-migration to the new GSo positions list!
-                if (state.settings.positions && !state.settings.positions.includes("Главный Следящий за Министерством (МСП)")) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                    state.settings.currentPosition = DEFAULT_POSITIONS[0];
-                    saveToLocalStorage();
-                }
-                if (!state.settings.currentPosition) {
-                    state.settings.currentPosition = state.settings.positions[0];
-                }
-            } else {
-                // CLEAN START WITH ZERO DEMO RECORDS (AS REQUESTED!)
-                state.records = []; 
-                state.settings.theme = "deep-space";
-                state.settings.userRole = "user";
-                state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-                state.settings.positions = [...DEFAULT_POSITIONS];
-                state.settings.currentPosition = DEFAULT_POSITIONS[0];
-                state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED TEAM ROOM CODE
-                state.settings.autoSync = true; // Enabled hands-free by default!
-                saveToLocalStorage();
-                showToast("✨ База данных успешно инициализирована. Начните работу!", "info");
+                state = JSON.parse(savedState);
             }
         } catch (e) {
-            console.error("Ошибка при чтении localStorage, загружаем чистый шаблон", e);
-            state.records = [];
+            console.error("Ошибка чтения localStorage в Архиве", e);
         }
     }
 
@@ -1223,765 +686,69 @@
         try {
             localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
         } catch (e) {
-            console.error("Не удалось сохранить в localStorage", e);
+            console.error("Ошибка записи localStorage", e);
         }
+    }
+
+    // Real-time synchronization across multiple open tabs/iframes!
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'reportcraft_state_updated') {
+            loadFromLocalStorage(); // Read new state from localStorage
+            applyTheme(); // Restyle background instantly
+            applyRolePermissionsUI(); // Update UI role locks instantly!
+            
+            // Toggle Sync Button dynamically
+            if (state.settings && state.settings.syncKey) {
+                document.getElementById("cloudSyncBtn").style.display = "inline-flex";
+            } else {
+                document.getElementById("cloudSyncBtn").style.display = "none";
+            }
+
+            filterAndRender(); // Re-filter and re-render history feed in real-time!
+        }
+    });
+
+    // Theme logic cycling through 5 themes on click
+    function toggleTheme() {
+        const themes = ['deep-space', 'polar-night', 'sunset-glow', 'neon-cyber', 'pure-light'];
+        let currentIdx = themes.indexOf(state.settings.theme);
+        if (currentIdx === -1) currentIdx = 0;
+        
+        const nextIdx = (currentIdx + 1) % themes.length;
+        state.settings.theme = themes[nextIdx];
+        
+        saveToLocalStorage();
+        applyTheme();
+        
+        const names = {
+            'deep-space': 'Глубокий Космос',
+            'polar-night': 'Полярная Ночь',
+            'sunset-glow': 'Теплый Закат',
+            'neon-cyber': 'Киберпанк',
+            'pure-light': 'Чистый Лист'
+        };
+        showToast(`Тема: ${names[state.settings.theme]}`, "info");
     }
 
     function applyTheme() {
         const root = document.documentElement;
-        if (state.settings && state.settings.theme) {
-            root.setAttribute("data-theme", state.settings.theme);
-        } else {
-            root.setAttribute("data-theme", "deep-space");
+        if (!state.settings || !state.settings.theme) {
+            state.settings = { theme: "deep-space" };
         }
-    }
+        root.setAttribute("data-theme", state.settings.theme);
 
-    // --- Render Dynamic Positions/Roles Select list ---
-    function renderPositionsDropdown() {
-        const select = document.getElementById("positionSelect");
-        if (!select) return;
-        select.innerHTML = "";
-
-        const positions = (state.settings && state.settings.positions && state.settings.positions.length > 0)
-            ? state.settings.positions
-            : DEFAULT_POSITIONS;
-
-        positions.forEach(pos => {
-            const opt = document.createElement("option");
-            opt.value = pos;
-            opt.innerText = pos;
-            if (state.settings.currentPosition === pos) {
-                opt.selected = true;
-            }
-            select.appendChild(opt);
-        });
-    }
-
-    // --- Toast Notification Component ---
-    function showToast(message, type = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-        toast.className = `toast ${type}`;
-        
-        let icon = "";
-        if (type === "success") {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        } else if (type === "danger") {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+        const themeIcon = document.getElementById("themeIcon");
+        if (state.settings.theme === "pure-light") {
+            themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
         } else {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-        }
-
-        toast.innerHTML = `${icon} <span>${message}</span>`;
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add("slide-fade-out");
-            toast.addEventListener("animationend", () => {
-                toast.remove();
-            });
-        }, 3000);
-    }
-
-    // --- YouTube URL Live Parser ---
-    function parseYoutubeId(url) {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    // Handle YouTube Input
-    function handleYoutubeInput() {
-        const url = document.getElementById("recordYoutube").value.trim();
-        const previewBox = document.getElementById("ytPreview");
-        const linkElem = document.getElementById("ytLink");
-        const thumbElem = document.getElementById("ytThumbnail");
-
-        const videoId = parseYoutubeId(url);
-        if (videoId) {
-            previewBox.classList.add("active");
-            linkElem.href = url;
-            thumbElem.style.backgroundImage = `url('https://img.youtube.com/vi/${videoId}/mqdefault.jpg')`;
-            thumbElem.style.backgroundSize = "cover";
-            thumbElem.style.backgroundPosition = "center";
-            thumbElem.innerText = "";
-            document.getElementById("ytTitle").innerText = `Обнаружено видео! ID: ${videoId}`;
-        } else {
-            previewBox.classList.remove("active");
-            thumbElem.style.backgroundImage = "none";
-            thumbElem.innerText = "🎥 YT";
-        }
-        generateLiveReport();
-    }
-
-    // --- Render Dynamic Checklist Categories tabs ---
-    function renderCategories() {
-        const container = document.getElementById("categoriesContainer");
-        container.innerHTML = "";
-
-        const categories = (state.settings && state.settings.categories && state.settings.categories.length > 0)
-            ? state.settings.categories
-            : DEFAULT_CATEGORIES;
-
-        categories.forEach(cat => {
-            const span = document.createElement("span");
-            span.className = "preset-badge";
-            span.innerText = cat.name;
-            span.onclick = () => loadCategoryChecklist(cat);
-            container.appendChild(span);
-        });
-    }
-
-    function loadCategoryChecklist(category) {
-        state.currentChecklist = category.items.map(text => {
-            return { text: text, completed: false };
-        });
-
-        renderChecklist();
-        generateLiveReport();
-        showToast(`Загружен шаблон категории: ${category.name}`, "success");
-    }
-
-    // --- Checklist Interactive Handler ---
-    function renderChecklist() {
-        const container = document.getElementById("checklistItems");
-        container.innerHTML = "";
-
-        if (state.currentChecklist.length === 0) {
-            container.innerHTML = `
-                <li style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">
-                    Чек-лист пуст. Выберите категорию выше или впишите свои задачи вручную!
-                </li>
+            themeIcon.innerHTML = `
+                <circle cx="12" cy="12" r="5"></circle>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
             `;
-            return;
         }
-
-        state.currentChecklist.forEach((item, index) => {
-            const li = document.createElement("li");
-            li.className = `checklist-item ${item.completed ? 'checked' : ''}`;
-
-            li.innerHTML = `
-                <div class="checklist-item-left">
-                    <div class="checkbox-custom ${item.completed ? 'checked' : ''}" onclick="toggleChecklistItem(${index})"></div>
-                    <span class="checklist-item-text" onclick="toggleChecklistItem(${index})">${escapeHtml(item.text)}</span>
-                </div>
-                <div class="checklist-item-actions">
-                    <button class="btn-action-icon" onclick="deleteChecklistItem(${index})" title="Удалить">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
-            container.appendChild(li);
-        });
     }
 
-    function addChecklistItem() {
-        const input = document.getElementById("newCheckItem");
-        const text = input.value.trim();
-        if (!text) return;
-
-        state.currentChecklist.push({ text: text, completed: false });
-        input.value = "";
-        renderChecklist();
-        generateLiveReport();
-        showToast("Пункт добавлен в чек-лист", "success");
-    }
-
-    function toggleChecklistItem(index) {
-        state.currentChecklist[index].completed = !state.currentChecklist[index].completed;
-        renderChecklist();
-        generateLiveReport();
-    }
-
-    function deleteChecklistItem(index) {
-        state.currentChecklist.splice(index, 1);
-        renderChecklist();
-        generateLiveReport();
-        showToast("Пункт удален", "danger");
-    }
-
-    // --- DYNAMIC MATERIALS LINKS MANAGER (FOR ADDING ADDITIONAL MATERIALS/PRs/FIGMAs PER DAY) ---
-    function renderMaterials() {
-        const container = document.getElementById("materialsListContainer");
-        container.innerHTML = "";
-
-        if (!state.currentMaterials || state.currentMaterials.length === 0) {
-            return; // keep it hidden if no links added
-        }
-
-        state.currentMaterials.forEach((m, idx) => {
-            const badge = document.createElement("span");
-            badge.className = "material-badge";
-            badge.innerHTML = `
-                🔗 <b>${escapeHtml(m.title)}</b>
-                <button type="button" class="material-badge-delete" onclick="deleteMaterialLink(${idx})" title="Удалить ссылку">×</button>
-            `;
-            container.appendChild(badge);
-        });
-    }
-
-    function addMaterialLink() {
-        const urlInput = document.getElementById("materialUrlInput");
-        const titleInput = document.getElementById("materialTitleInput");
-
-        let url = urlInput.value.trim();
-        let title = titleInput.value.trim();
-
-        if (!url) {
-            showToast("Пожалуйста, введите URL-ссылку на материал!", "danger");
-            urlInput.focus();
-            return;
-        }
-
-        // Auto prepend protocol if missing
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'https://' + url;
-        }
-
-        // Auto extract a beautiful clean title if left blank
-        if (!title) {
-            try {
-                const domain = new URL(url).hostname.replace('www.', '');
-                title = domain.split('.')[0];
-                title = title.charAt(0).toUpperCase() + title.slice(1);
-            } catch(e) {
-                title = "Материал";
-            }
-        }
-
-        if (!state.currentMaterials) state.currentMaterials = [];
-        state.currentMaterials.push({ title: title, url: url });
-
-        urlInput.value = "";
-        titleInput.value = "";
-
-        renderMaterials();
-        generateLiveReport();
-        showToast("Дополнительный материал добавлен!", "success");
-    }
-
-    function deleteMaterialLink(idx) {
-        state.currentMaterials.splice(idx, 1);
-        renderMaterials();
-        generateLiveReport();
-        showToast("Ссылка на материал удалена", "danger");
-    }
-
-    // --- Report Formatter / Engine using the EXACT requested layout ---
-    function generateLiveReport() {
-        const startVal = document.getElementById("startDate").value;
-        const endVal = document.getElementById("endDate").value;
-        const dateVal = document.getElementById("recordDate").value;
-        const ytVal = document.getElementById("recordYoutube").value.trim();
-        const descVal = document.getElementById("recordDesc").value.trim();
-        const nickVal = document.getElementById("nicknameInput").value.trim();
-
-        const previewContainer = document.getElementById("reportPreview");
-
-        // Set live badge text depending on mode
-        const modeBadge = document.getElementById("previewModeBadge");
-        if (state.currentDraftDays && state.currentDraftDays.length > 0) {
-            modeBadge.innerText = `Сводный (${state.currentDraftDays.length} дней зафиксировано)`;
-            modeBadge.className = "card-badge green";
-        } else {
-            modeBadge.innerText = "Предпросмотр";
-            modeBadge.className = "card-badge blue";
-        }
-
-        if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0) && (!state.currentMaterials || state.currentMaterials.length === 0)) {
-            previewContainer.innerText = "Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени......";
-            return;
-        }
-
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
-        previewContainer.innerText = reportText;
-    }
-
-    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist, nickname) {
-        const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
-        const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
-        const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
-        const positionSelect = document.getElementById("positionSelect");
-        const selectedPosition = positionSelect ? positionSelect.value : "";
-
-        let report = `📝 ОТЧЁТ О ВЫПОЛНЕННОЙ РАБОТЕ\n\n`;
-        report += `С ${formattedStart} по ${formattedEnd}\n\n`;
-        report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        report += `📅 Дата отчёта: ${formattedReport}\n`;
-        if (selectedPosition) {
-            report += `💼 Должность: ${selectedPosition}\n`;
-        }
-        if (nickname) {
-            report += `👤 Никнейм: ${nickname}\n`;
-        }
-        report += `\n`;
-
-        // If user is compiling a multi-day draft, display the logged days first!
-        if (state.currentDraftDays && state.currentDraftDays.length > 0) {
-            report += `🛠️ ВЫПОЛНЕННЫЕ ЗАДАЧИ ПО ДНЯМ:\n\n`;
-            
-            state.currentDraftDays.forEach((day, index) => {
-                const formattedDayDate = day.date ? day.date.split('-').reverse().join('.') : "__.__.____";
-                report += `📅 ДЕНЬ ${index + 1}: ${formattedDayDate}\n`;
-                if (day.youtube) {
-                    report += `🎥 Видео: ${day.youtube}\n`;
-                }
-                report += `📝 Работа: ${day.description}\n`;
-                
-                // Print additional materials if exist for this day
-                if (day.materials && day.materials.length > 0) {
-                    report += `🔗 Доп. материалы:\n`;
-                    day.materials.forEach(m => {
-                        report += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-
-                if (day.checklist && day.checklist.length > 0) {
-                    report += `📋 Чек-лист выполненных задач:\n`;
-                    day.checklist.forEach(item => {
-                        const status = item.completed ? "[x]" : "[ ]";
-                        report += `  ${status} ${item.text}\n`;
-                    });
-                }
-                report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            });
-
-            // Pre-render the currently active typing day as a draft "in progress" at the bottom
-            if (description || (state.currentMaterials && state.currentMaterials.length > 0)) {
-                const formattedDayDate = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
-                report += `⏳ ТЕКУЩИЙ ДЕНЬ (В ПРОЦЕССЕ ЗАПОЛНЕНИЯ): ${formattedDayDate}\n`;
-                if (youtube) report += `🎥 Видео: ${youtube}\n`;
-                report += `📝 Работа: ${description || "—"}\n`;
-                
-                if (state.currentMaterials && state.currentMaterials.length > 0) {
-                    report += `🔗 Доп. материалы:\n`;
-                    state.currentMaterials.forEach(m => {
-                        report += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-
-                if (checklist && checklist.length > 0) {
-                    report += `📋 Чек-лист:\n`;
-                    checklist.forEach(item => {
-                        const status = item.completed ? "[x]" : "[ ]";
-                        report += `  ${status} ${item.text}\n`;
-                    });
-                }
-            }
-        } else {
-            // Default Classic Single Day format
-            report += `🎥 ВИДЕО ДЕМОНСТРАЦИЯ:\n`;
-            report += `🔗 ${youtube ? youtube : ""}\n\n`;
-
-            if (state.currentMaterials && state.currentMaterials.length > 0) {
-                report += `🔗 ДОПОЛНИТЕЛЬНЫЕ МАТЕРИАЛЫ:\n`;
-                state.currentMaterials.forEach(m => {
-                    report += `- ${m.title}: ${m.url}\n`;
-                });
-                report += `\n`;
-            }
-
-            report += `🛠️ ОПИСАНИЕ ВЫПОЛНЕННЫХ ЗАДАЧ:\n`;
-            report += `${description}\n`;
-
-            if (checklist && checklist.length > 0) {
-                report += `\n📋 СТАТУС ВЫПОЛНЕНИЯ ПОДЗАДАЧ:\n`;
-                checklist.forEach(item => {
-                    const statusBox = item.completed ? "[x]" : "[ ]";
-                    report += `${statusBox} ${item.text}\n`;
-                });
-            }
-        }
-
-        return report;
-    }
-
-    // --- MULTI-DAY BUILDER ACTIONS WITH MATERIALS SUPPORT ---
-    function commitCurrentDayAndIncrement() {
-        const descInput = document.getElementById("recordDesc");
-        const descVal = descInput.value.trim();
-
-        if (!descVal) {
-            showToast("Пожалуйста, заполните описание выполненной работы за текущий день перед фиксацией!", "danger");
-            descInput.focus();
-            return;
-        }
-
-        const dateInput = document.getElementById("recordDate");
-        const ytInput = document.getElementById("recordYoutube");
-
-        // Create logged day object containing ALL daily data (including checklist & extra links!)
-        const loggedDay = {
-            date: dateInput.value,
-            youtube: ytInput.value.trim(),
-            description: descVal,
-            checklist: JSON.parse(JSON.stringify(state.currentChecklist)), // deep copy
-            materials: JSON.parse(JSON.stringify(state.currentMaterials)) // deep copy of daily materials
-        };
-
-        // Push to running draft
-        state.currentDraftDays.push(loggedDay);
-
-        // Increment date picker by exactly +1 day (transition to next day!)
-        const currentDate = new Date(dateInput.value);
-        currentDate.setDate(currentDate.getDate() + 1);
-        dateInput.value = currentDate.toISOString().split('T')[0];
-
-        // Reset inputs for the next day's write
-        descInput.value = "";
-        ytInput.value = "";
-        state.currentMaterials = []; // reset current day materials
-        
-        // Reset checklist items to UNCHECKED state so user can reuse the same category template
-        state.currentChecklist.forEach(item => {
-            item.completed = false;
-        });
-
-        // Re-renders and live update
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-
-        // Update draft action buttons visibility
-        updateDraftButtonsVisibility();
-
-        showToast(`📅 День зафиксирован! Дата переключена на ${dateInput.value.split('-').reverse().join('.')}`, "success");
-    }
-
-    // Resumes work on the previously committed day (removes it from committed array and loads back into the form inputs)
-    function rollbackLastCommittedDay() {
-        if (!state.currentDraftDays || state.currentDraftDays.length === 0) {
-            showToast("Нет зафиксированных дней для доработки!", "danger");
-            return;
-        }
-
-        // Pop last day from draft
-        const lastDay = state.currentDraftDays.pop();
-
-        // Load values back into DOM form fields
-        document.getElementById("recordDate").value = lastDay.date;
-        document.getElementById("recordYoutube").value = lastDay.youtube;
-        document.getElementById("recordDesc").value = lastDay.description;
-
-        // Restore checklist and materials deep copy states
-        state.currentChecklist = JSON.parse(JSON.stringify(lastDay.checklist));
-        state.currentMaterials = JSON.parse(JSON.stringify(lastDay.materials || []));
-
-        // Re-renders and updates
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-
-        // Update visibility of the draft actions
-        updateDraftButtonsVisibility();
-
-        showToast(`↩️ Запись за ${lastDay.date.split('-').reverse().join('.')} возвращена в форму для продолжения работы!`, "info");
-    }
-
-    // Reset draft
-    function resetMultiDayDraft() {
-        state.currentDraftDays = [];
-        state.currentMaterials = [];
-        updateDraftButtonsVisibility();
-        
-        renderMaterials();
-        generateLiveReport();
-        showToast("Сводный черновик отчета полностью сброшен", "info");
-    }
-
-    // Toggle draft helpers visibility based on active days logged
-    function updateDraftButtonsVisibility() {
-        const hasDraft = state.currentDraftDays && state.currentDraftDays.length > 0;
-        document.getElementById("resetDraftBtn").style.display = hasDraft ? "inline-flex" : "none";
-        document.getElementById("rollbackDayBtn").style.display = hasDraft ? "inline-flex" : "none";
-    }
-
-    // --- Action Buttons in Form ---
-    function clearForm() {
-        document.getElementById("recordDesc").value = "";
-        document.getElementById("recordYoutube").value = "";
-        state.currentChecklist = [];
-        state.currentDraftDays = []; // reset draft
-        state.currentMaterials = []; // reset materials
-        state.editingRecordId = null;
-        
-        updateDraftButtonsVisibility();
-
-        document.getElementById("saveRecordBtn").innerText = "💾 Сохранить в архив";
-        document.getElementById("saveRecordBtn").className = "btn btn-primary";
-        document.getElementById("constructorStatus").innerText = "Новый отчёт";
-        document.getElementById("constructorStatus").className = "card-badge purple";
-
-        const todayObj = new Date();
-        const todayStr = todayObj.toISOString().split('T')[0];
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(todayObj.getDate() - 7);
-        const startStr = sevenDaysAgo.toISOString().split('T')[0];
-
-        document.getElementById("startDate").value = startStr;
-        document.getElementById("endDate").value = todayStr;
-        document.getElementById("recordDate").value = todayStr;
-
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        showToast("Форма ввода очищена", "info");
-    }
-
-    // Copy to clipboard
-    function copyReportToClipboard() {
-        const previewText = document.getElementById("reportPreview").innerText;
-        if (!previewText || previewText.includes("Заполните форму")) {
-            showToast("Нечего копировать. Заполните форму сначала!", "danger");
-            return;
-        }
-
-        navigator.clipboard.writeText(previewText)
-            .then(() => {
-                showToast("📋 Отчёт успешно скопирован в буфер обмена!", "success");
-            })
-            .catch(err => {
-                const textArea = document.createElement("textarea");
-                textArea.value = previewText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast("📋 Отчёт скопирован!", "success");
-                } catch (e) {
-                    showToast("Не удалось скопировать", "danger");
-                }
-                document.body.removeChild(textArea);
-            });
-    }
-
-    // Save record to database
-    function saveRecord() {
-        const startVal = document.getElementById("startDate").value;
-        const endVal = document.getElementById("endDate").value;
-        const dateVal = document.getElementById("recordDate").value;
-        const ytVal = document.getElementById("recordYoutube").value.trim();
-        const descVal = document.getElementById("recordDesc").value.trim();
-        const nickVal = document.getElementById("nicknameInput").value.trim();
-
-        if (!startVal || !endVal || !dateVal) {
-            showToast("Пожалуйста, заполните даты!", "danger");
-            return;
-        }
-
-        if (state.records.length === 0 && !descVal && state.currentDraftDays.length === 0) {
-            showToast("Нечего сохранять. Пожалуйста, напишите отчет за день или зафиксируйте дни!", "danger");
-            return;
-        }
-
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
-        const recordId = "rec-" + Date.now();
-
-        if (state.editingRecordId) {
-            // Edit mode
-            const idx = state.records.findIndex(r => r.id === state.editingRecordId);
-            if (idx !== -1) {
-                state.records[idx].startDate = startVal;
-                state.records[idx].endDate = endVal;
-                state.records[idx].date = dateVal;
-                state.records[idx].youtubeUrl = ytVal;
-                state.records[idx].nickname = nickVal; // Save NickName!
-                state.records[idx].description = descVal;
-                state.records[idx].checklist = JSON.parse(JSON.stringify(state.currentChecklist));
-                showToast("📝 Запись успешно обновлена!", "success");
-            }
-        } else {
-            // Save mode
-            const newRecord = {
-                id: recordId,
-                startDate: startVal,
-                endDate: endVal,
-                date: dateVal,
-                youtubeUrl: ytVal,
-                nickname: nickVal, // Save NickName!
-                description: "Сводный отчет по дням:\n\n" + (descVal ? `Зафиксировано ${state.currentDraftDays.length + 1} дней.` : `Зафиксировано ${state.currentDraftDays.length} дней.`),
-                checklist: JSON.parse(JSON.stringify(state.currentChecklist)),
-                createdAt: new Date().toISOString()
-            };
-            state.records.unshift(newRecord);
-            showToast("🎉 Отчёт успешно сохранён в Архив!", "success");
-        }
-
-        // --- NEW: AUTO SAVE TO PHYSICAL LOCAL reports/ FOLDER ---
-        const cleanDate = dateVal.replace(/-/g, '_');
-        const filename = `report_${cleanDate}_${state.editingRecordId || recordId}.txt`;
-        
-        fetch('http://localhost:3000/api/save-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: filename, content: reportText })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                console.log("[Auto-Sync] Saved to folder: " + data.path);
-                showToast("🎉 Отчет сохранен и записан в папку reports/!", "success");
-            }
-        })
-        .catch(err => {
-            console.log("[Auto-Sync] Local folder server offline, saved only to browser localStorage.");
-        });
-
-        // Reset drafts and materials on save
-        state.currentDraftDays = [];
-        state.currentMaterials = [];
-        updateDraftButtonsVisibility();
-
-        // Trigger team cloud background push if enabled!
-        if (state.settings && state.settings.syncKey && state.settings.autoSync) {
-            pushToCloudInBackground();
-        }
-
-        saveToLocalStorage();
-        updateTopCountVisuals();
-        showSuccessModal();
-        clearForm();
-    }
-
-    // Background silent push to team cloud
-    function pushToCloudInBackground() {
-        const key = state.settings.syncKey;
-        if (!key) return;
-        const data = JSON.stringify(state.records);
-        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).catch(err => console.warn("Background cloud sync failed", err));
-    }
-
-    function loadRecordToForm(id) {
-        const r = state.records.find(item => item.id === id);
-        if (!r) return;
-
-        state.editingRecordId = r.id;
-        document.getElementById("startDate").value = r.startDate || "";
-        document.getElementById("endDate").value = r.endDate || "";
-        document.getElementById("recordDate").value = r.date;
-        document.getElementById("recordYoutube").value = r.youtubeUrl || "";
-        document.getElementById("nicknameInput").value = r.nickname || ""; // Restore NickName!
-        document.getElementById("recordDesc").value = r.description.startsWith("Сводный отчет") ? "" : r.description;
-        
-        state.currentChecklist = JSON.parse(JSON.stringify(r.checklist));
-        state.currentDraftDays = []; // clear draft
-        state.currentMaterials = []; // clear materials
-        
-        updateDraftButtonsVisibility();
-
-        const saveBtn = document.getElementById("saveRecordBtn");
-        saveBtn.innerText = "💾 Обновить в архиве";
-        saveBtn.className = "btn btn-success";
-
-        document.getElementById("constructorStatus").innerText = "Редактирование";
-        document.getElementById("constructorStatus").className = "card-badge green";
-
-        document.getElementById("block1").scrollIntoView({ behavior: 'smooth' });
-
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        showToast("✏️ Запись загружена в форму редактирования", "info");
-    }
-
-    // Update records count visuals
-    function updateTopCountVisuals() {
-        const total = state.records.length;
-        document.getElementById("topStatsCount").innerText = total;
-    }
-
-    // Modal triggers
-    function showSuccessModal() {
-        document.getElementById("successModal").classList.add("active");
-    }
-
-    // Close Modal
-    function closeSuccessModal() {
-        document.getElementById("successModal").classList.remove("active");
-    }
-
-    // --- VK BOT MESSAGE SENDING ENGINE (JSONP BYPASS CORS) ---
-    function sendVkMessageViaJsonp(token, peerId, message, onComplete) {
-        const randomId = Math.floor(Math.random() * 1000000000);
-        const callbackName = 'vk_callback_index_' + Math.floor(Math.random() * 1000000);
-        const scriptId = 'vk_script_index_send_' + Date.now();
-
-        window[callbackName] = function(response) {
-            delete window[callbackName];
-            const scriptNode = document.getElementById(scriptId);
-            if (scriptNode) scriptNode.remove();
-            if (onComplete) onComplete(response);
-        };
-
-        const script = document.createElement('script');
-        script.id = scriptId;
-        
-        const encodedMessage = encodeURIComponent(message);
-        script.src = `https://api.vk.com/method/messages.send?peer_id=${peerId}&message=${encodedMessage}&random_id=${randomId}&access_token=${token}&v=5.131&callback=${callbackName}`;
-        
-        document.body.appendChild(script);
-
-        setTimeout(() => {
-            if (window[callbackName]) {
-                delete window[window[callbackName]];
-                const node = document.getElementById(scriptId);
-                if (node) node.remove();
-                if (onComplete) onComplete({ error: { error_msg: "Таймаут запроса. Проверьте сеть или настройки VK-бота в Настройках." } });
-            }
-        }, 8000);
-    }
-
-    function sendReportToVk() {
-        const token = state.settings.vkToken;
-        const peerId = state.settings.vkPeerId;
-
-        if (!token || !peerId) {
-            showToast("Сначала настройте токен и ID чата VK на странице Настроек!", "danger");
-            setTimeout(() => {
-                window.location.href = "settings.html";
-            }, 1500);
-            return;
-        }
-
-        const reportText = document.getElementById("reportPreview").innerText;
-        if (!reportText || reportText.includes("Заполните форму")) {
-            showToast("Нечего отправлять! Сначала заполните отчет.", "danger");
-            return;
-        }
-
-        showToast("Отправка отчёта в чат VK...", "info");
-
-        sendVkMessageViaJsonp(token, peerId, reportText, (res) => {
-            if (res.response) {
-                showToast("⚡️ Отчёт успешно отправлен в ваш чат ВКонтакте!", "success");
-            } else if (res.error) {
-                showToast("❌ Ошибка отправки: " + res.error.error_msg, "danger");
-            } else {
-                showToast("❌ Не удалось отправить отчёт в VK", "danger");
-            }
-        });
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // --- ACCESS ROLE CONTROLLER FOR INDEX.HTML (NEW!) ---
+    // --- ACCESS ROLE CONTROLLERS FOR ARCHIVE ---
     function applyRolePermissionsUI() {
         const role = state.settings.userRole || "user";
         const badge = document.getElementById("roleBadgeBtn");
@@ -1989,9 +756,11 @@
         if (role === "admin") {
             badge.className = "btn btn-success btn-sm";
             badge.innerHTML = `👑 Администратор <span style="font-size:0.7rem; opacity:0.8;">(Выйти)</span>`;
+            document.getElementById("dbAdminPanel").style.display = "block";
         } else {
             badge.className = "btn btn-secondary btn-sm";
             badge.innerHTML = `👤 Пользователь <span style="font-size:0.7rem; opacity:0.8;">(Войти)</span>`;
+            document.getElementById("dbAdminPanel").style.display = "none";
         }
     }
 
@@ -2024,6 +793,7 @@
             saveToLocalStorage();
             applyRolePermissionsUI();
             closeLoginModal();
+            filterAndRender(); // Re-render feed to display the "Delete" buttons!
             showToast("👑 Доступ Администратора успешно предоставлен!", "success");
         } else {
             showToast("❌ Неверный пароль администратора!", "danger");
@@ -2032,13 +802,413 @@
 
     function executeLogout() {
         state.settings.userRole = "user";
-        state.settings.autoSync = false; // Disable autosync on logout for safety
+        state.settings.autoSync = false;
         
         saveToLocalStorage();
         applyRolePermissionsUI();
         closeLoginModal();
+        filterAndRender(); // Re-render feed to hide the "Delete" buttons!
         showToast("🔒 Вы вышли из профиля Администратора. Режим Пользователя.", "info");
     }
+
+    // --- SMART LOCAL FILE SYSTEM FOLDER SYNCHRONIZATION ---
+    function syncWithLocalFolder() {
+        if (!state.records || state.records.length === 0) {
+            showToast("Нет отчётов для выгрузки в папку!", "danger");
+            return;
+        }
+        
+        showToast("📂 Выгрузка отчетов в локальную папку...", "info");
+
+        fetch('http://localhost:3000/api/sync-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ records: state.records })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`📂 Успешно синхронизировано отчетов: ${data.count} в папку reports/!`, "success");
+            } else {
+                showToast("Не удалось записать файлы в локальную папку", "danger");
+            }
+        })
+        .catch(err => {
+            console.warn(err);
+            showToast("Локальный сервер папки недоступен. Запустите server.js!", "danger");
+        });
+    }
+
+    // --- TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SILENT AUTOMATIC MODE SUPPORT!) ---
+    function pullAndMergeFromCloud(isSilent = false) {
+        const key = state.settings.syncKey;
+        if (!key) return;
+
+        if (!isSilent) {
+            showToast("📥 Синхронизация и слияние с облаком...", "info");
+        }
+        
+        const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
+
+        fetch(url)
+        .then(response => {
+            if (response.status === 404) {
+                if (!isSilent) {
+                    showToast("☁️ Облачное хранилище пусто. Копируем локальную базу наверх...", "warning");
+                    if (state.settings.userRole === "admin") {
+                        pushToCloudInBackground();
+                    }
+                }
+                return null;
+            }
+            if (!response.ok) throw new Error("API Error");
+            return response.json();
+        })
+        .then(rawString => {
+            if (!rawString) return;
+            try {
+                const cloudRecords = JSON.parse(rawString);
+                if (cloudRecords && Array.isArray(cloudRecords)) {
+                    // Smart non-destructive merge logic
+                    const mergedMap = new Map();
+                    
+                    // Add local records first
+                    state.records.forEach(r => mergedMap.set(r.id, r));
+                    
+                    // Add cloud records if they are unique
+                    let newAddedCount = 0;
+                    cloudRecords.forEach(cr => {
+                        if (!mergedMap.has(cr.id)) {
+                            mergedMap.set(cr.id, cr);
+                            newAddedCount++;
+                        }
+                    });
+
+                    if (newAddedCount > 0) {
+                        const mergedArray = Array.from(mergedMap.values());
+                        mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+
+                        state.records = mergedArray;
+                        saveToLocalStorage();
+                        filterAndRender(); // Update the chronological feed instantly!
+
+                        showToast(`🔄 Облако: Загружено новых отчетов от команды: ${newAddedCount}!`, "success");
+
+                        // Re-push merged DB back if admin
+                        if (state.settings.userRole === "admin") {
+                            pushToCloudInBackground();
+                        }
+                    } else {
+                        if (!isSilent) {
+                            showToast("☁️ База данных актуальна, новых отчетов нет.", "success");
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                if (!isSilent) showToast("Ошибка разбора облачных данных", "danger");
+            }
+        })
+        .catch(err => {
+            console.warn(err);
+            // ONLY show sandbox catcher if triggered MANUALLY! (Avoids interval popup spam)
+            if (!isSilent) {
+                const confirmSim = confirm(
+                    `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальный облачный сервер блокируется.\n\n` +
+                    `При открытии файлов на компьютере функция совместного обмена с коллегами по ключу "${key}" работает в полную силу!\n\n` +
+                    `Хотите симулировать получение новых отчётов от ваших коллег (ГСов) прямо сейчас в песочнице для проверки слияния баз?`
+                );
+                
+                if (confirmSim) {
+                    const simulatedColleagueRecords = [
+                        {
+                            id: "rec-colleague-1",
+                            startDate: "2026-05-25",
+                            endDate: "2026-05-29",
+                            date: "2026-06-02",
+                            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            nickname: "Alex_Smi",
+                            description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
+                            checklist: [
+                                { text: "Проверить отчеты лидеров фракций", completed: true },
+                                { text: "Провести еженедельный созвон следящих", completed: true },
+                                { text: "Внедрить изменения в правила переводов", completed: false }
+                            ]
+                        },
+                        {
+                            id: "rec-colleague-2",
+                            startDate: "2026-05-24",
+                            endDate: "2026-05-28",
+                            date: "2026-06-01",
+                            youtubeUrl: "",
+                            nickname: "Dmitry_K",
+                            description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
+                            checklist: [
+                                { text: "Проверить обзвон кандидатов на Армию", completed: true },
+                                { text: "Внести логи назначения лидера", completed: true }
+                            ]
+                        }
+                    ];
+
+                    const mergedMap = new Map();
+                    state.records.forEach(r => mergedMap.set(r.id, r));
+                    
+                    let newAddedCount = 0;
+                    simulatedColleagueRecords.forEach(cr => {
+                        if (!mergedMap.has(cr.id)) {
+                            mergedMap.set(cr.id, cr);
+                            newAddedCount++;
+                        }
+                    });
+
+                    const mergedArray = Array.from(mergedMap.values());
+                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+
+                    state.records = mergedArray;
+                    saveToLocalStorage();
+                    filterAndRender(); // Re-render feed instantly!
+
+                    showToast(`🔄 Симуляция: Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
+                } else {
+                    showToast("Синхронизация отменена", "info");
+                }
+            }
+        });
+    }
+
+    function pushToCloudInBackground() {
+        const key = state.settings.syncKey;
+        if (!key) return;
+        const data = JSON.stringify(state.records);
+        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).catch(err => console.warn("Background sync failed", err));
+    }
+
+    // Filter Logic Engine
+    function filterAndRender() {
+        const keyword = document.getElementById("searchKeyword").value.toLowerCase();
+
+        filteredRecords = state.records.filter(r => {
+            const inDesc = r.description.toLowerCase().includes(keyword);
+            const inDate = r.date.includes(keyword) || (r.startDate && r.startDate.includes(keyword));
+            const inChecklist = r.checklist && r.checklist.some(t => t.text.toLowerCase().includes(keyword));
+            const inNick = r.nickname && r.nickname.toLowerCase().includes(keyword); // Search by Nickname too!
+            
+            // Generate full text in memory to search inside compiled templates too!
+            const fullCompiledText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist, r.nickname).toLowerCase();
+            const inCompiled = fullCompiledText.includes(keyword);
+
+            return inDesc || inDate || inChecklist || inCompiled || inNick;
+        });
+
+        renderHistoryFeed();
+    }
+
+    // Render Clean History Feed
+    function renderHistoryFeed() {
+        const container = document.getElementById("historyFeedContainer");
+        container.innerHTML = "";
+
+        const isAdmin = (state.settings.userRole === "admin");
+
+        if (filteredRecords.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <h2>История отчётов пуста</h2>
+                    <p>Вы ещё не сохранили ни одного отчёта, либо фильтры поиска не дали результатов.</p>
+                </div>
+            `;
+            return;
+        }
+
+        filteredRecords.forEach(r => {
+            const formattedStart = r.startDate ? r.startDate.split('-').reverse().join('.') : "__.__.____";
+            const formattedEnd = r.endDate ? r.endDate.split('-').reverse().join('.') : "__.__.____";
+            const formattedReport = r.date ? r.date.split('-').reverse().join('.') : "__.__.____";
+
+            const reportText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist, r.nickname);
+
+            const card = document.createElement("div");
+            card.className = "report-card";
+
+            // Only show delete button to admins!
+            const deleteBtnHtml = isAdmin 
+                ? `<button class="btn btn-danger btn-sm" onclick="showConfirmDeleteModal('${r.id}')">
+                        🗑️ Удалить
+                   </button>`
+                : "";
+
+            card.innerHTML = `
+                <div class="report-card-header">
+                    <div class="report-card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Отчёт за период: С ${formattedStart} по ${formattedEnd}
+                    </div>
+                    <span class="card-badge purple">
+                        📅 Создан: ${formattedReport}
+                    </span>
+                </div>
+
+                <!-- Live Monospace compiled report text block -->
+                <div class="report-text-block">${reportText}</div>
+
+                <!-- Bottom operations for single card -->
+                <div class="card-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="copySingleReport(\`${escapeBackticks(reportText)}\`)">
+                        📋 Скопировать отчёт
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="downloadSingleReport('${r.date}', \`${escapeBackticks(reportText)}\`)">
+                        💾 Скачать .txt
+                    </button>
+                    <a href="index.html?edit=${r.id}" class="btn btn-success btn-sm">
+                        ✏️ Доработать в Конструкторе
+                    </a>
+                    ${deleteBtnHtml}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Compile report text matching the format exactly (WITH NICKNAME SUPPORT!)
+    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist, nickname) {
+        const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
+        const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
+        const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
+
+        let report = `📝 ОТЧЁТ О ВЫПОЛНЕННОЙ РАБОТЕ\n\n`;
+        report += `С ${formattedStart} по ${formattedEnd}\n\n`;
+        report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        report += `📅 Дата: ${formattedReport}\n\n`;
+        if (nickname) {
+            report += `👤 Никнейм: ${nickname}\n\n`;
+        }
+        report += `🎥 ВИДЕО ДЕМОНСТРАЦИЯ:\n`;
+        report += `🔗 ${youtube ? youtube : ""}\n\n\n\n`;
+        report += `🛠️ ОПИСАНИЕ ВЫПОЛНЕННЫХ ЗАДАЧ:\n`;
+        report += `${description}\n`;
+
+        if (checklist && checklist.length > 0) {
+            report += `\n📋 СТАТУС ВЫПОЛНЕНИЯ ПОДЗАДАЧ:\n`;
+            checklist.forEach(item => {
+                const statusBox = item.completed ? "[x]" : "[ ]";
+                report += `${statusBox} ${item.text}\n`;
+            });
+        }
+
+        return report;
+    }
+
+    // Action functions
+    function copySingleReport(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Отчёт скопирован в буфер обмена!", "success");
+        }).catch(() => {
+            showToast("Нечего копировать", "danger");
+        });
+    }
+
+    // Download Single report
+    function downloadSingleReport(date, text) {
+        const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(text);
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `report_${date}.txt`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        showToast("Отчёт сохранен как файл .txt", "success");
+    }
+
+    function showConfirmDeleteModal(id) {
+        if (state.settings.userRole !== "admin") return;
+        recordToDeleteId = id;
+        document.getElementById("confirmDeleteModal").classList.add("active");
+    }
+
+    function showConfirmResetModal() {
+        if (state.settings.userRole !== "admin") return;
+        document.getElementById("confirmResetModal").classList.add("active");
+    }
+
+    function hideConfirmDeleteModal() {
+        document.getElementById("confirmDeleteModal").classList.remove("active");
+        document.getElementById("confirmResetModal").classList.remove("active");
+        recordToDeleteId = null;
+    }
+
+    // Modal confirmation execution trigger
+    document.getElementById("confirmDeleteBtn").onclick = function() {
+        if (state.settings.userRole !== "admin") return;
+        if (recordToDeleteId) {
+            state.records = state.records.filter(r => r.id !== recordToDeleteId);
+            saveToLocalStorage();
+            hideConfirmDeleteModal();
+            filterAndRender();
+            showToast("Отчёт успешно удален из архива", "danger");
+            
+            // If auto-sync is enabled, push background update
+            if (state.settings && state.settings.syncKey && state.settings.autoSync) {
+                pushToCloudInBackground();
+            }
+        }
+    };
+
+    function resetAllDataAndClose() {
+        if (state.settings.userRole !== "admin") return;
+        state.records = [];
+        saveToLocalStorage();
+        hideConfirmDeleteModal();
+        filterAndRender();
+        showToast("💥 Все данные базы полностью очищены", "danger");
+    }
+
+    // Notifications Toast helper
+    function showToast(message, type = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        
+        let icon = "";
+        if (type === "success") {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        } else if (type === "danger") {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+        } else {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        }
+
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("slide-fade-out");
+            toast.addEventListener("animationend", () => {
+                toast.remove();
+            });
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function escapeBackticks(str) {
+        if (!str) return '';
+        return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+    }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05903100b1cec31',t:'MTc4MDQzMDA4Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058f84f4a48ec31',t:'MTc4MDQyOTY0Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
