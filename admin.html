@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель Администратора 👑</title>
+    <!-- CSS Styles embedded for offline iframe rendering and premium design -->
+    <style>
+        :root {
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+        }
+
+        /* --- THEME STYLES --- */
+        [data-theme="deep-space"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+        }
+        [data-theme="polar-night"] {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-card: #0f172a;
+            --border-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-glow: rgba(14, 165, 233, 0.15);
+        }
+        [data-theme="sunset-glow"] {
+            --bg-primary: #1c1917;
+            --bg-secondary: #292524;
+            --bg-card: #292524;
+            --border-color: #44403c;
+            --text-primary: #fafaf9;
+            --text-secondary: #d6d3d1;
+            --primary: #f43f5e;
+            --primary-hover: #e11d48;
+            --primary-glow: rgba(244, 63, 94, 0.15);
+        }
+        [data-theme="neon-cyber"] {
+            --bg-primary: #090514;
+            --bg-secondary: #120b24;
+            --bg-card: #120b24;
+            --border-color: #2e1a4a;
+            --text-primary: #fdfaff;
+            --text-secondary: #b5a4cf;
+            --primary: #d946ef;
+            --primary-hover: #c084fc;
+            --primary-glow: rgba(217, 70, 239, 0.15);
+        }
+        [data-theme="pure-light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-glow: rgba(79, 70, 229, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title-container h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .header-title-container p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+            background-color: rgba(255,255,255,0.02);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .grid-admin {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.75rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid-admin {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-badge.purple {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .card-badge.blue {
+            background-color: rgba(14, 165, 233, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .list-manager-box {
+            border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .list-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.85rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            gap: 0.5rem;
+        }
+
+        .list-item-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        /* Access Locked Screen styling */
+        .lock-screen-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 12rem);
+        }
+
+        .lock-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            animation: lockPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes lockPop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .lock-icon-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            border: 2px dashed rgba(239, 68, 68, 0.3);
+        }
+
+        /* Toast notifications container */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 1000;
+        }
+
+        .toast {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--card-shadow);
+            color: var(--text-primary);
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 280px;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.danger { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--info); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-fade-out {
+            animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header id="pageHeader">
+        <div class="header-title-container">
+            <h1>👑 Панель Администратора</h1>
+            <p>Центральный пульт управления базами данных, шаблонами и списком ролей</p>
+        </div>
+        <div class="header-actions">
+            <!-- Go back to index -->
+            <a href="index.html" class="btn btn-secondary" style="font-weight: 700;">
+                📋 Конструктор
+            </a>
+            <!-- Go to archive -->
+            <a href="history.html" class="btn btn-secondary" style="font-weight: 700;">
+                📂 Архив
+            </a>
+            <!-- Go to settings -->
+            <a href="settings.html" class="btn btn-secondary" style="font-weight: 700;">
+                ⚙️ Настройки
+            </a>
+            <!-- Logout Button (Only visible if admin) -->
+            <button class="btn btn-danger btn-sm" id="headerLogoutBtn" onclick="executeAdminLogout()" style="display: none; font-weight:700;">
+                🔒 Выйти
+            </button>
+        </div>
+    </header>
+
+    <!-- LOCKED ACCESS SCREEN -->
+    <div class="lock-screen-wrapper" id="lockScreen" style="display: none;">
+        <div class="lock-card">
+            <div class="lock-icon-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">Доступ ограничен</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 2rem;">
+                Данная страница содержит секретные административные инструменты. Пожалуйста, введите пароль администратора для авторизации.
+            </p>
+            <form onsubmit="event.preventDefault(); attemptLockScreenLogin();">
+                <div class="form-group" style="text-align: left;">
+                    <label for="lockPasswordInput">Пароль Администратора</label>
+                    <input type="password" id="lockPasswordInput" placeholder="Пароль администратора..." required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+                    🔑 Авторизоваться как Администратор
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN ADMINISTRATIVE DASHBOARD CONTENT (Hidden from users) -->
+    <div id="adminPanelContent" style="display: none;">
+        
+        <!-- ROW 1: SYSTEMS GENERAL OVERVIEW STATS -->
+        <div class="card" style="padding: 1.5rem 2rem; margin-bottom: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 2rem;">📊</span>
+                    <div>
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Состояние и статистика системы</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary);">Оперативные данные из локального хранилища браузера</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1.5rem;">
+                    <div style="text-align: center; border-right: 1px solid var(--border-color); padding-right: 1.5rem;">
+                        <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);" id="statTotalReports">0</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight:700;">Всего отчетов</span>
+                    </div>
+                    <div style="text-align: center; border-right: 1px solid var(--border-color); padding-right: 1.5rem;">
+                        <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--success);" id="statTotalPositions">0</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight:700;">Должностей</span>
+                    </div>
+                    <div style="text-align: center;">
+                        <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--info);" id="statTotalCategories">0</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight:700;">Категорий</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-admin">
+            
+            <!-- LEFT COLUMN: SYSTEM SETTINGS (ROLES AND CHECKLISTS) -->
+            <div class="left-admin-col">
+                
+                <!-- CARD: ROLES & POSITIONS MANAGEMENT -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            Управление списком должностей
+                        </h2>
+                        <span class="card-badge blue" id="countPositionsBadge">0 ролей</span>
+                    </div>
+
+                    <div style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        Добавляйте или удаляйте должности/роли следящих. Этот список напрямую загружается в выпадающий список формы на главной странице.
+                    </div>
+
+                    <!-- Positions Manager List wrapper -->
+                    <div class="list-manager-box" id="positionsManagerList">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- New Position Form input -->
+                    <form onsubmit="event.preventDefault(); addNewPosition();" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="text" id="newPositionInput" placeholder="Новая должность (напр. Главный Следящий)..." required style="font-size: 0.85rem;">
+                        <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0; font-weight:700;">➕ Добавить</button>
+                    </form>
+                </div>
+
+                <!-- CARD: CHECKLIST CATEGORIES & TEMPLATES EDITOR -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            Кастомизация шаблонов задач
+                        </h2>
+                        <span class="card-badge blue">Чек-листы</span>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        Редактируйте категории и наборы задач, которые следящие могут подгружать в свой чек-лист в один клик.
+                    </div>
+
+                    <!-- Select active Category -->
+                    <div class="form-group">
+                        <label for="adminCategorySelector">Выберите категорию для редактирования:</label>
+                        <select id="adminCategorySelector" onchange="renderCategoryItemsEditor()">
+                            <!-- Categories options injected dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Add/Delete Category controls -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 1rem;">
+                        <input type="text" id="newCategoryInput" placeholder="Создать категорию (напр. 📁 Форум)..." style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="addNewCategory()" style="font-weight:700;">➕ Создать</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteActiveCategory()" style="font-weight:700;">🗑️ Удалить категорию</button>
+                    </div>
+
+                    <!-- Active Category's items list editor -->
+                    <label style="font-weight:700; font-size:0.8rem; text-transform:uppercase; color: var(--text-secondary); display:block; margin-bottom:0.5rem;">
+                        📝 Задачи в выбранной категории:
+                    </label>
+                    <div class="list-manager-box" id="categoryItemsList" style="max-height: 200px;">
+                        <!-- Items rendered dynamically -->
+                    </div>
+
+                    <!-- New Category Item input -->
+                    <form onsubmit="event.preventDefault(); addNewCategoryItem();" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="text" id="newCategoryItemInput" placeholder="Новая типовая задача (напр. Проверить жалобы)..." required style="font-size: 0.85rem;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0; font-weight:700;">➕ Добавить задачу</button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: INTEGRATION AND DATABASE UTILITIES -->
+            <div class="right-admin-col">
+                
+                <!-- CARD: VK BOT INTEGRATION SETTINGS -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#0077FF" viewBox="0 0 24 24"><path d="M22.28 5.3c.16-.54 0-.94-.77-.94h-2.54c-.65 0-.95.34-1.11.72 0 0-1.29 3.15-3.13 5.2-.6.59-.86.78-1.19.78-.16 0-.4-.19-.4-.73V5.3c0-.65-.18-.94-.74-.94H12c-.41 0-.66.3-.66.6 0 .61.92.75 1.01 2.46v3.71c0 .81-.15.96-.47.96-.86 0-2.95-3.17-4.19-6.81-.25-.72-.5-1.02-1.15-1.02H4c-.73 0-.88.34-.88.72 0 .68.87 4.07 4.05 8.52C9.29 17.5 12.3 19 15.02 19c1.63 0 1.83-.37 1.83-1V15.7c0-.73.15-.88.66-.88.38 0 1.03.19 2.54 1.65 1.73 1.73 2.01 2.53 2.99 2.53h2.54c.73 0 1.09-.37.88-1.1-.23-.72-1.06-1.77-1.44-2.22-.2-.25-.51-.51-.6-.64-.13-.16-.1-.23.08-.51.02-.02 1.82-2.57 2-3.48z"/></svg>
+                            Интеграция с ВКонтакте (VK API)
+                        </h2>
+                        <span class="card-badge purple">VK BOT</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vkTokenInput">Токен API Сообщества (VK Group Access Token)</label>
+                        <input type="password" id="vkTokenInput" placeholder="vk1.a.xxxx..." oninput="saveVkSettings()">
+                    </div>
+                    <div class="form-group">
+                        <label for="vkPeerIdInput">ID Получателя / Чата (Peer ID)</label>
+                        <input type="text" id="vkPeerIdInput" placeholder="Например: 2000000001 (чат) или 1234567 (пользователь)" oninput="saveVkSettings()">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.3rem;">
+                            💡 ID чата начинается с 2000000001. ID личной переписки — ID пользователя.
+                        </span>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="testVkConnection()" style="width: 100%; margin-top: 0.5rem; border-color: #0077FF; color: #0077FF; font-weight:700;">
+                        🔌 Проверить связь с VK
+                    </button>
+                </div>
+
+                <!-- CARD: SYSTEM DATABASE UTILITIES -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Администрирование & Резервное копирование
+                        </h2>
+                        <span class="card-badge purple">Система</span>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        Локальное управление базой данных. Рекомендуется периодически скачивать копию базы данных во избежание утери данных в браузере.
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportDataToJSON()">
+                            💾 Скачать копию (JSON)
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">
+                            📂 Импортировать из JSON
+                        </button>
+                        <input type="file" id="importFile" accept=".json" onchange="importDataFromJSON(event)" style="display: none;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <button class="btn btn-success btn-sm" onclick="loadMockDataAndRefresh()">
+                            🔄 Загрузить демо-данные
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="showConfirmResetModal()">
+                            ⚠️ Очистить всю базу
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Notification Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Confirmation Reset Modal -->
+<div class="modal-overlay" id="confirmResetModal">
+    <div class="modal">
+        <div class="modal-title">Сбросить всю базу данных?</div>
+        <div class="modal-body">
+            Это действие безвозвратно удалит все сохранённые отчёты и настройки во всей системе. Восстановление будет невозможно. Вы уверены?
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="hideConfirmResetModal()">Отмена</button>
+            <button class="btn btn-danger btn-sm" onclick="resetAllDataAndClose()">Да, удалить всё</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global Application State (fully synchronized)
+    let state = {
+        records: [],
+        currentChecklist: [],
+        editingRecordId: null,
+        settings: {
+            theme: "deep-space",
+            vkToken: "",
+            vkPeerId: "",
+            syncKey: "",
+            autoSync: false,
+            userRole: "user",
+            positions: [],
+            categories: []
+        }
+    };
+
+    // Default Fallback Job Positions/Roles
+    const DEFAULT_POSITIONS = [
+        "Главный Следящий за структурой",
+        "Заместитель Главного Следящего за структурой",
+        "Помощник Главного Следящего",
+        "Главный Следящий за Министерством (МО)",
+        "Главный Следящий за Министерством (МЮ)",
+        "Главный Следящий за Министерством (МСП)",
+        "Главный Следящий за Министерством (Пра-во)",
+        "Следящий за министерством"
+    ];
+
+    // Default Fallback Categories
+    const DEFAULT_CATEGORIES = [
+        {
+            name: "💻 Разработка",
+            items: [
+                "Написать программный код",
+                "Провести рефакторинг",
+                "Проверить консоль на наличие ошибок",
+                "Закоммитить изменения в Git"
+            ]
+        },
+        {
+            name: "🧪 Тестирование",
+            items: [
+                "Проверить граничные значения",
+                "Протестировать адаптивность верстки",
+                "Проверить во всех целевых браузерах",
+                "Провести ручной тест пользовательских сценариев"
+            ]
+        },
+        {
+            name: "🚀 Деплой",
+            items: [
+                "Собрать продакшн-бандл проекта",
+                "Запустить автотесты на сервере сборки",
+                "Выполнить деплой на стейджинг/прод",
+                "Проверить логи ошибок после запуска"
+            ]
+        }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadFromLocalStorage();
+        applyTheme();
+        checkAccessControl();
+    });
+
+    // Real-time synchronization across multiple open tabs/iframes!
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'reportcraft_state_updated') {
+            loadFromLocalStorage();
+            applyTheme();
+            checkAccessControl();
+        }
+    });
+
+    function loadFromLocalStorage() {
+        try {
+            const savedState = localStorage.getItem("reportcraft_state_updated");
+            if (savedState) {
+                state = JSON.parse(savedState);
+                if (!state.settings) state.settings = {};
+                if (!state.settings.positions || state.settings.positions.length === 0) {
+                    state.settings.positions = [...DEFAULT_POSITIONS];
+                }
+                if (!state.settings.categories || state.settings.categories.length === 0) {
+                    state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+                }
+            } else {
+                state.settings.theme = "deep-space";
+                state.settings.userRole = "user";
+                state.settings.positions = [...DEFAULT_POSITIONS];
+                state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+                saveToLocalStorage();
+            }
+        } catch (e) {
+            console.error("Ошибка при чтении localStorage", e);
+        }
+    }
+
+    function saveToLocalStorage() {
+        try {
+            localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
+        } catch (e) {
+            console.error("Не удалось записать в localStorage", e);
+        }
+    }
+
+    function applyTheme() {
+        const root = document.documentElement;
+        root.setAttribute("data-theme", state.settings.theme || "deep-space");
+    }
+
+    // --- ACCESS CONTROL CHECK ---
+    function checkAccessControl() {
+        const role = state.settings.userRole || "user";
+        
+        const lockScreen = document.getElementById("lockScreen");
+        const adminContent = document.getElementById("adminPanelContent");
+        const headerLogoutBtn = document.getElementById("headerLogoutBtn");
+
+        if (role === "admin") {
+            lockScreen.style.display = "none";
+            adminContent.style.display = "block";
+            headerLogoutBtn.style.display = "inline-flex";
+            
+            // Populate/render data in panel
+            updateStatsCounters();
+            renderPositionsEditor();
+            populateCategorySelector();
+            renderCategoryItemsEditor();
+            
+            // Populate VK fields
+            document.getElementById("vkTokenInput").value = state.settings.vkToken || "";
+            document.getElementById("vkPeerIdInput").value = state.settings.vkPeerId || "";
+        } else {
+            lockScreen.style.display = "flex";
+            adminContent.style.display = "none";
+            headerLogoutBtn.style.display = "none";
+        }
+    }
+
+    function attemptLockScreenLogin() {
+        const pass = document.getElementById("lockPasswordInput").value;
+        if (pass === "R3Zfd-75eU") {
+            state.settings.userRole = "admin";
+            saveToLocalStorage();
+            checkAccessControl();
+            showToast("👑 Добро пожаловать, Администратор!", "success");
+        } else {
+            showToast("❌ Неверный пароль администратора!", "danger");
+            document.getElementById("lockPasswordInput").value = "";
+            document.getElementById("lockPasswordInput").focus();
+        }
+    }
+
+    function executeAdminLogout() {
+        state.settings.userRole = "user";
+        state.settings.autoSync = false;
+        saveToLocalStorage();
+        checkAccessControl();
+        showToast("🔒 Вы вышли из профиля Администратора.", "info");
+    }
+
+    // --- SYSTEMS STATS ---
+    function updateStatsCounters() {
+        document.getElementById("statTotalReports").innerText = state.records ? state.records.length : 0;
+        document.getElementById("statTotalPositions").innerText = state.settings.positions ? state.settings.positions.length : 0;
+        document.getElementById("statTotalCategories").innerText = state.settings.categories ? state.settings.categories.length : 0;
+    }
+
+    // --- POSITIONS EDITOR ---
+    function renderPositionsEditor() {
+        const container = document.getElementById("positionsManagerList");
+        container.innerHTML = "";
+
+        const positions = state.settings.positions || [];
+        document.getElementById("countPositionsBadge").innerText = `${positions.length} должностей`;
+
+        if (positions.length === 0) {
+            container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 1rem 0;">Список должностей пуст.</div>`;
+            return;
+        }
+
+        positions.forEach((pos, idx) => {
+            const row = document.createElement("div");
+            row.className = "list-item-row";
+            row.innerHTML = `
+                <span class="list-item-text">${escapeHtml(pos)}</span>
+                <button class="btn btn-danger btn-sm" onclick="deletePosition(${idx})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Удалить</button>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function addNewPosition() {
+        const input = document.getElementById("newPositionInput");
+        const val = input.value.trim();
+        if (!val) return;
+
+        if (!state.settings.positions) state.settings.positions = [];
+        state.settings.positions.push(val);
+        
+        saveToLocalStorage();
+        renderPositionsEditor();
+        updateStatsCounters();
+        input.value = "";
+        showToast("Должность успешно добавлена!", "success");
+    }
+
+    function deletePosition(idx) {
+        state.settings.positions.splice(idx, 1);
+        saveToLocalStorage();
+        renderPositionsEditor();
+        updateStatsCounters();
+        showToast("Должность успешно удалена", "danger");
+    }
+
+    // --- CHECKLIST TEMPLATES EDITOR ---
+    function populateCategorySelector() {
+        const selector = document.getElementById("adminCategorySelector");
+        const currentSelVal = selector.value;
+        selector.innerHTML = "";
+
+        const categories = state.settings.categories || [];
+        categories.forEach((cat, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.innerText = cat.name;
+            selector.appendChild(opt);
+        });
+
+        // Restore previous selection if possible
+        if (currentSelVal && currentSelVal < categories.length) {
+            selector.value = currentSelVal;
+        }
+    }
+
+    function renderCategoryItemsEditor() {
+        const container = document.getElementById("categoryItemsList");
+        container.innerHTML = "";
+
+        const idx = document.getElementById("adminCategorySelector").value;
+        if (idx === "" || !state.settings.categories || !state.settings.categories[idx]) {
+            container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 1rem 0;">Выберите или создайте категорию.</div>`;
+            return;
+        }
+
+        const cat = state.settings.categories[idx];
+        const items = cat.items || [];
+
+        if (items.length === 0) {
+            container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 1rem 0;">В этой категории нет шаблонов задач.</div>`;
+            return;
+        }
+
+        items.forEach((item, itemIdx) => {
+            const row = document.createElement("div");
+            row.className = "list-item-row";
+            row.innerHTML = `
+                <span class="list-item-text">${escapeHtml(item)}</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteCategoryItem(${idx}, ${itemIdx})" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Удалить</button>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function addNewCategory() {
+        const input = document.getElementById("newCategoryInput");
+        const val = input.value.trim();
+        if (!val) return;
+
+        if (!state.settings.categories) state.settings.categories = [];
+        state.settings.categories.push({
+            name: val,
+            items: []
+        });
+
+        saveToLocalStorage();
+        populateCategorySelector();
+        // Select the newly created category
+        document.getElementById("adminCategorySelector").value = state.settings.categories.length - 1;
+        renderCategoryItemsEditor();
+        updateStatsCounters();
+        input.value = "";
+        showToast(`Создана новая категория задач: ${val}`, "success");
+    }
+
+    function deleteActiveCategory() {
+        const idx = document.getElementById("adminCategorySelector").value;
+        if (idx === "") return;
+
+        const catName = state.settings.categories[idx].name;
+        state.settings.categories.splice(idx, 1);
+
+        saveToLocalStorage();
+        populateCategorySelector();
+        renderCategoryItemsEditor();
+        updateStatsCounters();
+        showToast(`Удалена категория: ${catName}`, "danger");
+    }
+
+    function addNewCategoryItem() {
+        const catIdx = document.getElementById("adminCategorySelector").value;
+        if (catIdx === "") return;
+
+        const input = document.getElementById("newCategoryItemInput");
+        const val = input.value.trim();
+        if (!val) return;
+
+        state.settings.categories[catIdx].items.push(val);
+        saveToLocalStorage();
+        renderCategoryItemsEditor();
+        input.value = "";
+        showToast("Шаблон задачи добавлен в категорию!", "success");
+    }
+
+    function deleteCategoryItem(catIdx, itemIdx) {
+        state.settings.categories[catIdx].items.splice(itemIdx, 1);
+        saveToLocalStorage();
+        renderCategoryItemsEditor();
+        showToast("Типовая задача удалена", "danger");
+    }
+
+    // --- VK INTEGRATION SETTINGS ---
+    function saveVkSettings() {
+        state.settings.vkToken = document.getElementById("vkTokenInput").value.trim();
+        state.settings.vkPeerId = document.getElementById("vkPeerIdInput").value.trim();
+        saveToLocalStorage();
+    }
+
+    function sendVkMessageViaJsonp(token, peerId, message, onComplete) {
+        const randomId = Math.floor(Math.random() * 1000000000);
+        const callbackName = 'vk_callback_admin_' + Math.floor(Math.random() * 1000000);
+        const scriptId = 'vk_script_admin_send_' + Date.now();
+
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            const scriptNode = document.getElementById(scriptId);
+            if (scriptNode) scriptNode.remove();
+            if (onComplete) onComplete(response);
+        };
+
+        const script = document.createElement('script');
+        script.id = scriptId;
+        const encodedMessage = encodeURIComponent(message);
+        script.src = `https://api.vk.com/method/messages.send?peer_id=${peerId}&message=${encodedMessage}&random_id=${randomId}&access_token=${token}&v=5.131&callback=${callbackName}`;
+        
+        document.body.appendChild(script);
+
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[window[callbackName]];
+                const node = document.getElementById(scriptId);
+                if (node) node.remove();
+                if (onComplete) onComplete({ error: { error_msg: "Таймаут запроса. Проверьте настройки токена ВК." } });
+            }
+        }, 8000);
+    }
+
+    function testVkConnection() {
+        const token = state.settings.vkToken;
+        const peerId = state.settings.vkPeerId;
+
+        if (!token || !peerId) {
+            showToast("Заполните токен доступа и ID чата перед тестированием!", "danger");
+            return;
+        }
+
+        showToast("Отправка тестового сигнала в ВК...", "info");
+        const msg = "🔔 [Служебное] Тестовое соединение с Панели Администратора прошло успешно!";
+
+        sendVkMessageViaJsonp(token, peerId, msg, (res) => {
+            if (res.response) {
+                showToast("⚡️ Связь успешно проверена! Тестовое сообщение доставлено.", "success");
+            } else if (res.error) {
+                showToast("❌ Ошибка соединения: " + res.error.error_msg, "danger");
+            } else {
+                showToast("❌ Не удалось отправить проверочный пакет в VK", "danger");
+            }
+        });
+    }
+
+    // --- DB MANAGEMENT ---
+    function exportDataToJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `reportcraft_full_db_backup_${Date.now()}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        showToast("База данных успешно выгружена в файл JSON!", "success");
+    }
+
+    function importDataFromJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (parsed.records && parsed.settings) {
+                    state = parsed;
+                    // Force keeping the role as admin
+                    state.settings.userRole = "admin";
+                    saveToLocalStorage();
+                    checkAccessControl();
+                    showToast("⚡️ Резервная копия успешно восстановлена!", "success");
+                } else {
+                    showToast("❌ Неверный формат файла резервной копии!", "danger");
+                }
+            } catch (err) {
+                showToast("Ошибка при чтении файла JSON", "danger");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    const MOCK_RECORDS = [
+        {
+            id: "mock-1",
+            startDate: "2026-05-25",
+            endDate: "2026-06-01",
+            date: "2026-06-02",
+            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            nickname: "Ivan_Ivanov",
+            description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
+            checklist: [
+                { text: "Проверить отчеты лидеров фракций", completed: true },
+                { text: "Провести еженедельный созвон следящих", completed: true },
+                { text: "Внедрить изменения в правила переводов", completed: false }
+            ],
+            createdAt: new Date().toISOString()
+        }
+    ];
+
+    function loadMockDataAndRefresh() {
+        state.records = [...MOCK_RECORDS];
+        saveToLocalStorage();
+        updateStatsCounters();
+        showToast("🔄 Загружены демонстрационные данные!", "success");
+    }
+
+    function showConfirmResetModal() {
+        document.getElementById("confirmResetModal").classList.add("active");
+    }
+
+    function hideConfirmResetModal() {
+        document.getElementById("confirmResetModal").classList.remove("active");
+    }
+
+    function resetAllDataAndClose() {
+        state.records = [];
+        state.settings.positions = [...DEFAULT_POSITIONS];
+        state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+        state.settings.vkToken = "";
+        state.settings.vkPeerId = "";
+        state.settings.syncKey = "";
+        state.settings.autoSync = false;
+        state.settings.userRole = "admin"; // keep logged in as admin after reset
+        
+        saveToLocalStorage();
+        hideConfirmResetModal();
+        checkAccessControl();
+        showToast("💥 База данных успешно сброшена до исходных параметров", "danger");
+    }
+
+    // --- NOTIFICATION TOAST COMPONENT ---
+    function showToast(message, type = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        
+        let icon = "";
+        if (type === "success") {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        } else if (type === "danger") {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+        } else {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        }
+
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("slide-fade-out");
+            toast.addEventListener("animationend", () => {
+                toast.remove();
+            });
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
