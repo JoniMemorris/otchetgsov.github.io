@@ -707,7 +707,7 @@
             <p>Генератор отчётов и трекер задач разработчика</p>
         </div>
         <div class="header-actions">
-            <!-- Access Role Badge / Toggle (NEW!) -->
+            <!-- Access Role Badge / Toggle -->
             <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem; font-weight:700;">
                 <!-- Content injected dynamically -->
             </button>
@@ -977,7 +977,7 @@
             currentNickname: "", // Pre-filled Nickname of GSo
             syncKey: "",
             autoSync: false,
-            userRole: "user" // NEW: Active role ('user' or 'admin')
+            userRole: "user" // Active role ('user' or 'admin')
         }
     };
 
@@ -1181,11 +1181,15 @@
                 if (!state.settings) state.settings = {};
                 if (!state.settings.theme) state.settings.theme = "deep-space";
                 if (!state.settings.userRole) state.settings.userRole = "user"; // default is user role
+                if (!state.settings.positions || state.settings.positions.length === 0) {
+                    state.settings.positions = [...DEFAULT_POSITIONS];
+                }
                 if (!state.settings.categories || state.settings.categories.length === 0) {
                     state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
                 }
-                if (!state.settings.positions || state.settings.positions.length === 0) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
+                if (!state.settings.syncKey) {
+                    state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED KEY FOR COLLABORATIVE TEAM CLOUD! (NEW!)
+                    state.settings.autoSync = true; // Auto background push enabled by default!
                 }
                 // Auto-migration to the new GSo positions list!
                 if (state.settings.positions && !state.settings.positions.includes("Главный Следящий за Министерством (МСП)")) {
@@ -1204,6 +1208,8 @@
                 state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
                 state.settings.positions = [...DEFAULT_POSITIONS];
                 state.settings.currentPosition = DEFAULT_POSITIONS[0];
+                state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED TEAM ROOM CODE
+                state.settings.autoSync = true; // Enabled hands-free by default!
                 saveToLocalStorage();
                 showToast("✨ База данных успешно инициализирована. Начните работу!", "info");
             }
@@ -1249,65 +1255,6 @@
             }
             select.appendChild(opt);
         });
-    }
-
-    // --- ACCESS ROLE CONTROLLER FOR INDEX.HTML (NEW!) ---
-    function applyRolePermissionsUI() {
-        const role = state.settings.userRole || "user";
-        const badge = document.getElementById("roleBadgeBtn");
-        
-        if (role === "admin") {
-            badge.className = "btn btn-success btn-sm";
-            badge.innerHTML = `👑 Администратор <span style="font-size:0.7rem; opacity:0.8;">(Выйти)</span>`;
-        } else {
-            badge.className = "btn btn-secondary btn-sm";
-            badge.innerHTML = `👤 Пользователь <span style="font-size:0.7rem; opacity:0.8;">(Войти)</span>`;
-        }
-    }
-
-    function openLoginModal() {
-        const modal = document.getElementById("loginModal");
-        const formBlock = document.getElementById("loginFormBlock");
-        const logoutBlock = document.getElementById("logoutFormBlock");
-
-        const role = state.settings.userRole || "user";
-        if (role === "admin") {
-            formBlock.style.display = "none";
-            logoutBlock.style.display = "block";
-        } else {
-            formBlock.style.display = "block";
-            logoutBlock.style.display = "none";
-            document.getElementById("adminPasswordInput").value = "";
-        }
-
-        modal.classList.add("active");
-    }
-
-    function closeLoginModal() {
-        document.getElementById("loginModal").classList.remove("active");
-    }
-
-    function attemptAdminLogin() {
-        const pass = document.getElementById("adminPasswordInput").value;
-        if (pass === "admin" || pass === "admin123") {
-            state.settings.userRole = "admin";
-            saveToLocalStorage();
-            applyRolePermissionsUI();
-            closeLoginModal();
-            showToast("👑 Доступ Администратора успешно предоставлен!", "success");
-        } else {
-            showToast("❌ Неверный пароль администратора!", "danger");
-        }
-    }
-
-    function executeLogout() {
-        state.settings.userRole = "user";
-        state.settings.autoSync = false; // Disable autosync on logout for safety
-        
-        saveToLocalStorage();
-        applyRolePermissionsUI();
-        closeLoginModal();
-        showToast("🔒 Вы вышли из профиля Администратора. Режим Пользователя.", "info");
     }
 
     // --- Toast Notification Component ---
@@ -1734,6 +1681,7 @@
         showToast(`↩️ Запись за ${lastDay.date.split('-').reverse().join('.')} возвращена в форму для продолжения работы!`, "info");
     }
 
+    // Reset draft
     function resetMultiDayDraft() {
         state.currentDraftDays = [];
         state.currentMaterials = [];
@@ -2092,5 +2040,5 @@
         showToast("🔒 Вы вышли из профиля Администратора. Режим Пользователя.", "info");
     }
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05903100b1cec31',t:'MTc4MDQzMDA4Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
