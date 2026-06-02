@@ -525,7 +525,7 @@
         <input type="text" id="searchKeyword" placeholder="🔍 Быстрый поиск в истории по дате, никнейму, роли или описанию..." oninput="filterAndRender()">
     </div>
 
-    <!-- DB Utilities / Backup / Restore Panel (RESTRICTED TO ADMIN - NEW!) -->
+    <!-- DB Utilities / Backup / Restore Panel (RESTRICTED TO ADMIN) -->
     <div class="db-utilities-panel" id="dbAdminPanel">
         <div class="filter-title" style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -554,7 +554,7 @@
     </div>
 </div>
 
-<!-- Login Modal Overlay (NEW!) -->
+<!-- Login Modal Overlay -->
 <div class="modal-overlay" id="loginModal">
     <div class="modal" style="max-width: 380px; text-align: center;">
         <div id="loginFormBlock">
@@ -648,12 +648,22 @@
         // Apply access role permissions instantly (NEW!)
         applyRolePermissionsUI();
 
-        // Check local physical server status to show folder sync
+        // Check if local Node.js folder sync server is alive to show button!
         fetch('http://localhost:3000/api/save-file', { method: 'OPTIONS' })
         .then(() => {
             document.getElementById("folderSyncBtn").style.display = "inline-flex";
         })
         .catch(() => {});
+
+        // Automatically and silently pull/sync from cloud on load! (NO MANUAL CLICK REQUIRED!)
+        if (state.settings && state.settings.syncKey) {
+            pullAndMergeFromCloud(true); // silent pull
+
+            // Poll background pull every 10 seconds silently!
+            setInterval(() => {
+                pullAndMergeFromCloud(true);
+            }, 10000);
+        }
 
         // Attach theme toggler
         document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
@@ -738,7 +748,7 @@
         }
     }
 
-    // --- ACCESS ROLE CONTROLLERS FOR ARCHIVE (NEW!) ---
+    // --- ACCESS ROLE CONTROLLERS FOR ARCHIVE ---
     function applyRolePermissionsUI() {
         const role = state.settings.userRole || "user";
         const badge = document.getElementById("roleBadgeBtn");
@@ -829,20 +839,25 @@
         });
     }
 
-    // --- TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SANDBOX OFFLINE FALLBACK SIMULATION) ---
-    function pullAndMergeFromCloud() {
+    // --- TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SILENT AUTOMATIC MODE SUPPORT!) ---
+    function pullAndMergeFromCloud(isSilent = false) {
         const key = state.settings.syncKey;
         if (!key) return;
 
-        showToast("📥 Синхронизация и слияние с облаком...", "info");
+        if (!isSilent) {
+            showToast("📥 Синхронизация и слияние с облаком...", "info");
+        }
+        
         const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
 
         fetch(url)
         .then(response => {
             if (response.status === 404) {
-                showToast("☁️ Облачное хранилище пусто. Копируем локальную базу наверх...", "warning");
-                if (state.settings.userRole === "admin") {
-                    pushToCloudInBackground();
+                if (!isSilent) {
+                    showToast("☁️ Облачное хранилище пусто. Копируем локальную базу наверх...", "warning");
+                    if (state.settings.userRole === "admin") {
+                        pushToCloudInBackground();
+                    }
                 }
                 return null;
             }
@@ -869,86 +884,94 @@
                         }
                     });
 
+                    if (newAddedCount > 0) {
+                        const mergedArray = Array.from(mergedMap.values());
+                        mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+
+                        state.records = mergedArray;
+                        saveToLocalStorage();
+                        filterAndRender(); // Update the chronological feed instantly!
+
+                        showToast(`🔄 Облако: Загружено новых отчетов от команды: ${newAddedCount}!`, "success");
+
+                        // Re-push merged DB back if admin
+                        if (state.settings.userRole === "admin") {
+                            pushToCloudInBackground();
+                        }
+                    } else {
+                        if (!isSilent) {
+                            showToast("☁️ База данных актуальна, новых отчетов нет.", "success");
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                if (!isSilent) showToast("Ошибка разбора облачных данных", "danger");
+            }
+        })
+        .catch(err => {
+            console.warn(err);
+            // ONLY show sandbox catcher if triggered MANUALLY! (Avoids interval popup spam)
+            if (!isSilent) {
+                const confirmSim = confirm(
+                    `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальный облачный сервер блокируется.\n\n` +
+                    `При открытии файлов на компьютере функция совместного обмена с коллегами по ключу "${key}" работает в полную силу!\n\n` +
+                    `Хотите симулировать получение новых отчётов от ваших коллег (ГСов) прямо сейчас в песочнице для проверки слияния баз?`
+                );
+                
+                if (confirmSim) {
+                    const simulatedColleagueRecords = [
+                        {
+                            id: "rec-colleague-1",
+                            startDate: "2026-05-25",
+                            endDate: "2026-05-29",
+                            date: "2026-06-02",
+                            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            nickname: "Alex_Smi",
+                            description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
+                            checklist: [
+                                { text: "Проверить отчеты лидеров фракций", completed: true },
+                                { text: "Провести еженедельный созвон следящих", completed: true },
+                                { text: "Внедрить изменения в правила переводов", completed: false }
+                            ]
+                        },
+                        {
+                            id: "rec-colleague-2",
+                            startDate: "2026-05-24",
+                            endDate: "2026-05-28",
+                            date: "2026-06-01",
+                            youtubeUrl: "",
+                            nickname: "Dmitry_K",
+                            description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
+                            checklist: [
+                                { text: "Проверить обзвон кандидатов на Армию", completed: true },
+                                { text: "Внести логи назначения лидера", completed: true }
+                            ]
+                        }
+                    ];
+
+                    const mergedMap = new Map();
+                    state.records.forEach(r => mergedMap.set(r.id, r));
+                    
+                    let newAddedCount = 0;
+                    simulatedColleagueRecords.forEach(cr => {
+                        if (!mergedMap.has(cr.id)) {
+                            mergedMap.set(cr.id, cr);
+                            newAddedCount++;
+                        }
+                    });
+
                     const mergedArray = Array.from(mergedMap.values());
                     mergedArray.sort((a, b) => b.date.localeCompare(a.date));
 
                     state.records = mergedArray;
                     saveToLocalStorage();
-                    filterAndRender(); // Update the chronological feed instantly!
+                    filterAndRender(); // Re-render feed instantly!
 
-                    showToast(`🔄 Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
-
-                    // Immediately push merged result back if admin
-                    if (state.settings.userRole === "admin") {
-                        pushToCloudInBackground();
-                    }
+                    showToast(`🔄 Симуляция: Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
+                } else {
+                    showToast("Синхронизация отменена", "info");
                 }
-            } catch(e) {
-                console.error(e);
-                showToast("Ошибка разбора облачных данных", "danger");
-            }
-        })
-        .catch(err => {
-            console.warn(err);
-            // SANDBOX OFFLINE CAPTURE & SIMULATION REDIRECT!
-            const confirmSim = confirm(
-                `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальный облачный сервер блокируется.\n\n` +
-                `При открытии файлов на компьютере функция совместного обмена с коллегами по ключу "${key}" работает в полную силу!\n\n` +
-                `Хотите симулировать получение новых отчётов от ваших коллег (ГСов) прямо сейчас в песочнице для проверки слияния баз?`
-            );
-            
-            if (confirmSim) {
-                const simulatedColleagueRecords = [
-                    {
-                        id: "rec-colleague-1",
-                        startDate: "2026-05-25",
-                        endDate: "2026-05-29",
-                        date: "2026-06-02",
-                        youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        nickname: "Alex_Smi",
-                        description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
-                        checklist: [
-                            { text: "Проверить отчеты лидеров фракций", completed: true },
-                            { text: "Провести еженедельный созвон следящих", completed: true },
-                            { text: "Внедрить изменения в правила переводов", completed: false }
-                        ]
-                    },
-                    {
-                        id: "rec-colleague-2",
-                        startDate: "2026-05-24",
-                        endDate: "2026-05-28",
-                        date: "2026-06-01",
-                        youtubeUrl: "",
-                        nickname: "Dmitry_K",
-                        description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
-                        checklist: [
-                            { text: "Проверить обзвон кандидатов на Армию", completed: true },
-                            { text: "Внести логи назначения лидера", completed: true }
-                        ]
-                    }
-                ];
-
-                const mergedMap = new Map();
-                state.records.forEach(r => mergedMap.set(r.id, r));
-                
-                let newAddedCount = 0;
-                simulatedColleagueRecords.forEach(cr => {
-                    if (!mergedMap.has(cr.id)) {
-                        mergedMap.set(cr.id, cr);
-                        newAddedCount++;
-                    }
-                });
-
-                const mergedArray = Array.from(mergedMap.values());
-                mergedArray.sort((a, b) => b.date.localeCompare(a.date));
-
-                state.records = mergedArray;
-                saveToLocalStorage();
-                filterAndRender(); // Re-render feed instantly!
-
-                showToast(`🔄 Симуляция: Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
-            } else {
-                showToast("Синхронизация отменена", "info");
             }
         });
     }
@@ -1014,7 +1037,7 @@
             const card = document.createElement("div");
             card.className = "report-card";
 
-            // Only show delete button to admins! (NEW!)
+            // Only show delete button to admins!
             const deleteBtnHtml = isAdmin 
                 ? `<button class="btn btn-danger btn-sm" onclick="showConfirmDeleteModal('${r.id}')">
                         🗑️ Удалить
@@ -1103,86 +1126,6 @@
         showToast("Отчёт сохранен как файл .txt", "success");
     }
 
-    // JSON export and imports (LOCKED TO ADMIN)
-    function exportDataToJSON() {
-        if (state.settings.userRole !== "admin") return;
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `reportcraft_backup_${new Date().toISOString().split('T')[0]}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-        showToast("Резервная копия JSON скачана!", "success");
-    }
-
-    function importDataFromJSON(event) {
-        if (state.settings.userRole !== "admin") return;
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedState = JSON.parse(e.target.result);
-                if (importedState.records && Array.isArray(importedState.records)) {
-                    state = importedState;
-                    saveToLocalStorage();
-                    filterAndRender();
-                    showToast("🎉 Данные успешно импортированы!", "success");
-                } else {
-                    showToast("Неверная структура JSON резервной копии", "danger");
-                }
-            } catch (err) {
-                showToast("Ошибка чтения JSON", "danger");
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function loadMockDataAndRefresh() {
-        if (state.settings.userRole !== "admin") return;
-        const MOCK_RECORDS = [
-            {
-                id: "mock-1",
-                startDate: "2026-05-25",
-                endDate: "2026-06-01",
-                date: "2026-06-02",
-                youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                nickname: "Ivan_Ivanov",
-                description: "Разработка ядра системы аутентификации на основе JWT. Написал миграции базы данных для таблицы пользователей, создал сервис генерации токенов с шифрованием SHA-256 и покрыл интеграционными тестами методы авторизации.",
-                checklist: [
-                    { text: "Создать миграции таблиц users", completed: true },
-                    { text: "Разработать модуль JWT и шифрования", completed: true },
-                    { text: "Реализовать Refresh & Access токены", completed: true },
-                    { text: "Написать интеграционные тесты API", completed: false }
-                ],
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: "mock-2",
-                startDate: "2026-05-18",
-                endDate: "2026-05-22",
-                date: "2026-05-22",
-                youtubeUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-                nickname: "Alex_Smi",
-                description: "Интеграция API платежного эквайринга Stripe. Реализовал создание сессий оплаты, отслеживание вебхуков успешного заверления транзакции и автоматическую отправку чеков пользователям по электронной почте.",
-                checklist: [
-                    { text: "Настроить SDK Stripe/эквайринга", completed: true },
-                    { text: "Обработка вебхуков от банка", completed: true },
-                    { text: "Провести успешную тестовую транзакцию", completed: true }
-                ],
-                createdAt: new Date().toISOString()
-            }
-        ];
-
-        state.records = [...MOCK_RECORDS];
-        state.settings.theme = "deep-space";
-        saveToLocalStorage();
-        filterAndRender();
-        showToast("🔄 Демо-данные успешно загружены!", "success");
-    }
-
     function showConfirmDeleteModal(id) {
         if (state.settings.userRole !== "admin") return;
         recordToDeleteId = id;
@@ -1267,5 +1210,5 @@
         return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
     }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058f13439cff136',t:'MTc4MDQyOTM1Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058f84f4a48ec31',t:'MTc4MDQyOTY0Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
