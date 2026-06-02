@@ -128,7 +128,7 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .btn-theme-toggle {
@@ -153,7 +153,7 @@
             transform: scale(1.05);
         }
 
-        /* Buttons styles */
+        /* Navigation Button */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -547,6 +547,15 @@
         }
     }
 
+    // Real-time synchronization across multiple open tabs/iframes! (THE ULTIMATE SYNC ENGINE)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'reportcraft_state_updated') {
+            loadFromLocalStorage(); // Read new state from localStorage
+            applyTheme(); // Restyle background instantly
+            filterAndRender(); // Re-filter and re-render history feed in real-time!
+        }
+    });
+
     // Theme logic cycling through 5 themes on click
     function toggleTheme() {
         const themes = ['deep-space', 'polar-night', 'sunset-glow', 'neon-cyber', 'pure-light'];
@@ -771,6 +780,7 @@
             .replace(/'/g, "&#039;");
     }
 
+    // Escape backticks for JS injection template strings
     function escapeBackticks(str) {
         if (!str) return '';
         return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
