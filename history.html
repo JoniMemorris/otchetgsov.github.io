@@ -466,6 +466,10 @@
             <button class="btn btn-success" id="cloudSyncBtn" onclick="pullAndMergeFromCloud()" style="font-weight: 700; display: none; background-color: var(--success); border-color: var(--success);">
                 ☁️ Облачный Синхрон
             </button>
+            <!-- Local Folder Sync Button (NEW!) -->
+            <button class="btn btn-primary" id="folderSyncBtn" onclick="syncWithLocalFolder()" style="font-weight: 700; display: none; background-color: var(--primary); border-color: var(--primary);">
+                📂 Выгрузить в папку
+            </button>
             <!-- Go Back to index -->
             <a href="index.html" class="btn btn-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -484,7 +488,7 @@
 
     <!-- Simple Search Bar -->
     <div class="search-panel">
-        <input type="text" id="searchKeyword" placeholder="🔍 Быстрый поиск в истории по дате, описанию или задачам..." oninput="filterAndRender()">
+        <input type="text" id="searchKeyword" placeholder="🔍 Быстрый поиск в истории по дате, никнейму, роли или описанию..." oninput="filterAndRender()">
     </div>
 
     <!-- History feed lists -->
@@ -530,6 +534,15 @@
         if (state.settings && state.settings.syncKey) {
             document.getElementById("cloudSyncBtn").style.display = "inline-flex";
         }
+
+        // Check if local Node.js folder sync server is alive to show button!
+        fetch('http://localhost:3000/api/save-file', { method: 'OPTIONS' })
+        .then(() => {
+            document.getElementById("folderSyncBtn").style.display = "inline-flex";
+        })
+        .catch(() => {
+            // Keep it hidden if backend is offline
+        });
 
         // Attach theme toggler
         document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
@@ -613,7 +626,35 @@
         }
     }
 
-    // --- NEW: TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SANDBOX OFFLINE FALLBACK SIMULATION) ---
+    // --- SMART LOCAL FILE SYSTEM FOLDER SYNCHRONIZATION ---
+    function syncWithLocalFolder() {
+        if (!state.records || state.records.length === 0) {
+            showToast("Нет отчётов для выгрузки в папку!", "danger");
+            return;
+        }
+        
+        showToast("📂 Выгрузка отчетов в локальную папку...", "info");
+
+        fetch('http://localhost:3000/api/sync-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ records: state.records })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`📂 Успешно синхронизировано отчетов: ${data.count} в папку reports/!`, "success");
+            } else {
+                showToast("Не удалось записать файлы в локальную папку", "danger");
+            }
+        })
+        .catch(err => {
+            console.warn(err);
+            showToast("Локальный сервер папки недоступен. Запустите server.js!", "danger");
+        });
+    }
+
+    // --- TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SANDBOX OFFLINE FALLBACK SIMULATION) ---
     function pullAndMergeFromCloud() {
         const key = state.settings.syncKey;
         if (!key) return;
@@ -636,9 +677,13 @@
             try {
                 const cloudRecords = JSON.parse(rawString);
                 if (cloudRecords && Array.isArray(cloudRecords)) {
+                    // Smart non-destructive merge logic
                     const mergedMap = new Map();
+                    
+                    // Add local records first
                     state.records.forEach(r => mergedMap.set(r.id, r));
                     
+                    // Add cloud records if they are unique
                     let newAddedCount = 0;
                     cloudRecords.forEach(cr => {
                         if (!mergedMap.has(cr.id)) {
@@ -681,6 +726,7 @@
                         endDate: "2026-05-29",
                         date: "2026-06-02",
                         youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        nickname: "Alex_Smi", // Simulated Colleague nickname!
                         description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
                         checklist: [
                             { text: "Проверить отчеты лидеров фракций", completed: true },
@@ -694,9 +740,10 @@
                         endDate: "2026-05-28",
                         date: "2026-06-01",
                         youtubeUrl: "",
+                        nickname: "Dmitry_K", // Simulated Colleague nickname!
                         description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
                         checklist: [
-                            { text: "Проверить обзвон кандидатов на Армию", completed: true },
+                            { text: "Провести обзвон кандидатов на Армию", completed: true },
                             { text: "Внести логи назначения лидера", completed: true }
                         ]
                     }
@@ -746,12 +793,13 @@
             const inDesc = r.description.toLowerCase().includes(keyword);
             const inDate = r.date.includes(keyword) || (r.startDate && r.startDate.includes(keyword));
             const inChecklist = r.checklist && r.checklist.some(t => t.text.toLowerCase().includes(keyword));
+            const inNick = r.nickname && r.nickname.toLowerCase().includes(keyword); // Search by Nickname too!
             
             // Generate full text in memory to search inside compiled templates too!
-            const fullCompiledText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist).toLowerCase();
+            const fullCompiledText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist, r.nickname).toLowerCase();
             const inCompiled = fullCompiledText.includes(keyword);
 
-            return inDesc || inDate || inChecklist || inCompiled;
+            return inDesc || inDate || inChecklist || inCompiled || inNick;
         });
 
         renderHistoryFeed();
@@ -780,7 +828,7 @@
             const formattedEnd = r.endDate ? r.endDate.split('-').reverse().join('.') : "__.__.____";
             const formattedReport = r.date ? r.date.split('-').reverse().join('.') : "__.__.____";
 
-            const reportText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist);
+            const reportText = compileReportText(r.startDate, r.endDate, r.date, r.youtubeUrl, r.description, r.checklist, r.nickname);
 
             const card = document.createElement("div");
             card.className = "report-card";
@@ -819,8 +867,8 @@
         });
     }
 
-    // Compile report text matching the format exactly
-    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist) {
+    // Compile report text matching the format exactly (WITH NICKNAME SUPPORT!)
+    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist, nickname) {
         const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
         const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
         const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
@@ -829,6 +877,9 @@
         report += `С ${formattedStart} по ${formattedEnd}\n\n`;
         report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
         report += `📅 Дата: ${formattedReport}\n\n`;
+        if (nickname) {
+            report += `👤 Никнейм: ${nickname}\n\n`;
+        }
         report += `🎥 ВИДЕО ДЕМОНСТРАЦИЯ:\n`;
         report += `🔗 ${youtube ? youtube : ""}\n\n\n\n`;
         report += `🛠️ ОПИСАНИЕ ВЫПОЛНЕННЫХ ЗАДАЧ:\n`;
@@ -918,7 +969,6 @@
         }, 3000);
     }
 
-    // Escape HTML strings
     function escapeHtml(str) {
         if (!str) return '';
         return str
@@ -929,11 +979,10 @@
             .replace(/'/g, "&#039;");
     }
 
-    // Escape backticks for template strings
     function escapeBackticks(str) {
         if (!str) return '';
         return str.replace(/`/g, '\\`').replace(/\$/g, '\\$');
     }
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058e1224f51f136',t:'MTc4MDQyODY5Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
