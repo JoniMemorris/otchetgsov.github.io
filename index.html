@@ -1179,10 +1179,10 @@
         if (state.settings && state.settings.syncKey) {
             pullAndMergeFromCloud(true); // silent pull
 
-            // Poll background pull every 10 seconds silently!
+            // Poll background pull every 5 seconds silently!
             setInterval(() => {
                 pullAndMergeFromCloud(true);
-            }, 10000);
+            }, 5000);
         }
     });
 
@@ -2052,6 +2052,10 @@
         fetch(url)
         .then(response => {
             if (response.status === 404) {
+                // If cloud is empty and we have reports, initialize it!
+                if (state.records && state.records.length > 0) {
+                    pushToCloudInBackground();
+                }
                 return null;
             }
             if (!response.ok) throw new Error("API Error");
@@ -2060,45 +2064,83 @@
         .then(rawString => {
             if (!rawString) return;
             try {
-                let cloudRecords;
+                let cloudData;
                 if (typeof rawString === 'string') {
-                    cloudRecords = JSON.parse(rawString);
+                    cloudData = JSON.parse(rawString);
                 } else {
-                    cloudRecords = rawString;
+                    cloudData = rawString;
                 }
-                if (cloudRecords && Array.isArray(cloudRecords)) {
-                    // Smart non-destructive merge logic
-                    const mergedMap = new Map();
+
+                let cloudRecords = [];
+                let cloudPositions = null;
+                let cloudCategories = null;
+                let cloudSettingsUpdatedAt = 0;
+
+                if (cloudData && Array.isArray(cloudData)) {
+                    cloudRecords = cloudData;
+                } else if (cloudData && typeof cloudData === 'object') {
+                    cloudRecords = cloudData.records || [];
+                    cloudPositions = cloudData.positions || null;
+                    cloudCategories = cloudData.categories || null;
+                    cloudSettingsUpdatedAt = cloudData.settingsUpdatedAt || 0;
+                }
+
+                let stateChanged = false;
+
+                // 1. Merge Records
+                const mergedMap = new Map();
+                state.records.forEach(r => mergedMap.set(r.id, r));
+                
+                let newAddedCount = 0;
+                cloudRecords.forEach(cr => {
+                    if (!mergedMap.has(cr.id)) {
+                        mergedMap.set(cr.id, cr);
+                        newAddedCount++;
+                        stateChanged = true;
+                    }
+                });
+
+                if (newAddedCount > 0) {
+                    const mergedArray = Array.from(mergedMap.values());
+                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+                    state.records = mergedArray;
+                }
+
+                // 2. Merge Positions & Categories (Last-Write-Wins)
+                const localUpdatedAt = state.settings.updatedAt || 0;
+                if (cloudSettingsUpdatedAt > localUpdatedAt) {
+                    if (cloudPositions && Array.isArray(cloudPositions) && cloudPositions.length > 0) {
+                        state.settings.positions = cloudPositions;
+                        stateChanged = true;
+                    }
+                    if (cloudCategories && Array.isArray(cloudCategories) && cloudCategories.length > 0) {
+                        state.settings.categories = cloudCategories;
+                        stateChanged = true;
+                    }
+                    state.settings.updatedAt = cloudSettingsUpdatedAt;
+                } else if (localUpdatedAt > cloudSettingsUpdatedAt) {
+                    // Local changes are newer, push them to cloud!
+                    pushToCloudInBackground();
+                }
+
+                if (stateChanged) {
+                    saveToLocalStorage();
                     
-                    // Add local records first
-                    state.records.forEach(r => mergedMap.set(r.id, r));
-                    
-                    // Add cloud records if they are unique
-                    let newAddedCount = 0;
-                    cloudRecords.forEach(cr => {
-                        if (!mergedMap.has(cr.id)) {
-                            mergedMap.set(cr.id, cr);
-                            newAddedCount++;
-                        }
-                    });
+                    // Re-render components
+                    updateTopCountVisuals();
+                    renderPositionsDropdown();
+                    renderCategories();
+                    renderChecklist();
+                    generateLiveReport();
 
                     if (newAddedCount > 0) {
-                        const mergedArray = Array.from(mergedMap.values());
-                        mergedArray.sort((a, b) => b.date.localeCompare(a.date));
-
-                        state.records = mergedArray;
-                        saveToLocalStorage();
-                        updateTopCountVisuals();
-                        generateLiveReport();
-
                         showToast(`🔄 Облако: Загружено новых отчетов от команды: ${newAddedCount}!`, "success");
-
-                        // Re-push merged DB back
-                        pushToCloudInBackground();
+                    } else {
+                        showToast(`🔄 Роли и чек-листы обновлены из облака!`, "info");
                     }
                 }
             } catch(e) {
-                console.error(e);
+                console.error("Cloud merge error:", e);
             }
         })
         .catch(err => {
@@ -2110,7 +2152,15 @@
     function pushToCloudInBackground() {
         const key = state.settings.syncKey;
         if (!key) return;
-        const data = JSON.stringify(state.records);
+
+        const payload = {
+            records: state.records || [],
+            positions: state.settings.positions || [],
+            categories: state.settings.categories || [],
+            settingsUpdatedAt: state.settings.updatedAt || 0
+        };
+
+        const data = JSON.stringify(payload);
         fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2258,5 +2308,5 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0610595ef3c9d9d',t:'MTc4MDUxNDA3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a061144918849d9d',t:'MTc4MDUxNDY3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
