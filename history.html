@@ -546,7 +546,7 @@
                 👑 Админ-Панель
             </a>
             <!-- Team Cloud Sync Button -->
-            <button class="btn btn-success" id="cloudSyncBtn" onclick="pullAndMergeFromCloud()" style="font-weight: 700; display: none; background-color: var(--success); border-color: var(--success);">
+            <button class="btn btn-success" id="cloudSyncBtn" onclick="pullAndMergeFromCloud(false)" style="font-weight: 700; display: inline-flex; background-color: var(--success); border-color: var(--success);">
                 <span style="font-size: 1.6rem; line-height: 1;">☁️</span> Облачный Синхрон
             </button>
             <!-- Local Folder Sync Button -->
@@ -705,9 +705,7 @@
         applyTheme();
 
         // Sync team cloud button
-        if (state.settings && state.settings.syncKey) {
-            document.getElementById("cloudSyncBtn").style.display = "inline-flex";
-        }
+        
 
         // Apply access role permissions instantly (NEW!)
         applyRolePermissionsUI();
@@ -720,13 +718,7 @@
         .catch(() => {});
 
         // Automatically and silently pull/sync from cloud on load! (NO MANUAL CLICK REQUIRED!)
-        if (state.settings && state.settings.syncKey) {
-            pullAndMergeFromCloud(true); // silent pull
-
-            // Poll background pull every 10 seconds silently!
-            setInterval(() => {
-                pullAndMergeFromCloud(true);
-            }, 10000);
+        , 10000);
         }
 
         // Attach theme toggler
@@ -762,9 +754,7 @@
             applyRolePermissionsUI(); // Update UI role locks instantly!
             
             // Toggle Sync Button dynamically
-            if (state.settings && state.settings.syncKey) {
-                document.getElementById("cloudSyncBtn").style.display = "inline-flex";
-            } else {
+             else {
                 document.getElementById("cloudSyncBtn").style.display = "none";
             }
 
@@ -907,153 +897,6 @@
     }
 
     // --- TEAM CLOUD SYNC FOR ARCHIVE FEED (WITH SILENT AUTOMATIC MODE SUPPORT!) ---
-    function pullAndMergeFromCloud(isSilent = false) {
-        const key = state.settings.syncKey;
-        if (!key) return;
-
-        if (!isSilent) {
-            showToast("📥 Синхронизация и слияние с облаком...", "info");
-        }
-        
-        const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
-
-        fetch(url)
-        .then(response => {
-            if (response.status === 404) {
-                if (!isSilent) {
-                    showToast("☁️ Облачное хранилище пусто. Копируем локальную базу наверх...", "warning");
-                    if (state.settings.userRole === "admin") {
-                        pushToCloudInBackground();
-                    }
-                }
-                return null;
-            }
-            if (!response.ok) throw new Error("API Error");
-            return response.json();
-        })
-        .then(rawString => {
-            if (!rawString) return;
-            try {
-                const cloudRecords = JSON.parse(rawString);
-                if (cloudRecords && Array.isArray(cloudRecords)) {
-                    // Smart non-destructive merge logic
-                    const mergedMap = new Map();
-                    
-                    // Add local records first
-                    state.records.forEach(r => mergedMap.set(r.id, r));
-                    
-                    // Add cloud records if they are unique
-                    let newAddedCount = 0;
-                    cloudRecords.forEach(cr => {
-                        if (!mergedMap.has(cr.id)) {
-                            mergedMap.set(cr.id, cr);
-                            newAddedCount++;
-                        }
-                    });
-
-                    if (newAddedCount > 0) {
-                        const mergedArray = Array.from(mergedMap.values());
-                        mergedArray.sort((a, b) => b.date.localeCompare(a.date));
-
-                        state.records = mergedArray;
-                        saveToLocalStorage();
-                        filterAndRender(); // Update the chronological feed instantly!
-
-                        showToast(`🔄 Облако: Загружено новых отчетов от команды: ${newAddedCount}!`, "success");
-
-                        // Re-push merged DB back if admin
-                        if (state.settings.userRole === "admin") {
-                            pushToCloudInBackground();
-                        }
-                    } else {
-                        if (!isSilent) {
-                            showToast("☁️ База данных актуальна, новых отчетов нет.", "success");
-                        }
-                    }
-                }
-            } catch(e) {
-                console.error(e);
-                if (!isSilent) showToast("Ошибка разбора облачных данных", "danger");
-            }
-        })
-        .catch(err => {
-            console.warn(err);
-            // ONLY show sandbox catcher if triggered MANUALLY! (Avoids interval popup spam)
-            if (!isSilent) {
-                const confirmSim = confirm(
-                    `⚠️ Встроенный предпросмотр работает в изолированной песочнице без сети, поэтому реальный облачный сервер блокируется.\n\n` +
-                    `При открытии файлов на компьютере функция совместного обмена с коллегами по ключу "${key}" работает в полную силу!\n\n` +
-                    `Хотите симулировать получение новых отчётов от ваших коллег (ГСов) прямо сейчас в песочнице для проверки слияния баз?`
-                );
-                
-                if (confirmSim) {
-                    const simulatedColleagueRecords = [
-                        {
-                            id: "rec-colleague-1",
-                            startDate: "2026-05-25",
-                            endDate: "2026-05-29",
-                            date: "2026-06-02",
-                            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                            nickname: "Alex_Smi",
-                            description: "Проведена плановая еженедельная проверка отчётов лидеров всех подконтрольных фракций. Выдано 2 устных предупреждения за мелкие косяки. Провели совместное собрание следящих, обсудили новые правила перевода игроков между организациями.",
-                            checklist: [
-                                { text: "Проверить отчеты лидеров фракций", completed: true },
-                                { text: "Провести еженедельный созвон следящих", completed: true },
-                                { text: "Внедрить изменения в правила переводов", completed: false }
-                            ]
-                        },
-                        {
-                            id: "rec-colleague-2",
-                            startDate: "2026-05-24",
-                            endDate: "2026-05-28",
-                            date: "2026-06-01",
-                            youtubeUrl: "",
-                            nickname: "Dmitry_K",
-                            description: "Успешно организовали и провели обзвон на пост лидера фракции Армия. Был отобран компетентный кандидат, заполнили логи назначения, выдали модерацию на форуме сообщества.",
-                            checklist: [
-                                { text: "Проверить обзвон кандидатов на Армию", completed: true },
-                                { text: "Внести логи назначения лидера", completed: true }
-                            ]
-                        }
-                    ];
-
-                    const mergedMap = new Map();
-                    state.records.forEach(r => mergedMap.set(r.id, r));
-                    
-                    let newAddedCount = 0;
-                    simulatedColleagueRecords.forEach(cr => {
-                        if (!mergedMap.has(cr.id)) {
-                            mergedMap.set(cr.id, cr);
-                            newAddedCount++;
-                        }
-                    });
-
-                    const mergedArray = Array.from(mergedMap.values());
-                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
-
-                    state.records = mergedArray;
-                    saveToLocalStorage();
-                    filterAndRender(); // Re-render feed instantly!
-
-                    showToast(`🔄 Симуляция: Базы синхронизированы! Добавлено новых отчетов: ${newAddedCount}`, "success");
-                } else {
-                    showToast("Синхронизация отменена", "info");
-                }
-            }
-        });
-    }
-
-    function pushToCloudInBackground() {
-        const key = state.settings.syncKey;
-        if (!key) return;
-        const data = JSON.stringify(state.records);
-        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).catch(err => console.warn("Background sync failed", err));
-    }
-
     // Filter Logic Engine
     function filterAndRender() {
         const keyword = document.getElementById("searchKeyword").value.toLowerCase();
@@ -1214,21 +1057,22 @@
     document.getElementById("confirmDeleteBtn").onclick = function() {
         if (state.settings.userRole !== "admin") return;
         if (recordToDeleteId) {
+            if (!state.settings.deletedIds) state.settings.deletedIds = [];
+            state.settings.deletedIds.push(recordToDeleteId);
             state.records = state.records.filter(r => r.id !== recordToDeleteId);
             saveToLocalStorage();
             hideConfirmDeleteModal();
             filterAndRender();
             showToast("Отчёт успешно удален из архива", "danger");
-            
-            // If auto-sync is enabled, push background update
-            if (state.settings && state.settings.syncKey && state.settings.autoSync) {
-                pushToCloudInBackground();
-            }
+            pushToCloudInBackground();
         }
+    }
     };
 
     function resetAllDataAndClose() {
         if (state.settings.userRole !== "admin") return;
+        if (!state.settings.deletedIds) state.settings.deletedIds = [];
+        state.records.forEach(r => state.settings.deletedIds.push(r.id));
         state.records = [];
         saveToLocalStorage();
         hideConfirmDeleteModal();
@@ -1279,5 +1123,163 @@
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+
+<!-- GLOBAL AUTO-SYNC SCRIPT -->
+<script>
+    const SYNC_URL = `https://keyvalue.imany.link/api/KV/gso_global_auto_sync_v4`;
+
+    setInterval(() => {
+        pullAndMergeFromCloud(true);
+    }, 10000);
+
+    setTimeout(() => pullAndMergeFromCloud(true), 1000);
+
+    function pushToCloudInBackground() {
+        fetch(SYNC_URL)
+        .then(res => (res.ok ? res.json() : null))
+        .then(rawString => {
+            let cloudRecords = [];
+            let cloudSettings = null;
+            if (rawString) {
+                try {
+                    let parsed = JSON.parse(rawString);
+                    cloudRecords = Array.isArray(parsed) ? parsed : (parsed.records || []);
+                    cloudSettings = parsed.settings || null;
+                } catch(e){}
+            }
+
+            const mergedMap = new Map();
+            cloudRecords.forEach(cr => mergedMap.set(cr.id, cr));
+            
+            if (!state.settings.deletedIds) state.settings.deletedIds = [];
+            
+            state.records.forEach(r => mergedMap.set(r.id, r));
+            state.settings.deletedIds.forEach(id => mergedMap.delete(id));
+
+            const mergedArray = Array.from(mergedMap.values());
+            mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+            
+            const payload = {
+                records: mergedArray,
+                settings: state.settings
+            };
+
+            const data = JSON.stringify(payload);
+            return fetch(SYNC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        })
+        .catch(err => console.warn("Background push failed", err));
+    }
+
+    function pullAndMergeFromCloud(isSilent = true) {
+        fetch(SYNC_URL)
+        .then(res => (res.ok ? res.json() : null))
+        .then(rawString => {
+            if (!rawString) return;
+            try {
+                let parsed = JSON.parse(rawString);
+                let cloudRecords = Array.isArray(parsed) ? parsed : (parsed.records || []);
+                let cloudSettings = parsed.settings || null;
+
+                let hasChanges = false;
+
+                if (cloudSettings) {
+                    const localStr = JSON.stringify({
+                        pos: state.settings.positions,
+                        cat: state.settings.categories,
+                        vkT: state.settings.vkToken,
+                        vkP: state.settings.vkPeerId,
+                        del: state.settings.deletedIds
+                    });
+                    const cloudStr = JSON.stringify({
+                        pos: cloudSettings.positions,
+                        cat: cloudSettings.categories,
+                        vkT: cloudSettings.vkToken,
+                        vkP: cloudSettings.vkPeerId,
+                        del: cloudSettings.deletedIds
+                    });
+
+                    if (localStr !== cloudStr) {
+                        hasChanges = true;
+                        const localTheme = state.settings.theme;
+                        const localRole = state.settings.userRole;
+                        const localNick = state.settings.currentNickname;
+                        const localPos = state.settings.currentPosition;
+                        
+                        state.settings = { ...state.settings, ...cloudSettings };
+                        
+                        state.settings.theme = localTheme;
+                        state.settings.userRole = localRole;
+                        if (localNick) state.settings.currentNickname = localNick;
+                        if (localPos) state.settings.currentPosition = localPos;
+                    }
+                }
+
+                if (!state.settings.deletedIds) state.settings.deletedIds = [];
+
+                const mergedMap = new Map();
+                state.records.forEach(r => mergedMap.set(r.id, r));
+                
+                let originalCount = mergedMap.size;
+
+                cloudRecords.forEach(cr => {
+                    if (!mergedMap.has(cr.id)) {
+                        mergedMap.set(cr.id, cr);
+                    } else {
+                        mergedMap.set(cr.id, cr);
+                    }
+                });
+
+                state.settings.deletedIds.forEach(id => mergedMap.delete(id));
+
+                if (mergedMap.size !== originalCount || hasChanges) {
+                    hasChanges = true;
+                }
+
+                if (hasChanges) {
+                    const mergedArray = Array.from(mergedMap.values());
+                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+                    
+                    if (JSON.stringify(state.records) !== JSON.stringify(mergedArray)) {
+                        state.records = mergedArray;
+                    }
+
+                    localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
+                    refreshUI();
+
+                    if (!isSilent && typeof showToast === 'function') {
+                        showToast("🔄 Данные синхронизированы с облаком!", "success");
+                    }
+                } else {
+                    if (!isSilent && typeof showToast === 'function') {
+                        showToast("☁️ Локальная база уже актуальна.", "success");
+                    }
+                }
+            } catch(e) {
+                console.error("Sync error", e);
+            }
+        })
+        .catch(err => console.warn(err));
+    }
+
+    function refreshUI() {
+        if (typeof filterAndRender === 'function') filterAndRender(); 
+        if (typeof renderPositionsDropdown === 'function') renderPositionsDropdown(); 
+        if (typeof renderCategories === 'function') renderCategories(); 
+        if (typeof updateStatsCounters === 'function') updateStatsCounters(); 
+        if (typeof renderPositionsEditor === 'function') renderPositionsEditor(); 
+        if (typeof populateCategorySelector === 'function') populateCategorySelector(); 
+        if (typeof renderCategoryItemsEditor === 'function') renderCategoryItemsEditor(); 
+        
+        const vkTokenInput = document.getElementById("vkTokenInput");
+        const vkPeerIdInput = document.getElementById("vkPeerIdInput");
+        if (vkTokenInput && document.activeElement !== vkTokenInput) vkTokenInput.value = state.settings.vkToken || "";
+        if (vkPeerIdInput && document.activeElement !== vkPeerIdInput) vkPeerIdInput.value = state.settings.vkPeerId || "";
+    }
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a05f017498bae919',t:'MTc4MDQ5MjkzNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
