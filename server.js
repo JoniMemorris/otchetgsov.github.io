@@ -95,7 +95,14 @@ const server = http.createServer((req, res) => {
                     let report = `📝 ОТЧЁТ О ВЫПОЛНЕННОЙ РАБОТЕ\n\n`;
                     report += `С ${formattedStart} по ${formattedEnd}\n\n`;
                     report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                    report += `📅 Дата: ${formattedReport}\n\n`;
+                    report += `📅 Дата отчёта: ${formattedReport}\n`;
+                    if (r.position) {
+                        report += `💼 Должность: ${r.position}\n`;
+                    }
+                    if (r.nickname) {
+                        report += `👤 Никнейм: ${r.nickname}\n`;
+                    }
+                    report += `\n`;
                     if (r.youtubeUrl) {
                         report += `🎥 ВИДЕО ДЕМОНСТРАЦИЯ:\n`;
                         report += `🔗 ${r.youtubeUrl}\n\n\n\n`;
