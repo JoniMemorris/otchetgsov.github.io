@@ -718,6 +718,14 @@
         loadFromLocalStorage();
         applyTheme();
         checkAccessControl();
+
+        // Automated background sync
+        if (state.settings && state.settings.syncKey) {
+            pullAndMergeFromCloud(true);
+            setInterval(() => {
+                pullAndMergeFromCloud(true);
+            }, 5000);
+        }
     });
 
     // Real-time synchronization across multiple open tabs/iframes!
@@ -756,7 +764,13 @@
 
     function saveToLocalStorage() {
         try {
+            state.settings.updatedAt = Date.now(); // Update timestamp on any setting/record mutation!
             localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
+            
+            // Push to cloud instantly
+            if (state.settings && state.settings.syncKey) {
+                pushToCloudInBackground();
+            }
         } catch (e) {
             console.error("Не удалось записать в localStorage", e);
         }
@@ -1158,7 +1172,132 @@
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    // --- AUTOMATED CLOUD SYNC FOR ADMIN PANEL ---
+    function pullAndMergeFromCloud(isSilent = false) {
+        const key = state.settings.syncKey;
+        if (!key) return;
+
+        const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
+
+        fetch(url)
+        .then(response => {
+            if (response.status === 404) {
+                // Initialize cloud if empty
+                if (state.records && state.records.length > 0) {
+                    pushToCloudInBackground();
+                }
+                return null;
+            }
+            if (!response.ok) throw new Error("API Error");
+            return response.json();
+        })
+        .then(rawString => {
+            if (!rawString) return;
+            try {
+                let cloudData;
+                if (typeof rawString === 'string') {
+                    cloudData = JSON.parse(rawString);
+                } else {
+                    cloudData = rawString;
+                }
+
+                let cloudRecords = [];
+                let cloudPositions = null;
+                let cloudCategories = null;
+                let cloudSettingsUpdatedAt = 0;
+
+                if (cloudData && Array.isArray(cloudData)) {
+                    cloudRecords = cloudData;
+                } else if (cloudData && typeof cloudData === 'object') {
+                    cloudRecords = cloudData.records || [];
+                    cloudPositions = cloudData.positions || null;
+                    cloudCategories = cloudData.categories || null;
+                    cloudSettingsUpdatedAt = cloudData.settingsUpdatedAt || 0;
+                }
+
+                let stateChanged = false;
+
+                // 1. Merge Records
+                const mergedMap = new Map();
+                state.records.forEach(r => mergedMap.set(r.id, r));
+                
+                let newAddedCount = 0;
+                cloudRecords.forEach(cr => {
+                    if (!mergedMap.has(cr.id)) {
+                        mergedMap.set(cr.id, cr);
+                        newAddedCount++;
+                        stateChanged = true;
+                    }
+                });
+
+                if (newAddedCount > 0) {
+                    const mergedArray = Array.from(mergedMap.values());
+                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
+                    state.records = mergedArray;
+                }
+
+                // 2. Merge Positions & Categories (Last-Write-Wins)
+                const localUpdatedAt = state.settings.updatedAt || 0;
+                if (cloudSettingsUpdatedAt > localUpdatedAt) {
+                    if (cloudPositions && Array.isArray(cloudPositions) && cloudPositions.length > 0) {
+                        state.settings.positions = cloudPositions;
+                        stateChanged = true;
+                    }
+                    if (cloudCategories && Array.isArray(cloudCategories) && cloudCategories.length > 0) {
+                        state.settings.categories = cloudCategories;
+                        stateChanged = true;
+                    }
+                    state.settings.updatedAt = cloudSettingsUpdatedAt;
+                } else if (localUpdatedAt > cloudSettingsUpdatedAt) {
+                    // Local changes are newer, push them to cloud!
+                    pushToCloudInBackground();
+                }
+
+                if (stateChanged) {
+                    // Save to local storage silently (bypassing state.settings.updatedAt update to avoid loops)
+                    localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
+
+                    // Re-render UI
+                    updateStatsCounters();
+                    renderPositionsEditor();
+                    populateCategorySelector();
+                    renderCategoryItemsEditor();
+
+                    if (newAddedCount > 0) {
+                        showToast(`🔄 Облако: Загружено новых отчетов: ${newAddedCount}!`, "success");
+                    } else {
+                        showToast(`🔄 Роли и чек-листы обновлены из облака!`, "info");
+                    }
+                }
+            } catch(e) {
+                console.error("Cloud merge error:", e);
+            }
+        })
+        .catch(err => {
+            console.warn("Background cloud poll failed:", err);
+        });
+    }
+
+    function pushToCloudInBackground() {
+        const key = state.settings.syncKey;
+        if (!key) return;
+
+        const payload = {
+            records: state.records || [],
+            positions: state.settings.positions || [],
+            categories: state.settings.categories || [],
+            settingsUpdatedAt: state.settings.updatedAt || 0
+        };
+
+        const data = JSON.stringify(payload);
+        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).catch(err => console.warn("Background cloud sync failed", err));
+    }
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a06113a9186f9d9d',t:'MTc4MDUxNDY1Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
