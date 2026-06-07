@@ -100,7 +100,7 @@
         .user-role-badge { margin-top: 8px; display: inline-block; font-size: 10px;}
         
         .sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
-        .nav-item { width: 100%; text-align: left; padding: 15px 20px; background: transparent; color: var(--sidebar-text); border: none; border-left: 4px solid transparent; border-radius: 0; font-size: 15px; font-weight: normal; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; margin-top: 0; }
+        .nav-item { width: 100%; text-align: left; padding: 15px 20px; background: transparent; color: var(--sidebar-text); border: none; border-left: 4px solid transparent; border-radius: 0; font-size: 15px; font-weight: normal; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; margin-top: 0; position: relative; }
         .nav-item:hover { background: var(--sidebar-hover); border-left-color: var(--primary); }
         .nav-item.active { background: var(--sidebar-hover); border-left-color: var(--primary); font-weight: bold; }
         
@@ -108,12 +108,44 @@
         .nav-item-admin.active { border-left-color: var(--admin-color); }
         .nav-item-admin:hover { border-left-color: var(--admin-color); }
 
+        /* --- БЕЙДЖ УВЕДОМЛЕНИЙ --- */
+        .notif-badge {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: auto;
+            animation: pulse-badge 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231,76,60,0.5); }
+            50% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(231,76,60,0); }
+        }
+
         .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
         .logout-btn { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; width: 100%; padding: 10px; margin-top: 0; }
         .logout-btn:hover { background: #e74c3c; color: #fff; }
 
         .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
         .content-card { background: var(--card-bg); padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); max-width: 1200px; margin: 0 auto; }
+
+        /* --- СТАТУС ПОДКЛЮЧЕНИЯ --- */
+        .connection-status {
+            display: flex; align-items: center; gap: 6px; font-size: 11px; color: #bdc3c7; margin-top: 6px;
+        }
+        .connection-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+        .connection-dot.online { background: #2ecc71; box-shadow: 0 0 4px #2ecc71; }
+        .connection-dot.offline { background: #e74c3c; }
+        .connection-dot.local { background: #f1c40f; }
 
         /* --- КОНСТРУКТОР ОТЧЕТА (ПРЕДПРОСМОТР) --- */
         .constructor-layout { display: flex; gap: 30px; align-items: flex-start; }
@@ -160,7 +192,9 @@
         .admin-sub-tab { width: auto; padding: 8px 15px; margin: 0; background: transparent; color: var(--text-muted); border: 1px solid transparent; border-radius: 6px; }
         .admin-sub-tab.active { background: var(--admin-color); color: white; }
 
-        .report-card { background: var(--input-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .report-card { background: var(--input-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
         .report-card-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; }
         .report-card pre { white-space: pre-wrap; font-family: inherit; margin: 0; padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
         
@@ -210,7 +244,7 @@
     <div class="modal">
         <div class="modal-header">
             <h3 style="margin:0; color: var(--text-color);">Редактирование профиля</h3>
-            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            <button class="close-btn" onclick="closeEditModal()">×</button>
         </div>
         <input type="hidden" id="edit-original-login">
         <div class="form-group">
@@ -270,6 +304,10 @@
                 Вы: <strong id="user-display-name" style="color: #fff;"></strong>
                 <br>
                 <div id="admin-badge" class="badge user-role-badge" style="display: none;">Роль</div>
+                <div class="connection-status" id="connection-status">
+                    <span class="connection-dot" id="connection-dot"></span>
+                    <span id="connection-text">Подключение...</span>
+                </div>
             </div>
         </div>
         
@@ -282,6 +320,7 @@
             </button>
             <button class="nav-item nav-item-admin" id="nav-admin" onclick="switchMainTab('admin')">
                 🛡️ Админ-панель
+                <span class="notif-badge" id="admin-notif-badge">0</span>
             </button>
         </nav>
 
@@ -373,8 +412,201 @@
     </main>
 </div>
 
+<!-- Firebase SDK (compat mode для простоты использования) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-    // --- КОНФИГУРАЦИЯ РОЛЕЙ ---
+    // ==================================================================================
+    //  FIREBASE КОНФИГУРАЦИЯ
+    //  ──────────────────────────────────────────────────────────────────────────────────
+    //  1. Перейдите на https://console.firebase.google.com/
+    //  2. Создайте новый проект (или используйте существующий)
+    //  3. Во вкладке "Realtime Database" нажмите "Create Database"
+    //  4. Выберите режим "Start in test mode" (для тестирования)
+    //  5. Перейдите в Настройки проекта -> "General" -> "Your apps" -> Web (</>)
+    //  6. Скопируйте firebaseConfig сюда:
+    // ==================================================================================
+    const firebaseConfig = {
+        apiKey:            "YOUR_API_KEY",           // <-- Вставьте ваш apiKey
+        authDomain:        "YOUR_PROJECT.firebaseapp.com",
+        databaseURL:       "https://YOUR_PROJECT-default-rtdb.firebaseio.com",  // <-- ВАЖНО: укажите databaseURL
+        projectId:         "YOUR_PROJECT",
+        storageBucket:     "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId:             "YOUR_APP_ID"
+    };
+
+    // ==================================================================================
+    //  ИНИЦИАЛИЗАЦИЯ FIREBASE
+    // ==================================================================================
+    let useFirebase = false;
+    let firebaseDB = null;
+
+    try {
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            firebase.initializeApp(firebaseConfig);
+            firebaseDB = firebase.database();
+            useFirebase = true;
+            console.log('[System] Firebase подключён — режим реального времени');
+        } else {
+            console.log('[System] Firebase не настроен — используется localStorage (только одна вкладка/браузер)');
+        }
+    } catch(e) {
+        console.warn('[System] Ошибка инициализации Firebase:', e);
+    }
+
+    // ==================================================================================
+    //  СЛОЙ ДАННЫХ (абстракция Firebase / localStorage)
+    // ==================================================================================
+    
+    // Глобальное хранилище отчётов (для режима localStorage)
+    let cachedReports = [];
+
+    /**
+     * Сохранить отчёт
+     */
+    function saveReportToDB(report) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                const newRef = firebaseDB.ref('reports').push();
+                report.id = newRef.key;
+                newRef.set(report)
+                    .then(() => resolve(report.id))
+                    .catch(reject);
+            } else {
+                report.id = Date.now();
+                const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+                reports.push(report);
+                localStorage.setItem('reportsDB', JSON.stringify(reports));
+                cachedReports = reports;
+                window.dispatchEvent(new CustomEvent('reportsUpdated', { detail: reports }));
+                resolve(report.id);
+            }
+        });
+    }
+
+    /**
+     * Подписка на обновления отчётов в реальном времени
+     */
+    let reportListenerActive = false;
+    function subscribeToReports(callback) {
+        if (useFirebase) {
+            if (reportListenerActive) return; // уже подписаны
+            reportListenerActive = true;
+            
+            firebaseDB.ref('reports').on('value', (snapshot) => {
+                const reports = [];
+                snapshot.forEach(child => {
+                    reports.push({ ...child.val(), id: child.key });
+                });
+                cachedReports = reports;
+                callback(reports);
+            }, (error) => {
+                console.error('[Firebase] Ошибка чтения отчётов:', error);
+                updateConnectionStatus('offline');
+            });
+
+            // Отслеживаем подключение
+            firebaseDB.ref('.info/connected').on('value', (snap) => {
+                updateConnectionStatus(snap.val() ? 'online' : 'offline');
+            });
+
+        } else {
+            // localStorage: слушаем обновления из других вкладок
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'reportsDB') {
+                    cachedReports = JSON.parse(e.newValue || '[]');
+                    callback(cachedReports);
+                }
+            });
+            // И кастомное событие для текущей вкладки
+            window.addEventListener('reportsUpdated', (e) => {
+                callback(e.detail);
+            });
+            // Начальная загрузка
+            cachedReports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+            callback(cachedReports);
+        }
+    }
+
+    /**
+     * Обновить поля отчёта
+     */
+    function updateReportInDB(id, updates) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref(`reports/${id}`).update(updates).then(resolve).catch(reject);
+            } else {
+                let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+                reports = reports.map(r => r.id === id ? { ...r, ...updates } : r);
+                localStorage.setItem('reportsDB', JSON.stringify(reports));
+                cachedReports = reports;
+                window.dispatchEvent(new CustomEvent('reportsUpdated', { detail: reports }));
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Удалить все отчёты
+     */
+    function deleteAllReportsFromDB() {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref('reports').remove().then(resolve).catch(reject);
+            } else {
+                localStorage.removeItem('reportsDB');
+                cachedReports = [];
+                window.dispatchEvent(new CustomEvent('reportsUpdated', { detail: [] }));
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Получить все отчёты (для экспорта)
+     */
+    function getAllReports() {
+        return new Promise((resolve) => {
+            if (cachedReports.length > 0 || !useFirebase) {
+                resolve([...cachedReports]);
+            } else if (useFirebase) {
+                firebaseDB.ref('reports').once('value').then(snapshot => {
+                    const reports = [];
+                    snapshot.forEach(child => {
+                        reports.push({ ...child.val(), id: child.key });
+                    });
+                    resolve(reports);
+                });
+            }
+        });
+    }
+
+    // ==================================================================================
+    //  СТАТУС ПОДКЛЮЧЕНИЯ
+    // ==================================================================================
+    function updateConnectionStatus(status) {
+        const dot = document.getElementById('connection-dot');
+        const text = document.getElementById('connection-text');
+        if (!dot || !text) return;
+
+        dot.className = 'connection-dot';
+        if (status === 'online') {
+            dot.classList.add('online');
+            text.textContent = 'Firebase: Онлайн';
+        } else if (status === 'offline') {
+            dot.classList.add('offline');
+            text.textContent = 'Firebase: Офлайн';
+        } else {
+            dot.classList.add('local');
+            text.textContent = 'Локальный режим';
+        }
+    }
+
+    // ==================================================================================
+    //  КОНФИГУРАЦИЯ РОЛЕЙ
+    // ==================================================================================
     const ROLE_CONFIG = {
         creator:      { name: 'Создатель',                           level: 6, badgeClass: 'badge-creator' },
         main_admin:   { name: 'Главный Администратор',               level: 5, badgeClass: 'badge-main-admin' },
@@ -385,29 +617,27 @@
         user:         { name: 'Пользователь',                        level: 0, badgeClass: 'badge-user' }
     };
 
-    // --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ---
+    // --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ПОЛЬЗОВАТЕЛЕЙ ---
     let usersDB = JSON.parse(localStorage.getItem('users') || '{}');
     
-    // Удаление старого открытого аккаунта admin в целях безопасности (если он был)
     if (usersDB['admin']) {
         delete usersDB['admin'];
     }
 
-    // Секретные 20-символьные логин и пароль для создателя
     const secretLogin = 'Admin92xK8vP3mN7bQ1j'; 
     const secretPass = 'SecPass4mN9bV2xZ8kL1';  
 
     if (!usersDB[secretLogin]) {
         usersDB[secretLogin] = { nickname: 'Создатель', login: secretLogin, password: secretPass, role: 'creator' };
     } else if (usersDB[secretLogin].role === 'main_admin') {
-        // Обновляем роль секретного аккаунта до Создателя
         usersDB[secretLogin].role = 'creator';
     }
     
     localStorage.setItem('users', JSON.stringify(usersDB));
 
-
-    // --- НАСТРОЙКИ ---
+    // ==================================================================================
+    //  НАСТРОЙКИ (ТЕМА)
+    // ==================================================================================
     function toggleSettings() { document.getElementById('settings-panel').classList.toggle('active'); }
     document.addEventListener('click', (e) => {
         const wrapper = document.querySelector('.settings-wrapper');
@@ -422,14 +652,15 @@
     themeSwitch.addEventListener('change', (e) => { applyTheme(e.target.checked ? 'dark' : 'light'); });
     applyTheme(localStorage.getItem('theme') || 'light');
 
-
+    // ==================================================================================
+    //  АВТОРИЗАЦИЯ
+    // ==================================================================================
     let userAuthMode = 'login'; 
     let currentUser = null;
     const elLanding = document.getElementById('landing-container');
     const elApp = document.getElementById('app-container');
     const authForm = document.getElementById('user-auth-form');
 
-    // --- АВТОРИЗАЦИЯ ---
     document.getElementById('user-toggle-link').addEventListener('click', () => {
         userAuthMode = (userAuthMode === 'login') ? 'register' : 'login';
         document.getElementById('user-auth-title').textContent = (userAuthMode === 'register') ? 'Регистрация' : 'Вход в систему';
@@ -445,7 +676,6 @@
         if (localStorage.getItem('loggedInUser')) {
             currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
             
-            // Принудительный выход, если сохранен старый admin
             if (currentUser.login === 'admin') {
                 logout();
                 return;
@@ -467,23 +697,37 @@
                 document.getElementById('nav-admin').style.display = 'flex';
                 badge.style.display = 'inline-block';
                 
-                // Вкладка "Пользователи и Доступы" видна только от 3 уровня (Куратор) и выше
                 if (roleInfo.level >= 3) {
                     document.getElementById('subtab-users-btn').style.display = 'inline-block';
                 } else {
                     document.getElementById('subtab-users-btn').style.display = 'none';
                 }
+
+                // Подписываемся на обновления отчётов (для админов)
+                startReportsSubscription();
             } else {
                 document.getElementById('nav-admin').style.display = 'none';
                 badge.style.display = 'none';
             }
+
+            // Обновляем статус подключения
+            if (useFirebase) {
+                updateConnectionStatus('checking');
+            } else {
+                updateConnectionStatus('local');
+            }
+
             switchMainTab('constructor');
         } else {
             elLanding.style.display = 'flex'; elApp.style.display = 'none'; 
         }
     }
 
-    function logout() { localStorage.removeItem('loggedInUser'); checkLogin(); }
+    function logout() { 
+        currentUser = null;
+        localStorage.removeItem('loggedInUser'); 
+        checkLogin(); 
+    }
 
     authForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -508,7 +752,70 @@
         }
     });
 
-    // --- НАВИГАЦИЯ ---
+    // ==================================================================================
+    //  ПОДПИСКА НА ОТЧЁТЫ (реальное время)
+    // ==================================================================================
+    let lastPendingCount = 0;
+
+    function startReportsSubscription() {
+        subscribeToReports((reports) => {
+            // Если админ сейчас на вкладке "Админ-панель" — обновляем
+            if (document.getElementById('tab-admin') && document.getElementById('tab-admin').style.display !== 'none') {
+                renderAdminReportsFromData(reports);
+            }
+
+            // Обновляем историю если на вкладке истории
+            if (document.getElementById('tab-history') && document.getElementById('tab-history').style.display !== 'none' && currentUser) {
+                renderUserHistoryFromData(reports);
+            }
+
+            // Обновляем бейдж уведомлений
+            updateNotifBadge(reports);
+        });
+    }
+
+    function updateNotifBadge(reports) {
+        if (!currentUser) return;
+        const roleInfo = ROLE_CONFIG[currentUser.role];
+        if (!roleInfo || roleInfo.level === 0) return;
+
+        const pendingCount = reports.filter(r => r.status === 'pending').length;
+        const badge = document.getElementById('admin-notif-badge');
+        const isAdminTabActive = document.getElementById('tab-admin') && document.getElementById('tab-admin').style.display !== 'none';
+
+        if (pendingCount > 0 && !isAdminTabActive) {
+            badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        // Звуковое уведомление при новом отчёте
+        if (pendingCount > lastPendingCount && lastPendingCount > 0) {
+            playNotifSound();
+        }
+        lastPendingCount = pendingCount;
+    }
+
+    function playNotifSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 880;
+            osc.type = 'sine';
+            gain.gain.value = 0.1;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc.stop(ctx.currentTime + 0.3);
+        } catch(e) { /* ignore audio errors */ }
+    }
+
+    // ==================================================================================
+    //  НАВИГАЦИЯ
+    // ==================================================================================
     function switchMainTab(tab) {
         document.getElementById('nav-constructor').classList.toggle('active', tab === 'constructor');
         document.getElementById('nav-history').classList.toggle('active', tab === 'history');
@@ -519,8 +826,17 @@
         document.getElementById('tab-admin').style.display = tab === 'admin' ? 'block' : 'none';
         
         if (tab === 'history') renderUserHistory();
-        if (tab === 'admin') switchAdminSubTab('reports'); 
+        if (tab === 'admin') { 
+            switchAdminSubTab('reports'); 
+            // Скрываем бейдж при открытии админки
+            document.getElementById('admin-notif-badge').style.display = 'none';
+        }
         if (tab === 'constructor') updatePreview();
+
+        // Обновляем бейдж
+        if (tab !== 'admin') {
+            updateNotifBadge(cachedReports);
+        }
     }
 
     window.switchAdminSubTab = function(subtab) {
@@ -534,7 +850,9 @@
         if (subtab === 'users') renderAdminUsers();
     };
 
-    // --- КОНСТРУКТОР: ДНИ И ПРЕДПРОСМОТР ---
+    // ==================================================================================
+    //  КОНСТРУКТОР: ДНИ И ПРЕДПРОСМОТР
+    // ==================================================================================
     let dayCount = 1;
 
     function addDayBlock() {
@@ -618,7 +936,9 @@
     document.getElementById('report-form').addEventListener('input', updatePreview);
     addDayBlock();
 
-    // --- ОТПРАВКА ОТЧЕТА ---
+    // ==================================================================================
+    //  ОТПРАВКА ОТЧЕТА
+    // ==================================================================================
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader(); reader.readAsDataURL(file);
@@ -639,23 +959,31 @@
             catch (err) { return alert('Ошибка при чтении файлов.'); }
         }
 
-        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
-        reports.push({
-            id: Date.now(), author: document.getElementById('report-nickname').value,
-            time: new Date().toLocaleString('ru-RU'), content: content, status: 'pending', adminComment: '', files: filesData
-        });
+        const report = {
+            author: document.getElementById('report-nickname').value,
+            time: new Date().toLocaleString('ru-RU'),
+            content: content,
+            status: 'pending',
+            adminComment: '',
+            files: filesData
+        };
 
         try {
-            localStorage.setItem('reportsDB', JSON.stringify(reports));
-            alert('Отчет отправлен!');
+            await saveReportToDB(report);
+            alert('✅ Отчет отправлен! Администратор увидит его автоматически.');
             document.getElementById('report-form').reset();
             document.getElementById('days-container').innerHTML = '';
             addDayBlock();
             switchMainTab('history');
-        } catch (e) { alert('Превышен лимит памяти браузера (попробуйте загрузить скриншоты меньшего размера).'); }
+        } catch (e) { 
+            console.error('Ошибка отправки отчёта:', e);
+            alert('Превышен лимит памяти (попробуйте загрузить скриншоты меньшего размера).'); 
+        }
     });
 
-    // --- РЕНДЕР ИСТОРИИ И ОТЧЕТОВ ---
+    // ==================================================================================
+    //  РЕНДЕР ИСТОРИИ И ОТЧЕТОВ
+    // ==================================================================================
     function getStatusBadge(status) {
         if(status === 'approved') return '<span class="badge badge-approved">✅ Одобрено</span>';
         if(status === 'rejected') return '<span class="badge badge-rejected">❌ Отклонено</span>';
@@ -667,7 +995,17 @@
     }
 
     function renderUserHistory() {
-        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]').filter(r => r.author === currentUser.nickname).reverse();
+        const reports = cachedReports.filter(r => r.author === currentUser.nickname).reverse();
+        renderUserHistoryCards(reports);
+    }
+
+    function renderUserHistoryFromData(reports) {
+        if (!currentUser) return;
+        const myReports = reports.filter(r => r.author === currentUser.nickname).reverse();
+        renderUserHistoryCards(myReports);
+    }
+
+    function renderUserHistoryCards(reports) {
         const list = document.getElementById('user-reports-list');
         if (reports.length === 0) return list.innerHTML = '<p style="color:var(--text-muted);">Отчетов нет.</p>';
         list.innerHTML = reports.map(r => `
@@ -677,38 +1015,86 @@
         `).join('');
     }
 
+    // ==================================================================================
+    //  АДМИН-ПАНЕЛЬ: ОТЧЕТЫ (с реальным временем)
+    // ==================================================================================
     window.renderAdminReports = function() {
-        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]').reverse();
-        const search = document.getElementById('admin-search').value.toLowerCase();
-        const filter = document.getElementById('admin-filter').value;
-        const filtered = reports.filter(r => r.author.toLowerCase().includes(search) && (filter === 'all' || r.status === filter));
+        renderAdminReportsFromData(cachedReports);
+    };
+
+    function renderAdminReportsFromData(allReports) {
+        const search = document.getElementById('admin-search') ? document.getElementById('admin-search').value.toLowerCase() : '';
+        const filter = document.getElementById('admin-filter') ? document.getElementById('admin-filter').value : 'all';
+        
+        const filtered = allReports
+            .slice()
+            .reverse()
+            .filter(r => r.author.toLowerCase().includes(search) && (filter === 'all' || r.status === filter));
+        
         const list = document.getElementById('admin-reports-list');
+        if (!list) return;
         
         if (filtered.length === 0) return list.innerHTML = '<p style="color:var(--text-muted);">Отчеты не найдены.</p>';
+        
         list.innerHTML = filtered.map(r => `
-            <div class="report-card"><div class="report-card-header"><span>Автор: <strong>${r.author}</strong> | ${r.time}</span>${getStatusBadge(r.status)}</div>
-            <pre>${r.content}</pre>${renderFilesHTML(r.files)}
-            <div class="admin-comment-input"><input type="text" id="comment-${r.id}" placeholder="Комментарий..." value="${r.adminComment}"><button class="btn-secondary" onclick="saveComment(${r.id})">Сохранить</button></div>
-            <div style="margin-top: 15px; display:flex; gap:10px;"><button class="btn-success" onclick="setStatus(${r.id}, 'approved')">Одобрить</button><button class="btn-danger" onclick="setStatus(${r.id}, 'rejected')">Отклонить</button><button class="btn-secondary" onclick="setStatus(${r.id}, 'pending')">В ожидание</button></div></div>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <span>Автор: <strong>${r.author}</strong> | ${r.time}</span>
+                    ${getStatusBadge(r.status)}
+                </div>
+                <pre>${r.content}</pre>
+                ${renderFilesHTML(r.files)}
+                <div class="admin-comment-input">
+                    <input type="text" id="comment-${r.id}" placeholder="Комментарий..." value="${(r.adminComment || '').replace(/"/g, '"')}">
+                    <button class="btn-secondary" onclick="saveComment('${r.id}')">Сохранить</button>
+                </div>
+                <div style="margin-top: 15px; display:flex; gap:10px;">
+                    <button class="btn-success" onclick="setStatus('${r.id}', 'approved')">Одобрить</button>
+                    <button class="btn-danger" onclick="setStatus('${r.id}', 'rejected')">Отклонить</button>
+                    <button class="btn-secondary" onclick="setStatus('${r.id}', 'pending')">В ожидание</button>
+                </div>
+            </div>
         `).join('');
+    }
+
+    window.setStatus = async (id, newStatus) => {
+        try {
+            await updateReportInDB(id, { status: newStatus });
+            // При Firebase обновление придёт автоматически через подписку
+            if (!useFirebase) renderAdminReports();
+        } catch(e) {
+            console.error('Ошибка обновления статуса:', e);
+            alert('Ошибка при обновлении статуса');
+        }
     };
 
-    window.setStatus = (id, newStatus) => {
-        let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
-        localStorage.setItem('reportsDB', JSON.stringify(reports.map(r => r.id === id ? { ...r, status: newStatus } : r)));
-        renderAdminReports();
-    };
-    window.saveComment = (id) => {
+    window.saveComment = async (id) => {
         const comment = document.getElementById(`comment-${id}`).value;
-        let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
-        localStorage.setItem('reportsDB', JSON.stringify(reports.map(r => r.id === id ? { ...r, adminComment: comment } : r)));
-        alert('Комментарий сохранен');
+        try {
+            await updateReportInDB(id, { adminComment: comment });
+            alert('Комментарий сохранен');
+        } catch(e) {
+            console.error('Ошибка сохранения комментария:', e);
+            alert('Ошибка при сохранении комментария');
+        }
     };
-    window.clearAllReports = () => { if(confirm('Удалить ВСЕ отчеты?')) { localStorage.removeItem('reportsDB'); renderAdminReports(); } };
 
-    // --- АДМИНКА: ПОЛЬЗОВАТЕЛИ И ДОСТУПЫ ---
+    window.clearAllReports = async () => {
+        if(confirm('Удалить ВСЕ отчеты?')) {
+            try {
+                await deleteAllReportsFromDB();
+                if (!useFirebase) renderAdminReports();
+            } catch(e) {
+                console.error('Ошибка удаления отчётов:', e);
+                alert('Ошибка при удалении отчётов');
+            }
+        }
+    };
+
+    // ==================================================================================
+    //  АДМИНКА: ПОЛЬЗОВАТЕЛИ И ДОСТУПЫ
+    // ==================================================================================
     window.renderAdminUsers = function() {
-        // Дополнительная проверка безопасности:
         if (!currentUser || (ROLE_CONFIG[currentUser.role] && ROLE_CONFIG[currentUser.role].level < 3)) {
             document.getElementById('admin-users-list').innerHTML = '<p style="color:var(--danger);">У вас нет доступа к этому разделу.</p>';
             return;
@@ -756,9 +1142,10 @@
         list.innerHTML = html;
     };
 
-    // --- МОДАЛЬНОЕ ОКНО ---
+    // ==================================================================================
+    //  МОДАЛЬНОЕ ОКНО
+    // ==================================================================================
     window.openEditModal = function(login) {
-        // Проверка прав (минимум 3 уровень)
         if (!currentUser || (ROLE_CONFIG[currentUser.role] && ROLE_CONFIG[currentUser.role].level < 3)) return;
 
         const users = JSON.parse(localStorage.getItem('users') || '{}');
@@ -813,11 +1200,9 @@
         users[newLogin] = updatedUser;
         localStorage.setItem('users', JSON.stringify(users));
 
+        // Обновляем автора в отчётах (и в Firebase тоже)
         if (newNickname !== oldNickname) {
-            let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
-            let changed = false;
-            reports.forEach(r => { if (r.author === oldNickname) { r.author = newNickname; changed = true; } });
-            if (changed) localStorage.setItem('reportsDB', JSON.stringify(reports));
+            updateReportsAuthor(oldNickname, newNickname);
         }
 
         if (currentUser.login === oldLogin) {
@@ -833,8 +1218,46 @@
         alert('Данные профиля успешно сохранены!');
     };
 
-    window.exportToCSV = () => {
-        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+    /**
+     * Обновить автора во всех отчётах (Firebase + localStorage)
+     */
+    async function updateReportsAuthor(oldNickname, newNickname) {
+        const reports = cachedReports;
+        const updates = {};
+        
+        if (useFirebase) {
+            reports.forEach(r => {
+                if (r.author === oldNickname) {
+                    updates[`${r.id}/author`] = newNickname;
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                try {
+                    await firebaseDB.ref('reports').update(updates);
+                } catch(e) {
+                    console.error('Ошибка обновления автора в Firebase:', e);
+                }
+            }
+        } else {
+            let changed = false;
+            reports.forEach(r => { 
+                if (r.author === oldNickname) { 
+                    r.author = newNickname; 
+                    changed = true; 
+                } 
+            });
+            if (changed) {
+                localStorage.setItem('reportsDB', JSON.stringify(reports));
+                cachedReports = reports;
+            }
+        }
+    }
+
+    // ==================================================================================
+    //  ЭКСПОРТ В CSV
+    // ==================================================================================
+    window.exportToCSV = async () => {
+        const reports = await getAllReports();
         if (reports.length === 0) return alert('Нет отчетов для экспорта');
         let csv = "\uFEFFID;Время;Автор;Статус;Комментарий;Текст\n";
         reports.forEach(r => {
@@ -846,8 +1269,16 @@
         link.download = "Отчеты.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     };
 
+    // ==================================================================================
+    //  ЗАПУСК
+    // ==================================================================================
     checkLogin();
+
+    // Сразу показываем статус
+    if (!useFirebase) {
+        updateConnectionStatus('local');
+    }
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a081110cb9c02409',t:'MTc4MDg1MDA5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a081752bcb559dcb',t:'MTc4MDg1NDE5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
