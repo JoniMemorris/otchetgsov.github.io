@@ -325,6 +325,11 @@
         </nav>
 
         <div class="sidebar-footer">
+            <div id="firebase-diag" style="display:none; margin-bottom:12px; padding:8px; background:rgba(231,76,60,0.15); border:1px solid #e74c3c; border-radius:6px; font-size:11px; color:#f5b7b1;">
+                <strong>⚠️ Firebase не подключён</strong><br>
+                Откройте <b>F12 → Console</b> для подробностей.<br>
+                <button onclick="retryFirebase()" style="width:100%; padding:6px; margin-top:6px; font-size:11px; background:var(--danger); color:#fff; border:none; border-radius:4px; cursor:pointer;">🔄 Повторить</button>
+            </div>
             <button class="logout-btn" onclick="logout()">🚪 Выйти из аккаунта</button>
         </div>
     </aside>
@@ -426,6 +431,10 @@
     //  4. Выберите режим "Start in test mode" (для тестирования)
     //  5. Перейдите в Настройки проекта -> "General" -> "Your apps" -> Web (</>)
     //  6. Скопируйте firebaseConfig сюда:
+    //
+    //  ⚠️  ВАЖНО: поле databaseURL ОБЯЗАТЕЛЬНО! Формат:
+    //      https://ВАШ-ПРОЕКТ-default-rtdb.firebaseio.com
+    //      (не https://ВАШ-ПРОЕКТ.firebaseio.com — это старый формат!)
     // ==================================================================================
   const firebaseConfig = {
     apiKey: "AIzaSyBqYD-chPlR77NezK18DlIXYi14mD-SmfA",
@@ -439,23 +448,91 @@
   };
 
     // ==================================================================================
-    //  ИНИЦИАЛИЗАЦИЯ FIREBASE
+    //  ИНИЦИАЛИЗАЦИЯ FIREBASE (с подробной диагностикой)
     // ==================================================================================
     let useFirebase = false;
     let firebaseDB = null;
 
-    try {
-        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    function initFirebase() {
+        const diagMessages = [];
+
+        // Проверка 1: Заглушки?
+        if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+            diagMessages.push('❌ apiKey не заполнен (осталась заглушка YOUR_API_KEY)');
+            console.log('[Firebase] Не настроен — используется localStorage');
+            updateConnectionStatus('local');
+            return;
+        }
+
+        // Проверка 2: databaseURL заполнен?
+        if (!firebaseConfig.databaseURL || firebaseConfig.databaseURL.includes("YOUR_PROJECT")) {
+            diagMessages.push('❌ databaseURL не заполнен или содержит заглушку YOUR_PROJECT');
+        }
+
+        // Проверка 3: правильный формат databaseURL?
+        if (firebaseConfig.databaseURL && !firebaseConfig.databaseURL.includes("-default-rtdb.firebaseio.com")) {
+            diagMessages.push('⚠️ databaseURL должен содержать "-default-rtdb.firebaseio.com" (не просто firebaseio.com)');
+        }
+
+        // Проверка 4: projectId заполнен?
+        if (!firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT") {
+            diagMessages.push('❌ projectId не заполнен');
+        }
+
+        if (diagMessages.length > 0) {
+            console.error('[Firebase] Ошибки конфигурации:\n' + diagMessages.join('\n'));
+            diagMessages.forEach(m => console.error('[Firebase]', m));
+            updateConnectionStatus('local');
+            return;
+        }
+
+        try {
             firebase.initializeApp(firebaseConfig);
             firebaseDB = firebase.database();
             useFirebase = true;
-            console.log('[System] Firebase подключён — режим реального времени');
-        } else {
-            console.log('[System] Firebase не настроен — используется localStorage (только одна вкладка/браузер)');
+            console.log('[Firebase] SDK инициализирован, подключение к БД...');
+
+            // Проверяем реальное подключение к серверу
+            const connectedRef = firebaseDB.ref('.info/connected');
+            let connectionCheckTimeout = null;
+
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    console.log('[Firebase] ✅ Подключено к серверу');
+                    updateConnectionStatus('online');
+                    if (connectionCheckTimeout) { clearTimeout(connectionCheckTimeout); connectionCheckTimeout = null; }
+                } else {
+                    console.log('[Firebase] ❌ Нет подключения к серверу');
+                    updateConnectionStatus('offline');
+                }
+            });
+
+            // Таймаут: если через 8 сек нет подключения — показываем диагностику
+            connectionCheckTimeout = setTimeout(() => {
+                if (!useFirebase) return;
+                console.error('[Firebase] Таймаут подключения (8 сек). Возможные причины:');
+                console.error('  1. databaseURL указан неправильно');
+                console.error('  2. Realtime Database не создана в консоли Firebase');
+                console.error('  3. Правила безопасности блокируют доступ');
+                console.error('  4. Блокировщик (ad blocker, firewall) блокирует Firebase');
+                updateConnectionStatus('offline');
+                showFirebaseDiagnostics();
+            }, 8000);
+
+        } catch(e) {
+            console.error('[Firebase] Ошибка инициализации:', e.message);
+            useFirebase = false;
+            firebaseDB = null;
+            updateConnectionStatus('local');
         }
-    } catch(e) {
-        console.warn('[System] Ошибка инициализации Firebase:', e);
     }
+
+    function showFirebaseDiagnostics() {
+        const diagDiv = document.getElementById('firebase-diag');
+        if (diagDiv) diagDiv.style.display = 'block';
+    }
+
+    initFirebase();
 
     // ==================================================================================
     //  СЛОЙ ДАННЫХ (абстракция Firebase / localStorage)
@@ -585,6 +662,110 @@
     }
 
     // ==================================================================================
+    //  СЛОЙ ДАННЫХ: ПОЛЬЗОВАТЕЛИ (Firebase / localStorage)
+    // ==================================================================================
+    let cachedUsers = {};
+
+    /**
+     * Загрузить пользователей из БД
+     */
+    function loadUsersFromDB() {
+        return new Promise((resolve) => {
+            if (useFirebase) {
+                firebaseDB.ref('users').once('value').then(snapshot => {
+                    cachedUsers = snapshot.val() || {};
+                    // Синхронизируем localStorage для оффлайн-кэша
+                    localStorage.setItem('users', JSON.stringify(cachedUsers));
+                    resolve(cachedUsers);
+                }).catch(() => {
+                    cachedUsers = JSON.parse(localStorage.getItem('users') || '{}');
+                    resolve(cachedUsers);
+                });
+            } else {
+                cachedUsers = JSON.parse(localStorage.getItem('users') || '{}');
+                resolve(cachedUsers);
+            }
+        });
+    }
+
+    /**
+     * Подписка на обновления пользователей в реальном времени
+     */
+    let usersListenerActive = false;
+    function subscribeToUsers(callback) {
+        if (useFirebase) {
+            if (usersListenerActive) return;
+            usersListenerActive = true;
+
+            firebaseDB.ref('users').on('value', (snapshot) => {
+                cachedUsers = snapshot.val() || {};
+                localStorage.setItem('users', JSON.stringify(cachedUsers));
+                callback(cachedUsers);
+            }, (error) => {
+                console.error('[Firebase] Ошибка чтения пользователей:', error);
+            });
+        } else {
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'users') {
+                    cachedUsers = JSON.parse(e.newValue || '{}');
+                    callback(cachedUsers);
+                }
+            });
+            window.addEventListener('usersUpdated', (e) => {
+                callback(e.detail);
+            });
+            cachedUsers = JSON.parse(localStorage.getItem('users') || '{}');
+            callback(cachedUsers);
+        }
+    }
+
+    /**
+     * Сохранить / обновить пользователя
+     */
+    function saveUserToDB(login, userData) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref(`users/${login}`).set(userData).then(resolve).catch(reject);
+            } else {
+                cachedUsers[login] = userData;
+                localStorage.setItem('users', JSON.stringify(cachedUsers));
+                window.dispatchEvent(new CustomEvent('usersUpdated', { detail: cachedUsers }));
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Удалить пользователя
+     */
+    function deleteUserFromDB(login) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref(`users/${login}`).remove().then(resolve).catch(reject);
+            } else {
+                delete cachedUsers[login];
+                localStorage.setItem('users', JSON.stringify(cachedUsers));
+                window.dispatchEvent(new CustomEvent('usersUpdated', { detail: cachedUsers }));
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Получить пользователя по логину
+     */
+    function getUser(login) {
+        return cachedUsers[login] || null;
+    }
+
+    /**
+     * Проверить, существует ли пользователь
+     */
+    function userExists(login) {
+        return !!cachedUsers[login];
+    }
+
+    // ==================================================================================
     //  СТАТУС ПОДКЛЮЧЕНИЯ
     // ==================================================================================
     function updateConnectionStatus(status) {
@@ -619,22 +800,31 @@
     };
 
     // --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ПОЛЬЗОВАТЕЛЕЙ ---
-    let usersDB = JSON.parse(localStorage.getItem('users') || '{}');
-    
-    if (usersDB['admin']) {
-        delete usersDB['admin'];
-    }
-
     const secretLogin = 'Admin92xK8vP3mN7bQ1j'; 
     const secretPass = 'SecPass4mN9bV2xZ8kL1';  
 
-    if (!usersDB[secretLogin]) {
-        usersDB[secretLogin] = { nickname: 'Создатель', login: secretLogin, password: secretPass, role: 'creator' };
-    } else if (usersDB[secretLogin].role === 'main_admin') {
-        usersDB[secretLogin].role = 'creator';
+    async function initUsersDB() {
+        await loadUsersFromDB();
+
+        // Удаляем старый admin если есть
+        if (cachedUsers['admin']) {
+            delete cachedUsers['admin'];
+            await deleteUserFromDB('admin');
+        }
+
+        // Создаём/обновляем аккаунт Создателя
+        if (!cachedUsers[secretLogin]) {
+            const creator = { nickname: 'Создатель', login: secretLogin, password: secretPass, role: 'creator' };
+            await saveUserToDB(secretLogin, creator);
+        } else if (cachedUsers[secretLogin].role === 'main_admin') {
+            cachedUsers[secretLogin].role = 'creator';
+            await saveUserToDB(secretLogin, cachedUsers[secretLogin]);
+        }
+
+        localStorage.setItem('users', JSON.stringify(cachedUsers));
     }
-    
-    localStorage.setItem('users', JSON.stringify(usersDB));
+
+    initUsersDB();
 
     // ==================================================================================
     //  НАСТРОЙКИ (ТЕМА)
@@ -1279,7 +1469,20 @@
     if (!useFirebase) {
         updateConnectionStatus('local');
     }
+
+    // Повторная попытка подключения к Firebase
+    window.retryFirebase = function() {
+        document.getElementById('firebase-diag').style.display = 'none';
+        useFirebase = false;
+        firebaseDB = null;
+        reportListenerActive = false;
+        try { firebase.app().delete(); } catch(e) {}
+        initFirebase();
+        if (useFirebase && currentUser) {
+            setTimeout(() => startReportsSubscription(), 500);
+        }
+    };
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a081752bcb559dcb',t:'MTc4MDg1NDE5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
