@@ -3,2310 +3,851 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчетность ГСов</title>
-    <!-- CSS Styles embedded for offline iframe rendering and premium design -->
+    <title>Продвинутая Система Отчетов</title>
     <style>
+        /* --- CSS ПЕРЕМЕННЫЕ --- */
         :root {
-            --radius-sm: 6px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-            --success: #10b981;
-            --success-bg: rgba(16, 185, 129, 0.1);
-            --danger: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.1);
-            --warning: #f59e0b;
-            --info: #0ea5e9;
+            --bg-color: #eef2f5;
+            --card-bg: #fff;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
+            --sidebar-hover: #34495e;
+            --text-color: #333;
+            --text-muted: #7f8c8d;
+            --border-color: #e1e8ed;
+            --input-bg: #fbfbfc;
+            
+            --primary: #3498db;
+            --primary-hover: #2980b9;
+            --success: #2ecc71;
+            --success-hover: #27ae60;
+            --danger: #e74c3c;
+            --danger-hover: #c0392b;
+            --warning: #f1c40f;
+            --admin-color: #9b59b6;
         }
 
-        /* --- THEME STYLES --- */
-        [data-theme="deep-space"] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --border-color: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --primary-glow: rgba(99, 102, 241, 0.15);
-        }
-        [data-theme="polar-night"] {
-            --bg-primary: #020617;
-            --bg-secondary: #0f172a;
-            --bg-card: #0f172a;
-            --border-color: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --primary-glow: rgba(14, 165, 233, 0.15);
-        }
-        [data-theme="sunset-glow"] {
-            --bg-primary: #1c1917;
-            --bg-secondary: #292524;
-            --bg-card: #292524;
-            --border-color: #44403c;
-            --text-primary: #fafaf9;
-            --text-secondary: #d6d3d1;
-            --primary: #f43f5e;
-            --primary-hover: #e11d48;
-            --primary-glow: rgba(244, 63, 94, 0.15);
-        }
-        [data-theme="neon-cyber"] {
-            --bg-primary: #090514;
-            --bg-secondary: #120b24;
-            --bg-card: #120b24;
-            --border-color: #2e1a4a;
-            --text-primary: #fdfaff;
-            --text-secondary: #b5a4cf;
-            --primary: #d946ef;
-            --primary-hover: #c084fc;
-            --primary-glow: rgba(217, 70, 239, 0.15);
-        }
-        [data-theme="pure-light"] {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #f1f5f9;
-            --bg-card: #ffffff;
-            --border-color: #e2e8f0;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --primary-glow: rgba(79, 70, 229, 0.1);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-family);
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --sidebar-bg: #1a1a1a;
+            --sidebar-text: #f1f1f1;
+            --sidebar-hover: #333333;
+            --text-color: #f1f1f1;
+            --text-muted: #aaaaaa;
+            --border-color: #333;
+            --input-bg: #2a2a2a;
         }
 
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            padding: 2rem 1.5rem;
-            min-height: 100vh;
-            line-height: 1.5;
-        }
-
-        /* Container Layout */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Header Style */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .header-title-container h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary) 0%, #a5b4fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-
-        .header-title-container p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-top: 0.25rem;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        /* Global Theme Toggle Button */
-        .btn-theme-toggle {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0.6rem;
-            border-radius: 50%;
-            cursor: pointer;
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .btn-theme-toggle:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        /* Dashboard Split Layout: Forms on Left, Generated Report on Right */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 1.75rem;
-            align-items: start;
-        }
-
-        @media (max-width: 1100px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Card styles */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 1.75rem;
-            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             overflow: hidden;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
-        }
-
-        .card-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .card-badge.purple {
-            background-color: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-
-        .card-badge.green {
-            background-color: var(--success-bg);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .card-badge.blue {
-            background-color: rgba(14, 165, 233, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(14, 165, 233, 0.3);
-        }
-
-        .card-badge.orange {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        /* Forms Elements */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-row-two {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .form-row-three {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        @media (max-width: 768px) {
-            .form-row-three,
-            .form-row-two {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="date"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* Buttons styles */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--text-secondary);
-            background-color: rgba(255,255,255,0.02);
-            transform: translateY(-1px);
-        }
-
-        .btn-vk {
-            background-color: #0077ff;
-            color: white !important;
-        }
-
-        .btn-vk:hover {
-            background-color: #0062d4;
-            transform: translateY(-1px);
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.75rem;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
-        }
-
-        /* Checklist Component styles */
-        .checklist-container {
-            border: 1px solid var(--border-color);
-            background-color: rgba(0, 0, 0, 0.05);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            margin-bottom: 0;
-        }
-
-        .checklist-input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist-presets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
-            margin-bottom: 1rem;
-        }
-
-        .preset-badge {
-            font-size: 0.75rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .preset-badge:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background-color: var(--primary-glow);
-        }
-
-        .checklist-items-list {
-            list-style: none;
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 0.25rem;
-        }
-
-        /* Custom Scrollbar */
-        .checklist-items-list::-webkit-scrollbar,
-        textarea::-webkit-scrollbar {
-            width: 6px;
-        }
-        .checklist-items-list::-webkit-scrollbar-thumb,
-        textarea::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 10px;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0.75rem;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.5rem;
-            gap: 0.5rem;
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        .checklist-item-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-grow: 1;
-        }
-
-        .checkbox-custom {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--text-muted);
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: transparent;
-            transition: all 0.15s ease;
-        }
-
-        .checkbox-custom.checked {
-            border-color: var(--success);
-            background-color: var(--success);
-        }
-
-        .checkbox-custom.checked::after {
-            content: "✓";
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .checklist-item-text {
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            cursor: pointer;
-            word-break: break-all;
-        }
-
-        .checklist-item.checked .checklist-item-text {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .checklist-item-actions {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .btn-action-icon {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-        }
-
-        .btn-action-icon:hover {
-            color: var(--danger);
-            background-color: var(--danger-bg);
-        }
-
-        /* YouTube Preview styling */
-        .youtube-preview-box {
-            background-color: var(--bg-secondary);
-            border: 1px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 0.75rem;
-            margin-top: 0.75rem;
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .youtube-preview-box.active {
-            display: flex;
-        }
-
-        .youtube-thumbnail {
-            width: 100px;
-            height: 60px;
-            border-radius: var(--radius-sm);
-            object-fit: cover;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
-            border: 1px solid var(--border-color);
-        }
-
-        .youtube-info {
-            flex-grow: 1;
-            font-size: 0.85rem;
-        }
-
-        .youtube-info .title {
-            font-weight: 600;
-            color: var(--text-primary);
-            word-break: break-all;
-        }
-
-        .youtube-info .link {
-            color: var(--primary);
-            text-decoration: none;
-            word-break: break-all;
-            display: block;
-        }
-
-        /* Materials added list styling (Pills) */
-        .material-badge {
-            background-color: rgba(99, 102, 241, 0.15);
-            border: 1px solid var(--primary);
-            color: var(--text-primary);
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.25rem 0.6rem;
-            border-radius: 50px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .material-badge-delete {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85rem;
-            display: inline-flex;
-        }
-
-        .material-badge-delete:hover {
-            color: var(--danger);
-        }
-
-        /* Report Output Generator Style */
-        .report-output-box {
-            background-color: rgba(0,0,0,0.15);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            color: #38bdf8;
-            height: 620px; /* Balanced height with left side cards */
-            overflow-y: auto;
-            user-select: all;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .report-output-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            justify-content: flex-end;
-        }
-
-        .report-output-actions .btn {
-            flex-grow: 1;
-        }
-
-        /* Modal Overlay styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 480px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: translateY(20px);
-            transition: transform 0.25s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: translateY(0);
-        }
-
-        .modal-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Notifications Toast */
-        .toast-container {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            z-index: 1000;
-        }
-
-        .toast {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--primary);
-            box-shadow: var(--card-shadow);
-            color: var(--text-primary);
-            padding: 0.85rem 1.25rem;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            min-width: 280px;
-            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .toast.success { border-left-color: var(--success); }
-        .toast.danger { border-left-color: var(--danger); }
-        .toast.info { border-left-color: var(--info); }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .slide-fade-out {
-            animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-        }
-
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(120%); opacity: 0; }
-        }
-
-        /* --- LOGIN / ACCESS KEY MODAL STYLES --- */
-        .login-key-circle {
-            width: 84px;
-            height: 84px;
-            margin: 0 auto 1.25rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 30% 30%, var(--primary), var(--primary-hover));
-            box-shadow: 0 0 0 8px var(--primary-glow), 0 10px 25px -5px rgba(0,0,0,0.4);
-            animation: keyPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .login-key-circle.success {
-            background: radial-gradient(circle at 30% 30%, #34d399, #059669);
-            box-shadow: 0 0 0 8px rgba(16,185,129,0.15), 0 10px 25px -5px rgba(0,0,0,0.4);
-        }
-        .login-key-circle svg {
-            width: 40px;
-            height: 40px;
-            stroke: #fff;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
-        }
-        @keyframes keyPop {
-            0% { transform: scale(0) rotate(-30deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0); opacity: 1; }
-        }
-        .password-field-wrap {
-            position: relative;
-        }
-        .password-field-wrap .key-mini {
-            position: absolute;
-            left: 0.85rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            stroke: var(--text-secondary);
-            pointer-events: none;
-        }
-        .password-field-wrap input {
-            padding-left: 2.6rem !important;
-        }
-
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- БЛОК НАСТРОЕК (ШЕСТЕРЕНКА) --- */
+        .settings-wrapper { position: absolute; top: 20px; right: 20px; z-index: 1000; }
+        .settings-btn {
+            background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color);
+            width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 22px;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, background-color 0.3s; padding: 0; margin: 0;
+        }
+        .settings-btn:hover { transform: rotate(45deg); }
+        .settings-panel {
+            display: none; position: absolute; top: 55px; right: 0; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; width: 220px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .settings-panel.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+        .settings-panel h4 { margin: 0 0 15px 0; font-size: 15px; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-align: center; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- ЛЕНДИНГ --- */
+        #landing-container { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .auth-block { background: var(--card-bg); padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid var(--border-color); width: 100%; max-width: 400px; }
+        .block-header { text-align: center; margin-top: 0; margin-bottom: 25px; font-size: 22px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+
+        /* --- ГЛАВНЫЙ ИНТЕРФЕЙС --- */
+        #app-container { display: flex; height: 100vh; width: 100%; }
+
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; background-color: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h3 { margin: 0 0 10px 0; font-size: 18px; }
+        
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: white; display: inline-block; white-space: nowrap;}
+        .badge-creator { background-color: #111; color: #f1c40f; box-shadow: 0 0 5px rgba(241, 196, 15, 0.5); border: 1px solid #f1c40f; }
+        .badge-main-admin { background-color: #c0392b; }
+        .badge-deputy-admin { background-color: #e67e22; }
+        .badge-curator { background-color: #8e44ad; }
+        .badge-gs-struct { background-color: #2980b9; }
+        .badge-gs-min { background-color: #16a085; }
+        .badge-user { background-color: #7f8c8d; }
+        
+        .user-role-badge { margin-top: 8px; display: inline-block; font-size: 10px;}
+        
+        .sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .nav-item { width: 100%; text-align: left; padding: 15px 20px; background: transparent; color: var(--sidebar-text); border: none; border-left: 4px solid transparent; border-radius: 0; font-size: 15px; font-weight: normal; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; margin-top: 0; }
+        .nav-item:hover { background: var(--sidebar-hover); border-left-color: var(--primary); }
+        .nav-item.active { background: var(--sidebar-hover); border-left-color: var(--primary); font-weight: bold; }
+        
+        .nav-item-admin { color: #d7bde2; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; display: none; }
+        .nav-item-admin.active { border-left-color: var(--admin-color); }
+        .nav-item-admin:hover { border-left-color: var(--admin-color); }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .logout-btn { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; width: 100%; padding: 10px; margin-top: 0; }
+        .logout-btn:hover { background: #e74c3c; color: #fff; }
+
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .content-card { background: var(--card-bg); padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); max-width: 1200px; margin: 0 auto; }
+
+        /* --- КОНСТРУКТОР ОТЧЕТА (ПРЕДПРОСМОТР) --- */
+        .constructor-layout { display: flex; gap: 30px; align-items: flex-start; }
+        .constructor-form { flex: 1; min-width: 300px; }
+        .constructor-preview { 
+            flex: 1; min-width: 300px; background: var(--input-bg); border: 1px solid var(--border-color); 
+            padding: 25px; border-radius: 8px; position: sticky; top: 0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .constructor-preview h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .constructor-preview pre { white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: var(--text-color); margin: 0; line-height: 1.5; }
+
+        @media (max-width: 900px) {
+            .constructor-layout { flex-direction: column; }
+            .constructor-preview { position: static; }
+        }
+
+        /* --- ФОРМЫ И КНОПКИ --- */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; font-size: 13px; text-transform: uppercase; }
+        input[type="text"], input[type="password"], input[type="date"], input[type="url"], input[type="file"], textarea, select {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; font-size: 15px; background-color: var(--input-bg); color: var(--text-color); transition: 0.3s;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; }
+        textarea { resize: vertical; height: 80px; }
+
+        button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        button:hover { background-color: var(--primary-hover); }
+        button:active { transform: scale(0.98); }
+        
+        .btn-primary { background-color: var(--primary); width: auto; padding: 8px 15px; }
+        .btn-danger { background-color: var(--danger); width: auto; padding: 8px 15px; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .btn-success { background-color: var(--success); width: auto; padding: 8px 15px; }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-secondary { background-color: var(--text-muted); width: auto; padding: 8px 15px; }
+        
+        .toggle-link { text-align: center; margin-top: 15px; font-size: 14px; color: var(--text-muted); }
+        .toggle-link a { color: var(--primary); text-decoration: none; cursor: pointer; font-weight: 600; }
+        .toggle-link a:hover { text-decoration: underline; }
+
+        /* --- АДМИНКА --- */
+        .admin-sub-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .admin-sub-tab { width: auto; padding: 8px 15px; margin: 0; background: transparent; color: var(--text-muted); border: 1px solid transparent; border-radius: 6px; }
+        .admin-sub-tab.active { background: var(--admin-color); color: white; }
+
+        .report-card { background: var(--input-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .report-card-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; }
+        .report-card pre { white-space: pre-wrap; font-family: inherit; margin: 0; padding: 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+        
+        .users-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .users-table th, .users-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; vertical-align: middle; }
+        .users-table th { background: var(--input-bg); color: var(--text-muted); font-weight: bold; text-transform: uppercase; font-size: 12px; }
+
+        .badge-pending { background-color: var(--warning); color: #000; }
+        .badge-approved { background-color: var(--success); }
+        .badge-rejected { background-color: var(--danger); }
+
+        .admin-comment { margin-top: 15px; padding: 10px; background: rgba(155, 89, 182, 0.1); border-left: 4px solid var(--admin-color); border-radius: 4px; font-size: 14px; }
+        .admin-comment-input { margin-top: 10px; display: flex; gap: 10px; }
+        .admin-comment-input input { flex: 1; }
+        .date-range { display: flex; gap: 10px; align-items: center; }
+        .date-range span { font-weight: bold; color: var(--text-muted); }
+        .files-preview { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .files-preview img { max-width: 100px; max-height: 100px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: cover; }
+
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal { background: var(--card-bg); padding: 30px; border-radius: 10px; width: 100%; max-width: 400px; box-shadow: 0 5px 30px rgba(0,0,0,0.3); border: 1px solid var(--border-color); animation: fadeIn 0.2s ease-out; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; padding-bottom: 10px; }
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); padding: 0; margin: 0; line-height: 1; }
+        .close-btn:hover { color: var(--danger); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Header -->
-    <header>
-        <div class="header-title-container">
-            <h1>📋 Отчетность ГСов</h1>
-            <p>Генератор отчётов и трекер задач разработчика</p>
+<!-- БЛОК НАСТРОЕК -->
+<div class="settings-wrapper">
+    <button class="settings-btn" onclick="toggleSettings()" title="Настройки">⚙️</button>
+    <div class="settings-panel" id="settings-panel">
+        <h4>Настройки</h4>
+        <div class="setting-item">
+            <span>Тёмная тема</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch">
+                <span class="slider"></span>
+            </label>
         </div>
-        <div class="header-actions">
-            <!-- Access Role Badge / Toggle (NEW!) -->
-            <button class="btn btn-secondary btn-sm" id="roleBadgeBtn" onclick="openLoginModal()" style="display: flex; align-items: center; gap: 0.3rem; font-weight:700;">
-                <!-- Content injected dynamically -->
-            </button>
-            <!-- Admin Panel Link -->
-            <a href="admin.html" class="btn btn-secondary" id="headerAdminLink" style="font-weight: 700; display: none; border-color: var(--warning); color: var(--warning); gap: 0.3rem;">
-                👑 Админ-Панель
-            </a>
-            <!-- Settings button link -->
-            <a href="settings.html" class="btn btn-secondary" style="font-weight: 700;">
-                ⚙️ Настройки
-            </a>
-            <!-- Full Archive Button on separate site -->
-            <a href="history.html" class="btn btn-secondary" style="font-weight: 700; border-color: var(--primary); color: var(--primary);">
-                📂 Архив отчётов
-            </a>
-            <!-- Fast Stat Badges -->
-            <div id="topStatsBadge" class="card-badge purple" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                Всего записей: <span id="topStatsCount">0</span>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
+<div id="edit-user-modal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 style="margin:0; color: var(--text-color);">Редактирование профиля</h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <input type="hidden" id="edit-original-login">
+        <div class="form-group">
+            <label>Новый Логин</label>
+            <input type="text" id="edit-login" required>
+        </div>
+        <div class="form-group">
+            <label>Новый Никнейм</label>
+            <input type="text" id="edit-nickname" required>
+        </div>
+        <div class="form-group">
+            <label>Новый Пароль</label>
+            <input type="text" id="edit-password" required>
+        </div>
+        <div class="form-group">
+            <label>Уровень доступа (Роль)</label>
+            <select id="edit-role"></select>
+        </div>
+        <button class="btn-success" onclick="saveUserEdit()" style="margin-top: 20px;">Сохранить изменения</button>
+    </div>
+</div>
+
+<!-- ЭКРАН АВТОРИЗАЦИИ -->
+<div id="landing-container">
+    <div class="auth-block">
+        <h2 class="block-header" id="user-auth-title">Вход в систему</h2>
+        <form id="user-auth-form">
+            <div class="form-group" id="user-nickname-group" style="display: none;">
+                <label>Никнейм</label>
+                <input type="text" id="reg-nickname" placeholder="Ваш никнейм">
+            </div>
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="user-login" required placeholder="Введите логин">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="user-password" required placeholder="Введите пароль">
+            </div>
+            <button type="submit" id="user-auth-btn">Войти</button>
+        </form>
+        <div class="toggle-link">
+            <span id="user-toggle-text">Нет аккаунта? </span>
+            <a id="user-toggle-link">Зарегистрироваться</a>
+        </div>
+    </div>
+</div>
+
+<!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
+<div id="app-container" style="display: none;">
+    
+    <!-- САЙДБАР -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3>Отчетность</h3>
+            <div style="font-size: 13px; color: #bdc3c7;">
+                Вы: <strong id="user-display-name" style="color: #fff;"></strong>
+                <br>
+                <div id="admin-badge" class="badge user-role-badge" style="display: none;">Роль</div>
             </div>
         </div>
-    </header>
+        
+        <nav class="sidebar-nav">
+            <button class="nav-item active" id="nav-constructor" onclick="switchMainTab('constructor')">
+                📝 Конструктор отчета
+            </button>
+            <button class="nav-item" id="nav-history" onclick="switchMainTab('history')">
+                📂 Мои отчеты
+            </button>
+            <button class="nav-item nav-item-admin" id="nav-admin" onclick="switchMainTab('admin')">
+                🛡️ Админ-панель
+            </button>
+        </nav>
 
-    <!-- Main Grid Dashboard: Separated Cards -->
-    <div class="dashboard-grid">
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">🚪 Выйти из аккаунта</button>
+        </div>
+    </aside>
 
-        <!-- LEFT COLUMN: INPUT FORM CARDS -->
-        <div class="left-column">
-            
-            <!-- CARD 1: NEW RECORD CARD (FORM INPUTS) -->
-            <div class="card" id="block1">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        Новая запись
-                    </h2>
-                    <span class="card-badge purple" id="constructorStatus">Новый отчёт</span>
-                </div>
-
-                <form id="recordForm" onsubmit="event.preventDefault();">
-                    <!-- Job Position Dropdown selection & NickName Input Row -->
-                    <div class="form-row-two">
+    <!-- КОНТЕНТ -->
+    <main class="main-content">
+        
+        <!-- Вкладка: Конструктор отчета -->
+        <div id="tab-constructor" class="content-card">
+            <div class="constructor-layout">
+                <!-- Левая часть: Форма -->
+                <div class="constructor-form">
+                    <h2 style="margin-top:0;">Сборка отчета</h2>
+                    <form id="report-form">
                         <div class="form-group">
-                            <label for="positionSelect">Ваша должность / роль *</label>
-                            <select id="positionSelect">
-                                <!-- Options injected dynamically from settings.positions -->
-                            </select>
+                            <label>Ваш Никнейм</label>
+                            <input type="text" id="report-nickname" required>
                         </div>
                         <div class="form-group">
-                            <label for="nicknameInput">Ваш Никнейм (NickName) *</label>
-                            <input type="text" id="nicknameInput" placeholder="Например: Ivan_Ivanov" required>
-                        </div>
-                    </div>
-
-                    <!-- Dates Selection Period (Start, End, and Report Date) -->
-                    <div class="form-row-three">
-                        <div class="form-group">
-                            <label for="startDate">Период С *</label>
-                            <input type="date" id="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="endDate">Период ПО *</label>
-                            <input type="date" id="endDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recordDate">Дата отчёта *</label>
-                            <input type="date" id="recordDate" required>
-                        </div>
-                    </div>
-
-                    <!-- YouTube Embed link and Materials & Documents Adder (PRs, Figma layouts) -->
-                    <div class="form-row-two">
-                        <div class="form-group">
-                            <label for="recordYoutube">Ссылка YouTube (демонстрация)</label>
-                            <input type="text" id="recordYoutube" placeholder="https://www.youtube.com/watch?v=...">
-                        </div>
-                        <div class="form-group">
-                            <label>Добавить материалы (PR, Figma, Документы)</label>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <input type="text" id="materialUrlInput" placeholder="Ссылка (http...)" style="flex-grow: 2; font-size: 0.85rem;">
-                                <input type="text" id="materialTitleInput" placeholder="Название (Figma, GitHub)" style="flex-grow: 1; font-size: 0.85rem;">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="addMaterialLink()" style="padding: 0.5rem 0.75rem;">➕</button>
+                            <label>Период отчета (с — по)</label>
+                            <div class="date-range">
+                                <input type="date" id="report-date-start" required>
+                                <span>—</span>
+                                <input type="date" id="report-date-end" required>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Render added materials list pills -->
-                    <div id="materialsListContainer" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;">
-                        <!-- Injected dynamic tags of materials -->
-                    </div>
+                        <!-- Блок с днями -->
+                        <div id="days-container"></div>
+                        <button type="button" class="btn-secondary" onclick="addDayBlock()" style="margin-bottom: 20px;">+ Добавить день</button>
 
-                    <!-- YouTube Live Preview -->
-                    <div class="youtube-preview-box" id="ytPreview">
-                        <div class="youtube-thumbnail" id="ytThumbnail">
-                            🎥 YT
+                        <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <label>Дополнительно: Скриншоты (опционально)</label>
+                            <input type="file" id="report-files" multiple accept="image/*">
                         </div>
-                        <div class="youtube-info">
-                            <div class="title" id="ytTitle">Видео готово к добавлению в отчёт</div>
-                            <a href="#" target="_blank" class="link" id="ytLink">Проверить ссылку</a>
-                        </div>
-                    </div>
 
-                    <!-- Description Textarea -->
-                    <div class="form-group">
-                        <label for="recordDesc">Описание выполненной работы *</label>
-                        <textarea id="recordDesc" placeholder="Что было сделано за этот день?..." required></textarea>
-                    </div>
-
-                    <!-- Multi-Day Compiler Action Row (Record Day, Rollback Day & Reset Draft) -->
-                    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 1.25rem;">
-                        <button type="button" class="btn btn-success" onclick="commitCurrentDayAndIncrement()" style="flex-grow: 3; padding: 0.85rem; font-weight: 700; background-color: var(--success); border-color: var(--success); gap: 0.4rem;" title="Сохраняет введенные данные в сводный отчет и переключает календарь на следующий день">
-                            📅 Зафиксировать день и перейти к следующему →
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" id="rollbackDayBtn" onclick="rollbackLastCommittedDay()" style="display: none; padding: 0.6rem 0.85rem; font-size: 0.85rem; flex-grow: 1;" title="Возвращает последний зафиксированный день обратно в форму для продолжения работы">
-                            ↩️ Вернуть день на доработку
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm" id="resetDraftBtn" onclick="resetMultiDayDraft()" style="display: none; padding: 0.6rem 0.85rem; font-size: 0.85rem; flex-grow: 1;" title="Сбросить все накопленные по дням тексты">
-                            🗑️ Сбросить сводный отчет
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- CARD 2: WORK CHECKLIST (DEDICATED SEPARATE CARD BELOW) -->
-            <div class="card" id="checklistBlock">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        Чек-лист работы
-                    </h2>
-                    <span class="card-badge blue">Задачи</span>
+                        <button type="submit" class="btn-success" style="font-size: 16px; padding: 15px;">Отправить готовый отчет</button>
+                    </form>
                 </div>
 
-                <div class="checklist-container">
-                    <!-- Categories (rendered dynamically based on settings) -->
-                    <label style="margin-bottom: 0.5rem; display: block; font-size: 0.8rem; font-weight:700; text-transform: uppercase; color: var(--text-muted);">
-                        📁 Выберите категорию для загрузки задач:
-                    </label>
-                    <div class="checklist-presets" id="categoriesContainer" style="margin-bottom: 1.25rem;">
-                        <!-- Injected dynamically -->
-                    </div>
-
-                    <!-- Input to add item -->
-                    <div class="checklist-input-group">
-                        <input type="text" id="newCheckItem" placeholder="Добавить свой пункт задачи... (Enter)">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="addChecklistItem()">Добавить</button>
-                    </div>
-
-                    <!-- Interactive List -->
-                    <ul class="checklist-items-list" id="checklistItems">
-                        <!-- Appended dynamically -->
-                    </ul>
+                <!-- Правая часть: Предпросмотр -->
+                <div class="constructor-preview">
+                    <h3>Предпросмотр</h3>
+                    <pre id="report-preview-text">Заполните форму слева, чтобы увидеть результат...</pre>
                 </div>
             </div>
-
         </div>
 
-        <!-- RIGHT SIDE: LIVE GENERATED REPORT CARD (OUTPUT & EXPORTS) -->
-        <div class="card animate-fade-in" id="previewBlock">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Сгенерированный отчёт
-                </h2>
-                <span class="card-badge blue" id="previewModeBadge">Предпросмотр</span>
-            </div>
-
-            <!-- Live Output box -->
-            <div class="report-output-box" id="reportPreview">
-                Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени...
-            </div>
-
-            <!-- Report Operations -->
-            <div class="report-output-actions">
-                <button type="button" class="btn btn-secondary" onclick="clearForm()" title="Сбросить форму">
-                    ❌ Очистить
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="copyReportToClipboard()" title="Скопировать в буфер обмена">
-                    📋 Скопировать
-                </button>
-                <button type="button" class="btn btn-primary" onclick="saveRecord()" id="saveRecordBtn">
-                    💾 Сохранить в архив
-                </button>
-            </div>
-
-            <!-- VK Sending Action -->
-            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
-                <button type="button" class="btn btn-vk" onclick="sendReportToVk()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 700; padding: 0.85rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M22.28 5.3c.16-.54 0-.94-.77-.94h-2.54c-.65 0-.95.34-1.11.72 0 0-1.29 3.15-3.13 5.2-.6.59-.86.78-1.19.78-.16 0-.4-.19-.4-.73V5.3c0-.65-.18-.94-.74-.94H12c-.41 0-.66.3-.66.6 0 .61.92.75 1.01 2.46v3.71c0 .81-.15.96-.47.96-.86 0-2.95-3.17-4.19-6.81-.25-.72-.5-1.02-1.15-1.02H4c-.73 0-.88.34-.88.72 0 .68.87 4.07 4.05 8.52C9.29 17.5 12.3 19 15.02 19c1.63 0 1.83-.37 1.83-1V15.7c0-.73.15-.88.66-.88.38 0 1.03.19 2.54 1.65 1.73 1.73 2.01 2.53 2.99 2.53h2.54c.73 0 1.09-.37.88-1.1-.23-.72-1.06-1.77-1.44-2.22-.2-.25-.51-.51-.6-.64-.13-.16-.1-.23.08-.51.02-.02 1.82-2.57 2-3.48z"/></svg>
-                    Отправить отчёт в ВКонтакте
-                </button>
-            </div>
-
+        <!-- Вкладка: История отчетов -->
+        <div id="tab-history" class="content-card" style="display: none;">
+            <h2 style="margin-top:0;">Мои отчеты</h2>
+            <div id="user-reports-list"></div>
         </div>
 
-    </div>
-</div>
-
-<!-- Success Saved Modal PopUp -->
-<div class="modal-overlay" id="successModal">
-    <div class="modal" style="text-align: center; max-width: 440px;">
-        <div style="font-size: 3.5rem; margin-bottom: 0.75rem; animation: popScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🎉</div>
-        <div class="modal-title">Отчёт успешно сохранён!</div>
-        <div class="modal-body">
-            Ваш отчёт записан в базу данных и добавлен в архив. Вы можете в любой момент просмотреть, экспортировать или скопировать его на странице архива.
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
-            <button class="btn btn-primary" onclick="closeSuccessModal()">
-                ✍️ Написать новый отчёт
-            </button>
-            <a href="history.html" class="btn btn-secondary">
-                📂 Перейти в архив отчётов
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Login Modal Overlay (Admin Authorizer) -->
-<div class="modal-overlay" id="loginModal">
-    <div class="modal" style="max-width: 400px; text-align: center;">
-        <div id="loginFormBlock">
-            <div class="login-key-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="7.5" cy="15.5" r="5.5"></circle>
-                    <path d="M11.5 11.5 21 2"></path>
-                    <path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
-                </svg>
+        <!-- Вкладка: Админ-панель -->
+        <div id="tab-admin" class="content-card" style="display: none; max-width: 1000px;">
+            <h2 style="margin-top:0; color: var(--admin-color);">Админ-панель</h2>
+            
+            <div class="admin-sub-tabs">
+                <button class="admin-sub-tab active" id="subtab-reports-btn" onclick="switchAdminSubTab('reports')">📄 База отчетов</button>
+                <button class="admin-sub-tab" id="subtab-users-btn" onclick="switchAdminSubTab('users')" style="display: none;">👥 Пользователи и Доступы</button>
             </div>
-            <div class="modal-title">Вход администратора</div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); text-align: center; line-height: 1.5;">
-                    Настройка интеграции ВК, изменение списка должностей и кастомизация чек-листов требуют прав <b>Администратора</b>.
-                </p>
-                <div class="form-group" style="text-align: left;">
-                    <label for="adminPasswordInput">Введите пароль администратора</label>
-                    <div class="password-field-wrap">
-                        <svg class="key-mini" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M11.5 11.5 21 2"></path><path d="M15.5 7.5 18 10l3-3-2.5-2.5"></path>
-                        </svg>
-                        <input type="password" id="adminPasswordInput" placeholder="Пароль администратора..." style="font-size: 0.95rem; padding: 0.7rem 0.95rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();attemptAdminLogin();}">
-                    </div>
+
+            <div id="admin-subtab-reports">
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <input type="text" id="admin-search" placeholder="Поиск по никнейму..." oninput="renderAdminReports()" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <select id="admin-filter" onchange="renderAdminReports()" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <option value="all">Все статусы</option>
+                        <option value="pending">Ожидают проверки</option>
+                        <option value="approved">Одобренные</option>
+                        <option value="rejected">Отклоненные</option>
+                    </select>
+                    <button onclick="exportToCSV()" class="btn-success">Экспорт (CSV)</button>
+                    <button onclick="clearAllReports()" class="btn-danger">Очистить отчеты</button>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="attemptAdminLogin()" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem; font-weight:700;">
-                    🔑 Войти как Администратор
-                </button>
+                <div id="admin-reports-list"></div>
+            </div>
+
+            <div id="admin-subtab-users" style="display: none;">
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 0;">Управление иерархией: Создатель -> Главный Администратор -> Заместитель ГА -> Куратор -> ГС Структур -> ГС Министерств.</p>
+                <div id="admin-users-list" style="overflow-x: auto;"></div>
             </div>
         </div>
-        <div id="logoutFormBlock" style="display: none;">
-            <div class="login-key-circle success">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 6 9 17l-5-5"></path>
-                </svg>
-            </div>
-            <div class="modal-title">Администратор 👑</div>
-            <div class="modal-body">
-                Вы вошли как <b>Администратор</b>. Все настройки разблокированы.
-                <button type="button" class="btn btn-danger" onclick="executeLogout()" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; font-weight:700;">
-                    🔒 Выйти из профиля
-                </button>
-            </div>
-        </div>
-        <div style="display:flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
-            <button class="btn btn-secondary btn-sm" onclick="closeLoginModal()">Отмена</button>
-        </div>
-    </div>
+
+    </main>
 </div>
 
-<!-- Notification Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- Core Javascript Logic -->
 <script>
-    // Global Application State
-    let state = {
-        records: [],
-        currentChecklist: [],
-        currentDraftDays: [], // Stores multi-day recorded logs in progress
-        currentMaterials: [], // Stores custom links/documents added for the active editing day
-        editingRecordId: null,
-        settings: {
-            theme: "deep-space",
-            vkToken: "",
-            vkPeerId: "",
-            categories: [],
-            positions: [], // Array of configured job roles
-            currentPosition: "", // Saved active job role
-            currentNickname: "", // Pre-filled Nickname of GSo
-            syncKey: "",
-            autoSync: false,
-            userRole: "user" // Active role ('user' or 'admin')
-        }
+    // --- КОНФИГУРАЦИЯ РОЛЕЙ ---
+    const ROLE_CONFIG = {
+        creator:      { name: 'Создатель',                           level: 6, badgeClass: 'badge-creator' },
+        main_admin:   { name: 'Главный Администратор',               level: 5, badgeClass: 'badge-main-admin' },
+        deputy_admin: { name: 'Заместитель Главного Администратора', level: 4, badgeClass: 'badge-deputy-admin' },
+        curator:      { name: 'Куратор',                             level: 3, badgeClass: 'badge-curator' },
+        gs_struct:    { name: 'Главный Следящий за Структурой',      level: 2, badgeClass: 'badge-gs-struct' },
+        gs_min:       { name: 'Главный Следящий за Министерством',   level: 1, badgeClass: 'badge-gs-min' },
+        user:         { name: 'Пользователь',                        level: 0, badgeClass: 'badge-user' }
     };
 
-    // Default Fallback Categories
-    const DEFAULT_CATEGORIES = [
-        {
-            name: "💻 Разработка",
-            items: [
-                "Написать программный код",
-                "Провести рефакторинг",
-                "Проверить консоль на наличие ошибок",
-                "Закоммитить изменения в Git"
-            ]
-        },
-        {
-            name: "🧪 Тестирование",
-            items: [
-                "Проверить граничные значения",
-                "Протестировать адаптивность верстки",
-                "Проверить во всех целевых браузерах",
-                "Провести ручной тест пользовательских сценариев"
-            ]
-        },
-        {
-            name: "🚀 Деплой",
-            items: [
-                "Собрать продакшн-бандл проекта",
-                "Запустить автотесты на сервере сборки",
-                "Выполнить деплой на стейджинг/прод",
-                "Проверить логи ошибок после запуска"
-            ]
+    // --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ---
+    let usersDB = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    // Удаление старого открытого аккаунта admin в целях безопасности (если он был)
+    if (usersDB['admin']) {
+        delete usersDB['admin'];
+    }
+
+    // Секретные 20-символьные логин и пароль для создателя
+    const secretLogin = 'Admin92xK8vP3mN7bQ1j'; 
+    const secretPass = 'SecPass4mN9bV2xZ8kL1';  
+
+    if (!usersDB[secretLogin]) {
+        usersDB[secretLogin] = { nickname: 'Создатель', login: secretLogin, password: secretPass, role: 'creator' };
+    } else if (usersDB[secretLogin].role === 'main_admin') {
+        // Обновляем роль секретного аккаунта до Создателя
+        usersDB[secretLogin].role = 'creator';
+    }
+    
+    localStorage.setItem('users', JSON.stringify(usersDB));
+
+
+    // --- НАСТРОЙКИ ---
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('active'); }
+    document.addEventListener('click', (e) => {
+        const wrapper = document.querySelector('.settings-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) document.getElementById('settings-panel').classList.remove('active');
+    });
+    const themeSwitch = document.getElementById('theme-switch');
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        themeSwitch.checked = (theme === 'dark');
+    }
+    themeSwitch.addEventListener('change', (e) => { applyTheme(e.target.checked ? 'dark' : 'light'); });
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+
+    let userAuthMode = 'login'; 
+    let currentUser = null;
+    const elLanding = document.getElementById('landing-container');
+    const elApp = document.getElementById('app-container');
+    const authForm = document.getElementById('user-auth-form');
+
+    // --- АВТОРИЗАЦИЯ ---
+    document.getElementById('user-toggle-link').addEventListener('click', () => {
+        userAuthMode = (userAuthMode === 'login') ? 'register' : 'login';
+        document.getElementById('user-auth-title').textContent = (userAuthMode === 'register') ? 'Регистрация' : 'Вход в систему';
+        document.getElementById('user-nickname-group').style.display = (userAuthMode === 'register') ? 'block' : 'none';
+        document.getElementById('reg-nickname').required = (userAuthMode === 'register');
+        document.getElementById('user-auth-btn').textContent = (userAuthMode === 'register') ? 'Зарегистрироваться' : 'Войти';
+        document.getElementById('user-toggle-text').textContent = (userAuthMode === 'register') ? 'Уже есть аккаунт? ' : 'Нет аккаунта? ';
+        document.getElementById('user-toggle-link').textContent = (userAuthMode === 'register') ? 'Войти' : 'Зарегистрироваться';
+        authForm.reset();
+    });
+
+    function checkLogin() {
+        if (localStorage.getItem('loggedInUser')) {
+            currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            
+            // Принудительный выход, если сохранен старый admin
+            if (currentUser.login === 'admin') {
+                logout();
+                return;
+            }
+
+            if(!ROLE_CONFIG[currentUser.role]) currentUser.role = 'user';
+            
+            const roleInfo = ROLE_CONFIG[currentUser.role];
+            elLanding.style.display = 'none'; elApp.style.display = 'flex'; 
+            
+            document.getElementById('user-display-name').textContent = currentUser.nickname;
+            document.getElementById('report-nickname').value = currentUser.nickname;
+            
+            const badge = document.getElementById('admin-badge');
+            badge.textContent = roleInfo.name;
+            badge.className = `badge user-role-badge ${roleInfo.badgeClass}`;
+
+            if (roleInfo.level > 0) {
+                document.getElementById('nav-admin').style.display = 'flex';
+                badge.style.display = 'inline-block';
+                
+                // Вкладка "Пользователи и Доступы" видна только от 3 уровня (Куратор) и выше
+                if (roleInfo.level >= 3) {
+                    document.getElementById('subtab-users-btn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('subtab-users-btn').style.display = 'none';
+                }
+            } else {
+                document.getElementById('nav-admin').style.display = 'none';
+                badge.style.display = 'none';
+            }
+            switchMainTab('constructor');
+        } else {
+            elLanding.style.display = 'flex'; elApp.style.display = 'none'; 
         }
-    ];
+    }
 
-    // Default Fallback Job Positions/Roles
-    const DEFAULT_POSITIONS = [
-        "Главный Следящий за структурой",
-        "Заместитель Главного Следящего за структурой",
-        "Помощник Главного Следящего",
-        "Главный Следящий за Министерством (МО)",
-        "Главный Следящий за Министерством (МЮ)",
-        "Главный Следящий за Министерством (МСП)",
-        "Главный Следящий за Министерством (Пра-во)",
-        "Следящий за министерством"
-    ];
+    function logout() { localStorage.removeItem('loggedInUser'); checkLogin(); }
 
-    // Initialize application
-    document.addEventListener("DOMContentLoaded", () => {
-        // Setup dates (start, end and report date)
-        const dateInput = document.getElementById("recordDate");
-        const startInput = document.getElementById("startDate");
-        const endInput = document.getElementById("endDate");
-        
-        const todayObj = new Date();
-        const todayStr = todayObj.toISOString().split('T')[0];
-        
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(todayObj.getDate() - 7);
-        const startStr = sevenDaysAgo.toISOString().split('T')[0];
+    authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const login = document.getElementById('user-login').value.trim();
+        const pass = document.getElementById('user-password').value.trim();
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
 
-        startInput.value = startStr;
-        endInput.value = todayStr;
-        dateInput.value = todayStr;
-
-        // Load storage or insert premium demo records if empty
-        loadFromLocalStorage();
-
-        // Theme Setup
-        applyTheme();
-
-        // Render Positions dropdown menu
-        renderPositionsDropdown();
-
-        // Render Access Badge in header (NEW!)
-        applyRolePermissionsUI();
-
-        // Sync Nickname value from Settings
-        document.getElementById("nicknameInput").value = state.settings.currentNickname || "";
-
-        // Listeners for auto-generating report on any input
-        startInput.addEventListener("input", generateLiveReport);
-        endInput.addEventListener("input", generateLiveReport);
-        dateInput.addEventListener("input", generateLiveReport);
-        document.getElementById("recordYoutube").addEventListener("input", handleYoutubeInput);
-        document.getElementById("recordDesc").addEventListener("input", generateLiveReport);
-        document.getElementById("newCheckItem").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addChecklistItem();
+        if (userAuthMode === 'login') {
+            if (users[login] && users[login].password === pass) {
+                localStorage.setItem('loggedInUser', JSON.stringify(users[login])); checkLogin();
+            } else alert('Неверный логин или пароль!');
+        } else {
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            if (users[login]) alert('Логин уже занят!');
+            else {
+                const newUser = { nickname, login, password: pass, role: 'user' };
+                users[login] = newUser;
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+                checkLogin();
             }
-        });
-
-        // Add Enter key trigger on Material inputs
-        document.getElementById("materialUrlInput").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addMaterialLink();
-            }
-        });
-        document.getElementById("materialTitleInput").addEventListener("keypress", (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addMaterialLink();
-            }
-        });
-
-        // Add listener to nickname input field
-        document.getElementById("nicknameInput").addEventListener("input", (e) => {
-            state.settings.currentNickname = e.target.value.trim();
-            saveToLocalStorage();
-            generateLiveReport();
-        });
-
-        // Listen for Position Dropdown Selection changes
-        document.getElementById("positionSelect").addEventListener("change", (e) => {
-            state.settings.currentPosition = e.target.value;
-            saveToLocalStorage();
-            generateLiveReport();
-        });
-
-        // Initial Renders
-        renderCategories();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        updateTopCountVisuals();
-
-        // Check draft buttons visibility on launch (handles refreshes)
-        updateDraftButtonsVisibility();
-
-        // Check for URL Parameter to Edit Single Record (seamless linking with history.html!)
-        checkEditModeFromQuery();
-
-        // Automatically and silently pull/sync from cloud on load!
-        if (state.settings && state.settings.syncKey) {
-            pullAndMergeFromCloud(true); // silent pull
-
-            // Poll background pull every 5 seconds silently!
-            setInterval(() => {
-                pullAndMergeFromCloud(true);
-            }, 5000);
         }
     });
 
-    // --- Check if URL has ?edit=ID ---
-    function checkEditModeFromQuery() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const editId = urlParams.get('edit');
-        if (editId) {
-            loadRecordToForm(editId);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }
-
-    // --- Mock Data Setup ---
-    const MOCK_RECORDS = [
-        {
-            id: "mock-1",
-            startDate: "2026-05-25",
-            endDate: "2026-06-01",
-            date: "2026-06-02",
-            youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            description: "Разработка ядра системы аутентификации на основе JWT. Написал миграции базы данных для таблицы пользователей, создал сервис генерации токенов с шифрованием SHA-256 и покрыл интеграционными тестами методы авторизации.",
-            checklist: [
-                { text: "Создать миграции таблиц users", completed: true },
-                { text: "Разработать модуль JWT и шифрования", completed: true },
-                { text: "Реализовать Refresh & Access токены", completed: true },
-                { text: "Написать интеграционные тесты API", completed: false }
-            ],
-            createdAt: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-            id: "mock-2",
-            startDate: "2026-05-18",
-            endDate: "2026-05-22",
-            date: "2026-05-22",
-            youtubeUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-            description: "Интеграция API платежного эквайринга Stripe. Реализовал создание сессий оплаты, отслеживание вебхуков успешного заверления транзакции и автоматическую отправку чеков пользователям по электронной почте.",
-            checklist: [
-                { text: "Настроить SDK Stripe/эквайринга", completed: true },
-                { text: "Обработка вебхуков от банка", completed: true },
-                { text: "Провести успешную тестовую транзакцию", completed: true }
-            ],
-            createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
-        },
-        {
-            id: "mock-3",
-            startDate: "2026-05-11",
-            endDate: "2026-05-15",
-            date: "2026-05-15",
-            youtubeUrl: "",
-            description: "Оптимизация производительности интерфейса панели управления. Реализовал ленивую загрузку (lazy loading) тяжелых аналитических графиков, оптимизировал размер бандла JS и исправил триггеры повторного рендеринга списков.",
-            checklist: [
-                { text: "Запустить профайлер React/Chrome", completed: true },
-                { text: "Внедрить React.memo и ленивые компоненты", completed: true },
-                { text: "Сократить размер бандла на 15%", completed: false }
-            ],
-            createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
-        }
-    ];
-
-    function loadFromLocalStorage() {
-        try {
-            const savedState = localStorage.getItem("reportcraft_state_updated");
-            if (savedState) {
-                const parsed = JSON.parse(savedState);
-                if (parsed.records) {
-                    state = parsed;
-                }
-                if (!state.records) state.records = [];
-                
-                if (!state.settings) state.settings = {};
-                if (!state.settings.theme) state.settings.theme = "deep-space";
-                if (!state.settings.userRole) state.settings.userRole = "user"; // default is user role
-                if (!state.settings.positions || state.settings.positions.length === 0) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                }
-                if (!state.settings.categories || state.settings.categories.length === 0) {
-                    state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-                }
-                if (!state.settings.syncKey) {
-                    state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED KEY FOR COLLABORATIVE TEAM CLOUD! (NEW!)
-                    state.settings.autoSync = true; // Auto background push enabled by default!
-                }
-                // Auto-migration to the new GSo positions list!
-                if (state.settings.positions && !state.settings.positions.includes("Главный Следящий за Министерством (МСП)")) {
-                    state.settings.positions = [...DEFAULT_POSITIONS];
-                    state.settings.currentPosition = DEFAULT_POSITIONS[0];
-                    saveToLocalStorage();
-                }
-                if (!state.settings.currentPosition) {
-                    state.settings.currentPosition = state.settings.positions[0];
-                }
-            } else {
-                // CLEAN START WITH ZERO DEMO RECORDS (AS REQUESTED!)
-                state.records = []; 
-                state.settings.theme = "deep-space";
-                state.settings.userRole = "user";
-                state.settings.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-                state.settings.positions = [...DEFAULT_POSITIONS];
-                state.settings.currentPosition = DEFAULT_POSITIONS[0];
-                state.settings.syncKey = "gso_shared_archive_master_2026"; // DEFAULT SHARED TEAM ROOM CODE
-                state.settings.autoSync = true; // Enabled hands-free by default!
-                saveToLocalStorage();
-                showToast("✨ База данных успешно инициализирована. Начните работу!", "info");
-            }
-        } catch (e) {
-            console.error("Ошибка при чтении localStorage, загружаем чистый шаблон", e);
-            state.records = [];
-        }
-    }
-
-    function saveToLocalStorage() {
-        try {
-            localStorage.setItem("reportcraft_state_updated", JSON.stringify(state));
-        } catch (e) {
-            console.error("Не удалось сохранить в localStorage", e);
-        }
-    }
-
-    function applyTheme() {
-        const root = document.documentElement;
-        if (state.settings && state.settings.theme) {
-            root.setAttribute("data-theme", state.settings.theme);
-        } else {
-            root.setAttribute("data-theme", "deep-space");
-        }
-    }
-
-    // --- Render Dynamic Positions/Roles Select list ---
-    function renderPositionsDropdown() {
-        const select = document.getElementById("positionSelect");
-        if (!select) return;
-        select.innerHTML = "";
-
-        const positions = (state.settings && state.settings.positions && state.settings.positions.length > 0)
-            ? state.settings.positions
-            : DEFAULT_POSITIONS;
-
-        positions.forEach(pos => {
-            const opt = document.createElement("option");
-            opt.value = pos;
-            opt.innerText = pos;
-            if (state.settings.currentPosition === pos) {
-                opt.selected = true;
-            }
-            select.appendChild(opt);
-        });
-    }
-
-    // --- ACCESS ROLE CONTROLLER FOR INDEX.HTML (NEW!) ---
-    function applyRolePermissionsUI() {
-        const role = state.settings.userRole || "user";
-        const badge = document.getElementById("roleBadgeBtn");
-        const adminLink = document.getElementById("headerAdminLink");
+    // --- НАВИГАЦИЯ ---
+    function switchMainTab(tab) {
+        document.getElementById('nav-constructor').classList.toggle('active', tab === 'constructor');
+        document.getElementById('nav-history').classList.toggle('active', tab === 'history');
+        document.getElementById('nav-admin').classList.toggle('active', tab === 'admin');
         
-        if (role === "admin") {
-            badge.className = "btn btn-success btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; filter:drop-shadow(0 0 4px #10b981);"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Администратор</span>`;
-            if (adminLink) adminLink.style.display = "inline-flex";
-        } else {
-            badge.className = "btn btn-secondary btn-sm";
-            badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3M15.5 7.5L14 6H12v2h2l1.5-1.5z"></path></svg> <span style="font-weight:700;">Пользователь</span>`;
-            if (adminLink) adminLink.style.display = "none";
-        }
-    }
-
-    function openLoginModal() {
-        const modal = document.getElementById("loginModal");
-        const formBlock = document.getElementById("loginFormBlock");
-        const logoutBlock = document.getElementById("logoutFormBlock");
-
-        const role = state.settings.userRole || "user";
-        if (role === "admin") {
-            formBlock.style.display = "none";
-            logoutBlock.style.display = "block";
-        } else {
-            formBlock.style.display = "block";
-            logoutBlock.style.display = "none";
-            document.getElementById("adminPasswordInput").value = "";
-        }
-
-        modal.classList.add("active");
-    }
-
-    function closeLoginModal() {
-        document.getElementById("loginModal").classList.remove("active");
-    }
-
-    function attemptAdminLogin() {
-        const pass = document.getElementById("adminPasswordInput").value;
-        if (pass === "R3Zfd-75eU") {
-            state.settings.userRole = "admin";
-            saveToLocalStorage();
-            applyRolePermissionsUI();
-            closeLoginModal();
-            showToast("🔑 Вы вошли как Администратор!", "success");
-        } else {
-            showToast("❌ Неверный пароль!", "danger");
-        }
-    }
-
-    function executeLogout() {
-        state.settings.userRole = "user";
-        state.settings.autoSync = false; // Disable autosync on logout for safety
+        document.getElementById('tab-constructor').style.display = tab === 'constructor' ? 'block' : 'none';
+        document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+        document.getElementById('tab-admin').style.display = tab === 'admin' ? 'block' : 'none';
         
-        saveToLocalStorage();
-        applyRolePermissionsUI();
-        closeLoginModal();
-        showToast("🔒 Вы вышли из профиля Администратора.", "info");
+        if (tab === 'history') renderUserHistory();
+        if (tab === 'admin') switchAdminSubTab('reports'); 
+        if (tab === 'constructor') updatePreview();
     }
 
-    // --- Toast Notification Component ---
-    function showToast(message, type = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-        toast.className = `toast ${type}`;
+    window.switchAdminSubTab = function(subtab) {
+        document.getElementById('subtab-reports-btn').classList.toggle('active', subtab === 'reports');
+        document.getElementById('subtab-users-btn').classList.toggle('active', subtab === 'users');
         
-        let icon = "";
-        if (type === "success") {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        } else if (type === "danger") {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-        } else {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-        }
+        document.getElementById('admin-subtab-reports').style.display = subtab === 'reports' ? 'block' : 'none';
+        document.getElementById('admin-subtab-users').style.display = subtab === 'users' ? 'block' : 'none';
 
-        toast.innerHTML = `${icon} <span>${message}</span>`;
-        container.appendChild(toast);
+        if (subtab === 'reports') renderAdminReports();
+        if (subtab === 'users') renderAdminUsers();
+    };
 
-        setTimeout(() => {
-            toast.classList.add("slide-fade-out");
-            toast.addEventListener("animationend", () => {
-                toast.remove();
-            });
-        }, 3000);
+    // --- КОНСТРУКТОР: ДНИ И ПРЕДПРОСМОТР ---
+    let dayCount = 1;
+
+    function addDayBlock() {
+        const container = document.getElementById('days-container');
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-block';
+        dayDiv.style.background = 'var(--card-bg)';
+        dayDiv.style.border = '1px solid var(--border-color)';
+        dayDiv.style.padding = '15px';
+        dayDiv.style.borderRadius = '6px';
+        dayDiv.style.marginBottom = '15px';
+        
+        dayDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0; color:var(--text-color);">День ${dayCount}</h4>
+                ${dayCount > 1 ? `<button type="button" class="btn-danger" style="padding:4px 8px; margin:0;" onclick="this.parentElement.parentElement.remove(); updateDayNumbers(); updatePreview();">Удалить</button>` : ''}
+            </div>
+            <div class="form-group">
+                <label>Ссылка на запись</label>
+                <input type="text" class="day-link" placeholder="Ссылка на YouTube / Доказательства...">
+            </div>
+            <div class="form-group">
+                <label>Описание работы</label>
+                <textarea class="day-desc" placeholder="Что было сделано..."></textarea>
+            </div>
+        `;
+        container.appendChild(dayDiv);
+        dayCount++;
+        updateDayNumbers();
+        updatePreview();
     }
 
-    // --- YouTube URL Live Parser ---
-    function parseYoutubeId(url) {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    // Handle YouTube Input
-    function handleYoutubeInput() {
-        const url = document.getElementById("recordYoutube").value.trim();
-        const previewBox = document.getElementById("ytPreview");
-        const linkElem = document.getElementById("ytLink");
-        const thumbElem = document.getElementById("ytThumbnail");
-
-        const videoId = parseYoutubeId(url);
-        if (videoId) {
-            previewBox.classList.add("active");
-            linkElem.href = url;
-            thumbElem.style.backgroundImage = `url('https://img.youtube.com/vi/${videoId}/mqdefault.jpg')`;
-            thumbElem.style.backgroundSize = "cover";
-            thumbElem.style.backgroundPosition = "center";
-            thumbElem.innerText = "";
-            document.getElementById("ytTitle").innerText = `Обнаружено видео! ID: ${videoId}`;
-        } else {
-            previewBox.classList.remove("active");
-            thumbElem.style.backgroundImage = "none";
-            thumbElem.innerText = "🎥 YT";
-        }
-        generateLiveReport();
-    }
-
-    // --- Render Dynamic Checklist Categories tabs ---
-    function renderCategories() {
-        const container = document.getElementById("categoriesContainer");
-        container.innerHTML = "";
-
-        const categories = (state.settings && state.settings.categories && state.settings.categories.length > 0)
-            ? state.settings.categories
-            : DEFAULT_CATEGORIES;
-
-        categories.forEach(cat => {
-            const span = document.createElement("span");
-            span.className = "preset-badge";
-            span.innerText = cat.name;
-            span.onclick = () => loadCategoryChecklist(cat);
-            container.appendChild(span);
+    function updateDayNumbers() {
+        const blocks = document.querySelectorAll('.day-block');
+        dayCount = 1;
+        blocks.forEach(block => {
+            block.querySelector('h4').textContent = `День ${dayCount}`;
+            dayCount++;
         });
     }
 
-    function loadCategoryChecklist(category) {
-        state.currentChecklist = category.items.map(text => {
-            return { text: text, completed: false };
-        });
-
-        renderChecklist();
-        generateLiveReport();
-        showToast(`Загружен шаблон категории: ${category.name}`, "success");
+    function formatDate(dateStr) {
+        if (!dateStr) return 'xx.xx.xxxx';
+        const d = new Date(dateStr);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
     }
 
-    // --- Checklist Interactive Handler ---
-    function renderChecklist() {
-        const container = document.getElementById("checklistItems");
-        container.innerHTML = "";
+    function updatePreview() {
+        if (!currentUser) return;
+        const nickname = document.getElementById('report-nickname').value || currentUser.nickname;
+        const dateStart = document.getElementById('report-date-start').value;
+        const dateEnd = document.getElementById('report-date-end').value;
+        const roleName = ROLE_CONFIG[currentUser.role] ? ROLE_CONFIG[currentUser.role].name : 'Пользователь';
+        
+        const todayD = new Date();
+        const todayStr = `${String(todayD.getDate()).padStart(2, '0')}.${String(todayD.getMonth() + 1).padStart(2, '0')}.${todayD.getFullYear()}`;
 
-        if (state.currentChecklist.length === 0) {
-            container.innerHTML = `
-                <li style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">
-                    Чек-лист пуст. Выберите категорию выше или впишите свои задачи вручную!
-                </li>
-            `;
-            return;
-        }
+        let text = `Отчет о выполненной работе\n\n`;
+        text += `С ${formatDate(dateStart)} по ${formatDate(dateEnd)}\n`;
+        text += `---------------------------\n`;
+        text += `Дата записи: ${todayStr}\n`;
+        text += `Должность: ${roleName}\n`;
+        text += `Никнейм: ${nickname}\n\n`;
 
-        state.currentChecklist.forEach((item, index) => {
-            const li = document.createElement("li");
-            li.className = `checklist-item ${item.completed ? 'checked' : ''}`;
-
-            li.innerHTML = `
-                <div class="checklist-item-left">
-                    <div class="checkbox-custom ${item.completed ? 'checked' : ''}" onclick="toggleChecklistItem(${index})"></div>
-                    <span class="checklist-item-text" onclick="toggleChecklistItem(${index})">${escapeHtml(item.text)}</span>
-                </div>
-                <div class="checklist-item-actions">
-                    <button class="btn-action-icon" onclick="deleteChecklistItem(${index})" title="Удалить">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
-            container.appendChild(li);
-        });
-    }
-
-    function addChecklistItem() {
-        const input = document.getElementById("newCheckItem");
-        const text = input.value.trim();
-        if (!text) return;
-
-        state.currentChecklist.push({ text: text, completed: false });
-        input.value = "";
-        renderChecklist();
-        generateLiveReport();
-        showToast("Пункт добавлен в чек-лист", "success");
-    }
-
-    function toggleChecklistItem(index) {
-        state.currentChecklist[index].completed = !state.currentChecklist[index].completed;
-        renderChecklist();
-        generateLiveReport();
-    }
-
-    function deleteChecklistItem(index) {
-        state.currentChecklist.splice(index, 1);
-        renderChecklist();
-        generateLiveReport();
-        showToast("Пункт удален", "danger");
-    }
-
-    // --- DYNAMIC MATERIALS LINKS MANAGER (FOR ADDING ADDITIONAL MATERIALS/PRs/FIGMAs PER DAY) ---
-    function renderMaterials() {
-        const container = document.getElementById("materialsListContainer");
-        container.innerHTML = "";
-
-        if (!state.currentMaterials || state.currentMaterials.length === 0) {
-            return; // keep it hidden if no links added
-        }
-
-        state.currentMaterials.forEach((m, idx) => {
-            const badge = document.createElement("span");
-            badge.className = "material-badge";
-            badge.innerHTML = `
-                🔗 <b>${escapeHtml(m.title)}</b>
-                <button type="button" class="material-badge-delete" onclick="deleteMaterialLink(${idx})" title="Удалить ссылку">×</button>
-            `;
-            container.appendChild(badge);
-        });
-    }
-
-    function addMaterialLink() {
-        const urlInput = document.getElementById("materialUrlInput");
-        const titleInput = document.getElementById("materialTitleInput");
-
-        let url = urlInput.value.trim();
-        let title = titleInput.value.trim();
-
-        if (!url) {
-            showToast("Пожалуйста, введите URL-ссылку на материал!", "danger");
-            urlInput.focus();
-            return;
-        }
-
-        // Auto prepend protocol if missing
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'https://' + url;
-        }
-
-        // Auto extract a beautiful clean title if left blank
-        if (!title) {
-            try {
-                const domain = new URL(url).hostname.replace('www.', '');
-                title = domain.split('.')[0];
-                title = title.charAt(0).toUpperCase() + title.slice(1);
-            } catch(e) {
-                title = "Материал";
-            }
-        }
-
-        if (!state.currentMaterials) state.currentMaterials = [];
-        state.currentMaterials.push({ title: title, url: url });
-
-        urlInput.value = "";
-        titleInput.value = "";
-
-        renderMaterials();
-        generateLiveReport();
-        showToast("Дополнительный материал добавлен!", "success");
-    }
-
-    function deleteMaterialLink(idx) {
-        state.currentMaterials.splice(idx, 1);
-        renderMaterials();
-        generateLiveReport();
-        showToast("Ссылка на материал удалена", "danger");
-    }
-
-    // --- Report Formatter / Engine using the EXACT requested layout ---
-    function generateLiveReport() {
-        const startVal = document.getElementById("startDate").value;
-        const endVal = document.getElementById("endDate").value;
-        const dateVal = document.getElementById("recordDate").value;
-        const ytVal = document.getElementById("recordYoutube").value.trim();
-        const descVal = document.getElementById("recordDesc").value.trim();
-        const nickVal = document.getElementById("nicknameInput").value.trim();
-
-        const previewContainer = document.getElementById("reportPreview");
-
-        // Set live badge text depending on mode
-        const modeBadge = document.getElementById("previewModeBadge");
-        if (state.currentDraftDays && state.currentDraftDays.length > 0) {
-            modeBadge.innerText = `Сводный (${state.currentDraftDays.length} дней зафиксировано)`;
-            modeBadge.className = "card-badge green";
-        } else {
-            modeBadge.innerText = "Предпросмотр";
-            modeBadge.className = "card-badge blue";
-        }
-
-        if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0) && (!state.currentMaterials || state.currentMaterials.length === 0)) {
-            previewContainer.innerText = "Заполните форму 'Новая запись' слева, чтобы увидеть готовый сгенерированный отчёт в реальном времени......";
-            return;
-        }
-
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
-        previewContainer.innerText = reportText;
-    }
-
-    function compileReportText(startDate, endDate, reportDate, youtube, description, checklist, nickname) {
-        const formattedStart = startDate ? startDate.split('-').reverse().join('.') : "__.__.____";
-        const formattedEnd = endDate ? endDate.split('-').reverse().join('.') : "__.__.____";
-        const formattedReport = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
-        const positionSelect = document.getElementById("positionSelect");
-        const selectedPosition = positionSelect ? positionSelect.value : "";
-
-        let report = `📝 ОТЧЁТ О ВЫПОЛНЕННОЙ РАБОТЕ\n\n`;
-        report += `С ${formattedStart} по ${formattedEnd}\n\n`;
-        report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        report += `📅 Дата отчёта: ${formattedReport}\n`;
-        if (selectedPosition) {
-            report += `💼 Должность: ${selectedPosition}\n`;
-        }
-        if (nickname) {
-            report += `👤 Никнейм: ${nickname}\n`;
-        }
-        report += `\n`;
-
-        // If user is compiling a multi-day draft, display the logged days first!
-        if (state.currentDraftDays && state.currentDraftDays.length > 0) {
-            report += `🛠️ ВЫПОЛНЕННЫЕ ЗАДАЧИ ПО ДНЯМ:\n\n`;
+        const blocks = document.querySelectorAll('.day-block');
+        blocks.forEach((block, index) => {
+            const link = block.querySelector('.day-link').value || '...';
+            const desc = block.querySelector('.day-desc').value || '...';
             
-            state.currentDraftDays.forEach((day, index) => {
-                const formattedDayDate = day.date ? day.date.split('-').reverse().join('.') : "__.__.____";
-                report += `📅 ДЕНЬ ${index + 1}: ${formattedDayDate}\n`;
-                if (day.youtube) {
-                    report += `🎥 Видео: ${day.youtube}\n`;
-                }
-                report += `📝 Работа: ${day.description}\n`;
-                
-                // Print additional materials if exist for this day
-                if (day.materials && day.materials.length > 0) {
-                    report += `🔗 Доп. материалы:\n`;
-                    day.materials.forEach(m => {
-                        report += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-
-                if (day.checklist && day.checklist.length > 0) {
-                    report += `📋 Чек-лист выполненных задач:\n`;
-                    day.checklist.forEach(item => {
-                        const status = item.completed ? "[x]" : "[ ]";
-                        report += `  ${status} ${item.text}\n`;
-                    });
-                }
-                report += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            });
-
-            // Pre-render the currently active typing day as a draft "in progress" at the bottom
-            if (description || (state.currentMaterials && state.currentMaterials.length > 0)) {
-                const formattedDayDate = reportDate ? reportDate.split('-').reverse().join('.') : "__.__.____";
-                report += `⏳ ТЕКУЩИЙ ДЕНЬ (В ПРОЦЕССЕ ЗАПОЛНЕНИЯ): ${formattedDayDate}\n`;
-                if (youtube) report += `🎥 Видео: ${youtube}\n`;
-                report += `📝 Работа: ${description || "—"}\n`;
-                
-                if (state.currentMaterials && state.currentMaterials.length > 0) {
-                    report += `🔗 Доп. материалы:\n`;
-                    state.currentMaterials.forEach(m => {
-                        report += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-
-                if (checklist && checklist.length > 0) {
-                    report += `📋 Чек-лист:\n`;
-                    checklist.forEach(item => {
-                        const status = item.completed ? "[x]" : "[ ]";
-                        report += `  ${status} ${item.text}\n`;
-                    });
-                }
-            }
-        } else {
-            // Default Classic Single Day format
-            report += `🎥 ВИДЕО ДЕМОНСТРАЦИЯ:\n`;
-            report += `🔗 ${youtube ? youtube : ""}\n\n`;
-
-            if (state.currentMaterials && state.currentMaterials.length > 0) {
-                report += `🔗 ДОПОЛНИТЕЛЬНЫЕ МАТЕРИАЛЫ:\n`;
-                state.currentMaterials.forEach(m => {
-                    report += `- ${m.title}: ${m.url}\n`;
-                });
-                report += `\n`;
-            }
-
-            report += `🛠️ ОПИСАНИЕ ВЫПОЛНЕННЫХ ЗАДАЧ:\n`;
-            report += `${description}\n`;
-
-            if (checklist && checklist.length > 0) {
-                report += `\n📋 СТАТУС ВЫПОЛНЕНИЯ ПОДЗАДАЧ:\n`;
-                checklist.forEach(item => {
-                    const statusBox = item.completed ? "[x]" : "[ ]";
-                    report += `${statusBox} ${item.text}\n`;
-                });
-            }
-        }
-
-        return report;
-    }
-
-    // --- MULTI-DAY BUILDER ACTIONS WITH MATERIALS SUPPORT ---
-    function commitCurrentDayAndIncrement() {
-        const descInput = document.getElementById("recordDesc");
-        const descVal = descInput.value.trim();
-
-        if (!descVal) {
-            showToast("Пожалуйста, заполните описание выполненной работы за текущий день перед фиксацией!", "danger");
-            descInput.focus();
-            return;
-        }
-
-        const dateInput = document.getElementById("recordDate");
-        const ytInput = document.getElementById("recordYoutube");
-
-        // Create logged day object containing ALL daily data (including checklist & extra links!)
-        const loggedDay = {
-            date: dateInput.value,
-            youtube: ytInput.value.trim(),
-            description: descVal,
-            checklist: JSON.parse(JSON.stringify(state.currentChecklist)), // deep copy
-            materials: JSON.parse(JSON.stringify(state.currentMaterials)) // deep copy of daily materials
-        };
-
-        // Push to running draft
-        state.currentDraftDays.push(loggedDay);
-
-        // Increment date picker by exactly +1 day (transition to next day!)
-        const currentDate = new Date(dateInput.value);
-        currentDate.setDate(currentDate.getDate() + 1);
-        dateInput.value = currentDate.toISOString().split('T')[0];
-
-        // Reset inputs for the next day's write
-        descInput.value = "";
-        ytInput.value = "";
-        state.currentMaterials = []; // reset current day materials
-        
-        // Reset checklist items to UNCHECKED state so user can reuse the same category template
-        state.currentChecklist.forEach(item => {
-            item.completed = false;
+            text += `День ${index + 1}.\n`;
+            text += `Ссылка на запись: ${link}\n`;
+            text += `Описание работы:\n${desc}\n\n`;
         });
 
-        // Re-renders and live update
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-
-        // Update draft action buttons visibility
-        updateDraftButtonsVisibility();
-
-        showToast(`📅 День зафиксирован! Дата переключена на ${dateInput.value.split('-').reverse().join('.')}`, "success");
+        document.getElementById('report-preview-text').textContent = text.trim();
     }
 
-    // Resumes work on the previously committed day (removes it from committed array and loads back into the form inputs)
-    function rollbackLastCommittedDay() {
-        if (!state.currentDraftDays || state.currentDraftDays.length === 0) {
-            showToast("Нет зафиксированных дней для доработки!", "danger");
-            return;
-        }
+    document.getElementById('report-form').addEventListener('input', updatePreview);
+    addDayBlock();
 
-        // Pop last day from draft
-        const lastDay = state.currentDraftDays.pop();
-
-        // Load values back into DOM form fields
-        document.getElementById("recordDate").value = lastDay.date;
-        document.getElementById("recordYoutube").value = lastDay.youtube;
-        document.getElementById("recordDesc").value = lastDay.description;
-
-        // Restore checklist and materials deep copy states
-        state.currentChecklist = JSON.parse(JSON.stringify(lastDay.checklist));
-        state.currentMaterials = JSON.parse(JSON.stringify(lastDay.materials || []));
-
-        // Re-renders and updates
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-
-        // Update visibility of the draft actions
-        updateDraftButtonsVisibility();
-
-        showToast(`↩️ Запись за ${lastDay.date.split('-').reverse().join('.')} возвращена в форму для продолжения работы!`, "info");
+    // --- ОТПРАВКА ОТЧЕТА ---
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = () => resolve({ name: file.name, data: reader.result });
+            reader.onerror = e => reject(e);
+        });
     }
 
-    function resetMultiDayDraft() {
-        state.currentDraftDays = [];
-        state.currentMaterials = [];
-        updateDraftButtonsVisibility();
+    document.getElementById('report-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        renderMaterials();
-        generateLiveReport();
-        showToast("Сводный черновик отчета полностью сброшен", "info");
+        const content = document.getElementById('report-preview-text').textContent;
+
+        const fileInput = document.getElementById('report-files');
+        let filesData = [];
+        if (fileInput.files.length > 0) {
+            try { filesData = await Promise.all(Array.from(fileInput.files).map(fileToBase64)); } 
+            catch (err) { return alert('Ошибка при чтении файлов.'); }
+        }
+
+        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+        reports.push({
+            id: Date.now(), author: document.getElementById('report-nickname').value,
+            time: new Date().toLocaleString('ru-RU'), content: content, status: 'pending', adminComment: '', files: filesData
+        });
+
+        try {
+            localStorage.setItem('reportsDB', JSON.stringify(reports));
+            alert('Отчет отправлен!');
+            document.getElementById('report-form').reset();
+            document.getElementById('days-container').innerHTML = '';
+            addDayBlock();
+            switchMainTab('history');
+        } catch (e) { alert('Превышен лимит памяти браузера (попробуйте загрузить скриншоты меньшего размера).'); }
+    });
+
+    // --- РЕНДЕР ИСТОРИИ И ОТЧЕТОВ ---
+    function getStatusBadge(status) {
+        if(status === 'approved') return '<span class="badge badge-approved">✅ Одобрено</span>';
+        if(status === 'rejected') return '<span class="badge badge-rejected">❌ Отклонено</span>';
+        return '<span class="badge badge-pending">⏳ На рассмотрении</span>';
+    }
+    function renderFilesHTML(files) {
+        if (!files || files.length === 0) return '';
+        return '<div class="files-preview">' + files.map(f => f.data.startsWith('data:image') ? `<a href="${f.data}" download="${f.name}"><img src="${f.data}"></a>` : '').join('') + '</div>';
     }
 
-    // Toggle draft helpers visibility based on active days logged
-    function updateDraftButtonsVisibility() {
-        const hasDraft = state.currentDraftDays && state.currentDraftDays.length > 0;
-        document.getElementById("resetDraftBtn").style.display = hasDraft ? "inline-flex" : "none";
-        document.getElementById("rollbackDayBtn").style.display = hasDraft ? "inline-flex" : "none";
+    function renderUserHistory() {
+        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]').filter(r => r.author === currentUser.nickname).reverse();
+        const list = document.getElementById('user-reports-list');
+        if (reports.length === 0) return list.innerHTML = '<p style="color:var(--text-muted);">Отчетов нет.</p>';
+        list.innerHTML = reports.map(r => `
+            <div class="report-card"><div class="report-card-header"><span>Отправлен: ${r.time}</span>${getStatusBadge(r.status)}</div>
+            <pre>${r.content}</pre>${renderFilesHTML(r.files)}
+            ${r.adminComment ? `<div class="admin-comment"><strong>Комментарий админа:</strong> ${r.adminComment}</div>` : ''}</div>
+        `).join('');
     }
 
-    // --- Action Buttons in Form ---
-    function clearForm() {
-        document.getElementById("recordDesc").value = "";
-        document.getElementById("recordYoutube").value = "";
-        state.currentChecklist = [];
-        state.currentDraftDays = []; // reset draft
-        state.currentMaterials = []; // reset materials
-        state.editingRecordId = null;
+    window.renderAdminReports = function() {
+        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]').reverse();
+        const search = document.getElementById('admin-search').value.toLowerCase();
+        const filter = document.getElementById('admin-filter').value;
+        const filtered = reports.filter(r => r.author.toLowerCase().includes(search) && (filter === 'all' || r.status === filter));
+        const list = document.getElementById('admin-reports-list');
         
-        updateDraftButtonsVisibility();
+        if (filtered.length === 0) return list.innerHTML = '<p style="color:var(--text-muted);">Отчеты не найдены.</p>';
+        list.innerHTML = filtered.map(r => `
+            <div class="report-card"><div class="report-card-header"><span>Автор: <strong>${r.author}</strong> | ${r.time}</span>${getStatusBadge(r.status)}</div>
+            <pre>${r.content}</pre>${renderFilesHTML(r.files)}
+            <div class="admin-comment-input"><input type="text" id="comment-${r.id}" placeholder="Комментарий..." value="${r.adminComment}"><button class="btn-secondary" onclick="saveComment(${r.id})">Сохранить</button></div>
+            <div style="margin-top: 15px; display:flex; gap:10px;"><button class="btn-success" onclick="setStatus(${r.id}, 'approved')">Одобрить</button><button class="btn-danger" onclick="setStatus(${r.id}, 'rejected')">Отклонить</button><button class="btn-secondary" onclick="setStatus(${r.id}, 'pending')">В ожидание</button></div></div>
+        `).join('');
+    };
 
-        document.getElementById("saveRecordBtn").innerText = "💾 Сохранить в архив";
-        document.getElementById("saveRecordBtn").className = "btn btn-primary";
-        document.getElementById("constructorStatus").innerText = "Новый отчёт";
-        document.getElementById("constructorStatus").className = "card-badge purple";
+    window.setStatus = (id, newStatus) => {
+        let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+        localStorage.setItem('reportsDB', JSON.stringify(reports.map(r => r.id === id ? { ...r, status: newStatus } : r)));
+        renderAdminReports();
+    };
+    window.saveComment = (id) => {
+        const comment = document.getElementById(`comment-${id}`).value;
+        let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+        localStorage.setItem('reportsDB', JSON.stringify(reports.map(r => r.id === id ? { ...r, adminComment: comment } : r)));
+        alert('Комментарий сохранен');
+    };
+    window.clearAllReports = () => { if(confirm('Удалить ВСЕ отчеты?')) { localStorage.removeItem('reportsDB'); renderAdminReports(); } };
 
-        const todayObj = new Date();
-        const todayStr = todayObj.toISOString().split('T')[0];
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(todayObj.getDate() - 7);
-        const startStr = sevenDaysAgo.toISOString().split('T')[0];
-
-        document.getElementById("startDate").value = startStr;
-        document.getElementById("endDate").value = todayStr;
-        document.getElementById("recordDate").value = todayStr;
-
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        showToast("Форма ввода очищена", "info");
-    }
-
-    // Copy to clipboard
-    function copyReportToClipboard() {
-        const previewText = document.getElementById("reportPreview").innerText;
-        if (!previewText || previewText.includes("Заполните форму")) {
-            showToast("Нечего копировать. Заполните форму сначала!", "danger");
+    // --- АДМИНКА: ПОЛЬЗОВАТЕЛИ И ДОСТУПЫ ---
+    window.renderAdminUsers = function() {
+        // Дополнительная проверка безопасности:
+        if (!currentUser || (ROLE_CONFIG[currentUser.role] && ROLE_CONFIG[currentUser.role].level < 3)) {
+            document.getElementById('admin-users-list').innerHTML = '<p style="color:var(--danger);">У вас нет доступа к этому разделу.</p>';
             return;
         }
 
-        navigator.clipboard.writeText(previewText)
-            .then(() => {
-                showToast("📋 Отчёт успешно скопирован в буфер обмена!", "success");
-            })
-            .catch(err => {
-                const textArea = document.createElement("textarea");
-                textArea.value = previewText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast("📋 Отчёт скопирован!", "success");
-                } catch (e) {
-                    showToast("Не удалось скопировать", "danger");
-                }
-                document.body.removeChild(textArea);
-            });
-    }
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const list = document.getElementById('admin-users-list');
+        const currRoleLevel = ROLE_CONFIG[currentUser.role].level;
+        
+        const sortedLogins = Object.keys(users).sort((a, b) => {
+            const levelA = (ROLE_CONFIG[users[a].role] || ROLE_CONFIG['user']).level;
+            const levelB = (ROLE_CONFIG[users[b].role] || ROLE_CONFIG['user']).level;
+            return levelB - levelA;
+        });
 
-    // Save record to database
-    function saveRecord() {
-        const startVal = document.getElementById("startDate").value;
-        const endVal = document.getElementById("endDate").value;
-        const dateVal = document.getElementById("recordDate").value;
-        const ytVal = document.getElementById("recordYoutube").value.trim();
-        const descVal = document.getElementById("recordDesc").value.trim();
-        const nickVal = document.getElementById("nicknameInput").value.trim();
-
-        if (!startVal || !endVal || !dateVal) {
-            showToast("Пожалуйста, заполните даты!", "danger");
-            return;
-        }
-
-        if (!descVal && (!state.currentDraftDays || state.currentDraftDays.length === 0)) {
-            showToast("Нечего сохранять. Пожалуйста, напишите отчет за день или зафиксируйте дни!", "danger");
-            return;
-        }
-
-        const positionSelect = document.getElementById("positionSelect");
-        const selectedPosition = positionSelect ? positionSelect.value : "";
-
-        let savedDescription = descVal;
-        let savedDraftDays = [];
-        let savedMaterials = [];
-
-        if (state.currentDraftDays && state.currentDraftDays.length > 0) {
-            savedDraftDays = JSON.parse(JSON.stringify(state.currentDraftDays));
-            savedMaterials = JSON.parse(JSON.stringify(state.currentMaterials || []));
+        let html = '<table class="users-table"><tr><th>Логин</th><th>Никнейм</th><th>Должность</th><th>Пароль</th><th>Действия</th></tr>';
+        
+        sortedLogins.forEach(login => {
+            const u = users[login];
+            const roleInfo = ROLE_CONFIG[u.role] || ROLE_CONFIG['user'];
+            const roleBadge = `<span class="badge ${roleInfo.badgeClass}">${roleInfo.name}</span>`;
             
-            // Build a compiled descriptive string for r.description so that it synchronizes and displays nicely
-            let compiledDesc = "";
-            state.currentDraftDays.forEach((day, index) => {
-                const formattedDayDate = day.date ? day.date.split('-').reverse().join('.') : "__.__.____";
-                compiledDesc += `📅 ДЕНЬ ${index + 1}: ${formattedDayDate}\n`;
-                if (day.youtube) {
-                    compiledDesc += `🎥 Видео: ${day.youtube}\n`;
-                }
-                compiledDesc += `📝 Работа: ${day.description}\n`;
-                if (day.materials && day.materials.length > 0) {
-                    compiledDesc += `🔗 Доп. материалы:\n`;
-                    day.materials.forEach(m => {
-                        compiledDesc += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-                if (day.checklist && day.checklist.length > 0) {
-                    compiledDesc += `📋 Чек-лист:\n`;
-                    day.checklist.forEach(item => {
-                        const status = item.completed ? "[x]" : "[ ]";
-                        compiledDesc += `  ${status} ${item.text}\n`;
-                    });
-                }
-                compiledDesc += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            });
-
-            if (descVal) {
-                const formattedDayDate = dateVal ? dateVal.split('-').reverse().join('.') : "__.__.____";
-                compiledDesc += `⏳ ТЕКУЩИЙ ДЕНЬ (В ПРОЦЕССЕ ЗАПОЛНЕНИЯ): ${formattedDayDate}\n`;
-                if (ytVal) compiledDesc += `🎥 Видео: ${ytVal}\n`;
-                compiledDesc += `📝 Работа: ${descVal}\n`;
-                if (state.currentMaterials && state.currentMaterials.length > 0) {
-                    compiledDesc += `🔗 Доп. материалы:\n`;
-                    state.currentMaterials.forEach(m => {
-                        compiledDesc += `  - ${m.title}: ${m.url}\n`;
-                    });
-                }
-            }
-            savedDescription = compiledDesc;
-        } else {
-            savedMaterials = JSON.parse(JSON.stringify(state.currentMaterials || []));
-        }
-
-        const reportText = compileReportText(startVal, endVal, dateVal, ytVal, descVal, state.currentChecklist, nickVal);
-        const recordId = "rec-" + Date.now();
-
-        if (state.editingRecordId) {
-            // Edit mode
-            const idx = state.records.findIndex(r => r.id === state.editingRecordId);
-            if (idx !== -1) {
-                state.records[idx].startDate = startVal;
-                state.records[idx].endDate = endVal;
-                state.records[idx].date = dateVal;
-                state.records[idx].youtubeUrl = ytVal;
-                state.records[idx].nickname = nickVal; // Save NickName!
-                state.records[idx].position = selectedPosition; // Save Position!
-                state.records[idx].description = savedDescription;
-                state.records[idx].draftDays = savedDraftDays;
-                state.records[idx].materials = savedMaterials;
-                state.records[idx].checklist = JSON.parse(JSON.stringify(state.currentChecklist));
-                showToast("📝 Запись успешно обновлена!", "success");
-            }
-        } else {
-            // Save mode
-            const newRecord = {
-                id: recordId,
-                startDate: startVal,
-                endDate: endVal,
-                date: dateVal,
-                youtubeUrl: ytVal,
-                nickname: nickVal, // Save NickName!
-                position: selectedPosition, // Save Position!
-                description: savedDescription,
-                draftDays: savedDraftDays,
-                materials: savedMaterials,
-                checklist: JSON.parse(JSON.stringify(state.currentChecklist)),
-                createdAt: new Date().toISOString()
-            };
-            state.records.unshift(newRecord);
-            showToast("🎉 Отчёт успешно сохранён в Архив!", "success");
-        }
-
-        // --- NEW: AUTO SAVE TO PHYSICAL LOCAL reports/ FOLDER ---
-        const cleanDate = dateVal.replace(/-/g, '_');
-        const filename = `report_${cleanDate}_${state.editingRecordId || recordId}.txt`;
-        
-        fetch('http://localhost:3000/api/save-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: filename, content: reportText })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                console.log("[Auto-Sync] Saved to folder: " + data.path);
-                showToast("🎉 Отчет сохранен и записан в папку reports/!", "success");
-            }
-        })
-        .catch(err => {
-            console.log("[Auto-Sync] Local folder server offline, saved only to browser localStorage.");
-        });
-
-        // Reset drafts and materials on save
-        state.currentDraftDays = [];
-        state.currentMaterials = [];
-        updateDraftButtonsVisibility();
-
-        // Trigger team cloud background push if enabled!
-        if (state.settings && state.settings.syncKey && state.settings.autoSync) {
-            pushToCloudInBackground();
-        }
-
-        saveToLocalStorage();
-        updateTopCountVisuals();
-        showSuccessModal();
-        clearForm();
-    }
-
-    // --- TEAM CLOUD SYNC FOR CONSTRUCTOR (WITH SILENT AUTOMATIC MODE SUPPORT!) ---
-    function pullAndMergeFromCloud(isSilent = false) {
-        const key = state.settings.syncKey;
-        if (!key) return;
-
-        const url = `https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`;
-
-        fetch(url)
-        .then(response => {
-            if (response.status === 404) {
-                // If cloud is empty and we have reports, initialize it!
-                if (state.records && state.records.length > 0) {
-                    pushToCloudInBackground();
-                }
-                return null;
-            }
-            if (!response.ok) throw new Error("API Error");
-            return response.json();
-        })
-        .then(rawString => {
-            if (!rawString) return;
-            try {
-                let cloudData;
-                if (typeof rawString === 'string') {
-                    cloudData = JSON.parse(rawString);
-                } else {
-                    cloudData = rawString;
-                }
-
-                let cloudRecords = [];
-                let cloudPositions = null;
-                let cloudCategories = null;
-                let cloudSettingsUpdatedAt = 0;
-
-                if (cloudData && Array.isArray(cloudData)) {
-                    cloudRecords = cloudData;
-                } else if (cloudData && typeof cloudData === 'object') {
-                    cloudRecords = cloudData.records || [];
-                    cloudPositions = cloudData.positions || null;
-                    cloudCategories = cloudData.categories || null;
-                    cloudSettingsUpdatedAt = cloudData.settingsUpdatedAt || 0;
-                }
-
-                let stateChanged = false;
-
-                // 1. Merge Records
-                const mergedMap = new Map();
-                state.records.forEach(r => mergedMap.set(r.id, r));
-                
-                let newAddedCount = 0;
-                cloudRecords.forEach(cr => {
-                    if (!mergedMap.has(cr.id)) {
-                        mergedMap.set(cr.id, cr);
-                        newAddedCount++;
-                        stateChanged = true;
-                    }
-                });
-
-                if (newAddedCount > 0) {
-                    const mergedArray = Array.from(mergedMap.values());
-                    mergedArray.sort((a, b) => b.date.localeCompare(a.date));
-                    state.records = mergedArray;
-                }
-
-                // 2. Merge Positions & Categories (Last-Write-Wins)
-                const localUpdatedAt = state.settings.updatedAt || 0;
-                if (cloudSettingsUpdatedAt > localUpdatedAt) {
-                    if (cloudPositions && Array.isArray(cloudPositions) && cloudPositions.length > 0) {
-                        state.settings.positions = cloudPositions;
-                        stateChanged = true;
-                    }
-                    if (cloudCategories && Array.isArray(cloudCategories) && cloudCategories.length > 0) {
-                        state.settings.categories = cloudCategories;
-                        stateChanged = true;
-                    }
-                    state.settings.updatedAt = cloudSettingsUpdatedAt;
-                } else if (localUpdatedAt > cloudSettingsUpdatedAt) {
-                    // Local changes are newer, push them to cloud!
-                    pushToCloudInBackground();
-                }
-
-                if (stateChanged) {
-                    saveToLocalStorage();
-                    
-                    // Re-render components
-                    updateTopCountVisuals();
-                    renderPositionsDropdown();
-                    renderCategories();
-                    renderChecklist();
-                    generateLiveReport();
-
-                    if (newAddedCount > 0) {
-                        showToast(`🔄 Облако: Загружено новых отчетов от команды: ${newAddedCount}!`, "success");
-                    } else {
-                        showToast(`🔄 Роли и чек-листы обновлены из облака!`, "info");
-                    }
-                }
-            } catch(e) {
-                console.error("Cloud merge error:", e);
-            }
-        })
-        .catch(err => {
-            console.warn("Background cloud poll failed:", err);
-        });
-    }
-
-    // Background silent push to team cloud
-    function pushToCloudInBackground() {
-        const key = state.settings.syncKey;
-        if (!key) return;
-
-        const payload = {
-            records: state.records || [],
-            positions: state.settings.positions || [],
-            categories: state.settings.categories || [],
-            settingsUpdatedAt: state.settings.updatedAt || 0
-        };
-
-        const data = JSON.stringify(payload);
-        fetch(`https://keyvalue.imany.link/api/KV/${encodeURIComponent(key)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).catch(err => console.warn("Background cloud sync failed", err));
-    }
-
-    function loadRecordToForm(id) {
-        const r = state.records.find(item => item.id === id);
-        if (!r) return;
-
-        state.editingRecordId = r.id;
-        document.getElementById("startDate").value = r.startDate || "";
-        document.getElementById("endDate").value = r.endDate || "";
-        document.getElementById("recordDate").value = r.date;
-        document.getElementById("recordYoutube").value = r.youtubeUrl || "";
-        document.getElementById("nicknameInput").value = r.nickname || ""; // Restore NickName!
-        
-        // Restore Position!
-        if (r.position) {
-            state.settings.currentPosition = r.position;
-            saveToLocalStorage();
-            renderPositionsDropdown();
-        }
-
-        // Restore Multi-day parameters if available
-        state.currentDraftDays = r.draftDays ? JSON.parse(JSON.stringify(r.draftDays)) : [];
-        state.currentMaterials = r.materials ? JSON.parse(JSON.stringify(r.materials)) : [];
-
-        if (state.currentDraftDays.length > 0) {
-            document.getElementById("recordDesc").value = "";
-        } else {
-            document.getElementById("recordDesc").value = r.description || "";
-        }
-        
-        state.currentChecklist = JSON.parse(JSON.stringify(r.checklist));
-        
-        updateDraftButtonsVisibility();
-
-        const saveBtn = document.getElementById("saveRecordBtn");
-        saveBtn.innerText = "💾 Обновить в архиве";
-        saveBtn.className = "btn btn-success";
-
-        document.getElementById("constructorStatus").innerText = "Редактирование";
-        document.getElementById("constructorStatus").className = "card-badge green";
-
-        document.getElementById("block1").scrollIntoView({ behavior: 'smooth' });
-
-        handleYoutubeInput();
-        renderChecklist();
-        renderMaterials();
-        generateLiveReport();
-        showToast("✏️ Запись загружена в форму редактирования", "info");
-    }
-
-    // Update records count visuals
-    function updateTopCountVisuals() {
-        const total = state.records.length;
-        document.getElementById("topStatsCount").innerText = total;
-    }
-
-    // Modal triggers
-    function showSuccessModal() {
-        document.getElementById("successModal").classList.add("active");
-    }
-
-    // Close Modal
-    function closeSuccessModal() {
-        document.getElementById("successModal").classList.remove("active");
-    }
-
-    // --- VK BOT MESSAGE SENDING ENGINE (JSONP BYPASS CORS) ---
-    function sendVkMessageViaJsonp(token, peerId, message, onComplete) {
-        const randomId = Math.floor(Math.random() * 1000000000);
-        const callbackName = 'vk_callback_index_' + Math.floor(Math.random() * 1000000);
-        const scriptId = 'vk_script_index_send_' + Date.now();
-
-        window[callbackName] = function(response) {
-            delete window[callbackName];
-            const scriptNode = document.getElementById(scriptId);
-            if (scriptNode) scriptNode.remove();
-            if (onComplete) onComplete(response);
-        };
-
-        const script = document.createElement('script');
-        script.id = scriptId;
-        
-        const encodedMessage = encodeURIComponent(message);
-        script.src = `https://api.vk.com/method/messages.send?peer_id=${peerId}&message=${encodedMessage}&random_id=${randomId}&access_token=${token}&v=5.131&callback=${callbackName}`;
-        
-        document.body.appendChild(script);
-
-        setTimeout(() => {
-            if (window[callbackName]) {
-                delete window[callbackName];
-                const node = document.getElementById(scriptId);
-                if (node) node.remove();
-                if (onComplete) onComplete({ error: { error_msg: "Таймаут запроса. Проверьте сеть или настройки VK-бота в Настройках." } });
-            }
-        }, 8000);
-    }
-
-    function sendReportToVk() {
-        const token = state.settings.vkToken;
-        const peerId = state.settings.vkPeerId;
-
-        if (!token || !peerId) {
-            showToast("Сначала настройте токен и ID чата VK на странице Настроек!", "danger");
-            setTimeout(() => {
-                window.location.href = "settings.html";
-            }, 1500);
-            return;
-        }
-
-        const reportText = document.getElementById("reportPreview").innerText;
-        if (!reportText || reportText.includes("Заполните форму")) {
-            showToast("Нечего отправлять! Сначала заполните отчет.", "danger");
-            return;
-        }
-
-        showToast("Отправка отчёта в чат VK...", "info");
-
-        sendVkMessageViaJsonp(token, peerId, reportText, (res) => {
-            if (res.response) {
-                showToast("⚡️ Отчёт успешно отправлен в ваш чат ВКонтакте!", "success");
-            } else if (res.error) {
-                showToast("❌ Ошибка отправки: " + res.error.error_msg, "danger");
+            let actionBtn = '';
+            if (currentUser.login === login) {
+                actionBtn = `<button class="btn-primary" style="padding: 5px 10px; font-size: 12px; margin: 0;" onclick="openEditModal('${login}')">✏️ Мой профиль</button>`;
+            } else if (currRoleLevel > roleInfo.level) {
+                actionBtn = `<button class="btn-secondary" style="padding: 5px 10px; font-size: 12px; margin: 0;" onclick="openEditModal('${login}')">✏️ Изменить</button>`;
             } else {
-                showToast("❌ Не удалось отправить отчёт в VK", "danger");
+                actionBtn = '<span style="color:var(--text-muted); font-size:12px;"><i>Нет доступа</i></span>';
             }
+
+            const passDisplay = (currentUser.login === login || currRoleLevel > roleInfo.level) 
+                                ? `<span style="font-family: monospace;">${u.password}</span>` 
+                                : '<span style="color:var(--text-muted);">***</span>';
+
+            html += `<tr>
+                <td><strong>${login}</strong></td>
+                <td>${u.nickname}</td>
+                <td>${roleBadge}</td>
+                <td>${passDisplay}</td>
+                <td>${actionBtn}</td>
+            </tr>`;
         });
-    }
+        html += '</table>';
+        list.innerHTML = html;
+    };
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+    // --- МОДАЛЬНОЕ ОКНО ---
+    window.openEditModal = function(login) {
+        // Проверка прав (минимум 3 уровень)
+        if (!currentUser || (ROLE_CONFIG[currentUser.role] && ROLE_CONFIG[currentUser.role].level < 3)) return;
 
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const u = users[login];
+        if(!u) return;
+
+        document.getElementById('edit-original-login').value = login;
+        document.getElementById('edit-login').value = u.login;
+        document.getElementById('edit-nickname').value = u.nickname;
+        document.getElementById('edit-password').value = u.password;
+
+        const roleSelect = document.getElementById('edit-role');
+        roleSelect.innerHTML = '';
+        const currRoleLevel = ROLE_CONFIG[currentUser.role].level;
+
+        if (currentUser.login === login) {
+            roleSelect.innerHTML = `<option value="${u.role}" selected>${ROLE_CONFIG[u.role].name}</option>`;
+            roleSelect.disabled = true;
+        } else {
+            roleSelect.disabled = false;
+            const sortedRoles = Object.keys(ROLE_CONFIG).sort((a, b) => ROLE_CONFIG[b].level - ROLE_CONFIG[a].level);
+            sortedRoles.forEach(r => {
+                if (ROLE_CONFIG[r].level < currRoleLevel) {
+                    const selected = (r === u.role) ? 'selected' : '';
+                    roleSelect.innerHTML += `<option value="${r}" ${selected}>${ROLE_CONFIG[r].name}</option>`;
+                } else if (r === u.role) {
+                    roleSelect.innerHTML += `<option value="${r}" selected>${ROLE_CONFIG[r].name}</option>`;
+                }
+            });
+        }
+        document.getElementById('edit-user-modal').style.display = 'flex';
+    };
+
+    window.closeEditModal = function() { document.getElementById('edit-user-modal').style.display = 'none'; };
+
+    window.saveUserEdit = function() {
+        const oldLogin = document.getElementById('edit-original-login').value;
+        const newLogin = document.getElementById('edit-login').value.trim();
+        const newNickname = document.getElementById('edit-nickname').value.trim();
+        const newPassword = document.getElementById('edit-password').value.trim();
+        const newRole = document.getElementById('edit-role').value;
+
+        if (!newLogin || !newNickname || !newPassword) return alert('Заполните все поля!');
+
+        let users = JSON.parse(localStorage.getItem('users') || '{}');
+        if (newLogin !== oldLogin && users[newLogin]) return alert('Пользователь с таким логином уже существует!');
+
+        const oldNickname = users[oldLogin].nickname;
+        const updatedUser = { login: newLogin, nickname: newNickname, password: newPassword, role: newRole };
+
+        if (newLogin !== oldLogin) delete users[oldLogin];
+        users[newLogin] = updatedUser;
+        localStorage.setItem('users', JSON.stringify(users));
+
+        if (newNickname !== oldNickname) {
+            let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+            let changed = false;
+            reports.forEach(r => { if (r.author === oldNickname) { r.author = newNickname; changed = true; } });
+            if (changed) localStorage.setItem('reportsDB', JSON.stringify(reports));
+        }
+
+        if (currentUser.login === oldLogin) {
+            localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+            currentUser = updatedUser;
+            document.getElementById('user-display-name').textContent = currentUser.nickname;
+            document.getElementById('report-nickname').value = currentUser.nickname;
+        }
+
+        closeEditModal();
+        renderAdminUsers();
+        if(document.getElementById('tab-admin').style.display !== 'none' && document.getElementById('admin-subtab-reports').style.display !== 'none') renderAdminReports();
+        alert('Данные профиля успешно сохранены!');
+    };
+
+    window.exportToCSV = () => {
+        const reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
+        if (reports.length === 0) return alert('Нет отчетов для экспорта');
+        let csv = "\uFEFFID;Время;Автор;Статус;Комментарий;Текст\n";
+        reports.forEach(r => {
+            const escape = str => `"${(str || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+            csv += `${r.id};${escape(r.time)};${escape(r.author)};${r.status};${escape(r.adminComment)};${escape(r.content)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
+        link.download = "Отчеты.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    };
+
+    checkLogin();
 </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a061144918849d9d',t:'MTc4MDUxNDY3OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a081110cb9c02409',t:'MTc4MDg1MDA5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
