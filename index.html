@@ -908,6 +908,9 @@
                 updateConnectionStatus('local');
             }
 
+            // Восстанавливаем несохранённый черновик отчета (если он остался с прошлой сессии)
+            restoreDraft();
+
             switchMainTab('constructor');
         } else {
             elLanding.style.display = 'flex'; elApp.style.display = 'none'; 
@@ -1124,8 +1127,75 @@
         document.getElementById('report-preview-text').textContent = text.trim();
     }
 
-    document.getElementById('report-form').addEventListener('input', updatePreview);
+    document.getElementById('report-form').addEventListener('input', () => { updatePreview(); saveDraft(); });
     addDayBlock();
+
+    // ==================================================================================
+    //  ЧЕРНОВИК ОТЧЕТА (сохранение при выходе / перезагрузке страницы)
+    // ==================================================================================
+    function getDraftKey() {
+        return currentUser ? `reportDraft_${currentUser.login}` : null;
+    }
+
+    function saveDraft() {
+        const key = getDraftKey();
+        if (!key) return;
+
+        const days = Array.from(document.querySelectorAll('.day-block')).map(block => ({
+            link: block.querySelector('.day-link').value,
+            desc: block.querySelector('.day-desc').value
+        }));
+
+        const draft = {
+            nickname: document.getElementById('report-nickname').value,
+            dateStart: document.getElementById('report-date-start').value,
+            dateEnd: document.getElementById('report-date-end').value,
+            days
+        };
+
+        localStorage.setItem(key, JSON.stringify(draft));
+    }
+
+    function restoreDraft() {
+        const key = getDraftKey();
+        if (!key) return;
+
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+
+        try {
+            const draft = JSON.parse(raw);
+
+            document.getElementById('report-nickname').value = draft.nickname || currentUser.nickname;
+            document.getElementById('report-date-start').value = draft.dateStart || '';
+            document.getElementById('report-date-end').value = draft.dateEnd || '';
+
+            const container = document.getElementById('days-container');
+            container.innerHTML = '';
+            dayCount = 1;
+
+            if (draft.days && draft.days.length > 0) {
+                draft.days.forEach(d => {
+                    addDayBlock();
+                    const blocks = document.querySelectorAll('.day-block');
+                    const last = blocks[blocks.length - 1];
+                    last.querySelector('.day-link').value = d.link || '';
+                    last.querySelector('.day-desc').value = d.desc || '';
+                });
+            } else {
+                addDayBlock();
+            }
+
+            updatePreview();
+        } catch (e) {
+            console.error('Ошибка восстановления черновика отчета:', e);
+        }
+    }
+
+    function clearDraft() {
+        const key = getDraftKey();
+        if (key) localStorage.removeItem(key);
+    }
 
     // ==================================================================================
     //  ОТПРАВКА ОТЧЕТА
@@ -1162,6 +1232,7 @@
         try {
             await saveReportToDB(report);
             alert('✅ Отчет отправлен! Администратор увидит его автоматически.');
+            clearDraft();
             document.getElementById('report-form').reset();
             document.getElementById('days-container').innerHTML = '';
             addDayBlock();
@@ -1484,5 +1555,5 @@
     };
 </script>
 
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2343281799c49cd',t:'MTc4NTQxMjc2Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
