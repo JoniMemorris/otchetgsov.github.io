@@ -318,6 +318,12 @@
             <button class="nav-item" id="nav-history" onclick="switchMainTab('history')">
                 📂 Мои отчеты
             </button>
+            <button class="nav-item" id="nav-tasks" onclick="switchMainTab('tasks')">
+                📋 Задания
+            </button>
+            <button class="nav-item nav-item-admin" id="nav-curator-report" onclick="switchMainTab('curatorReport')">
+                🎓 Отчет куратора (академка)
+            </button>
             <button class="nav-item nav-item-admin" id="nav-admin" onclick="switchMainTab('admin')">
                 🛡️ Админ-панель
                 <span class="notif-badge" id="admin-notif-badge">0</span>
@@ -382,6 +388,74 @@
         <div id="tab-history" class="content-card" style="display: none;">
             <h2 style="margin-top:0;">Мои отчеты</h2>
             <div id="user-reports-list"></div>
+        </div>
+
+        <!-- Вкладка: Задания -->
+        <div id="tab-tasks" class="content-card" style="display: none;">
+            <h2 style="margin-top:0;">📋 Задания</h2>
+
+            <div id="tasks-admin-controls" style="display:none; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border-color);">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Новое задание</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="new-task-text" placeholder="Текст задания...">
+                        <button type="button" class="btn-success" style="width:auto; white-space:nowrap; margin-top:0;" onclick="addTask()">+ Добавить</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tasks-list"></div>
+        </div>
+
+        <!-- Вкладка: Отчет куратора (академка) -->
+        <div id="tab-curator-report" class="content-card" style="display: none;">
+            <h2 style="margin-top:0; color: var(--admin-color);">🎓 Отчет куратора (академка)</h2>
+            <div class="constructor-layout">
+                <!-- Левая часть: Форма -->
+                <div class="constructor-form">
+                    <form id="curator-report-form">
+                        <div class="form-group">
+                            <label>Ваш Никнейм</label>
+                            <input type="text" id="cur-report-nickname" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Период отчета (с — по)</label>
+                            <div class="date-range">
+                                <input type="date" id="cur-report-date-start" required>
+                                <span>—</span>
+                                <input type="date" id="cur-report-date-end" required>
+                            </div>
+                        </div>
+
+                        <!-- Блок с днями -->
+                        <div id="cur-days-container"></div>
+                        <button type="button" class="btn-secondary" onclick="addCurDayBlock()" style="margin-bottom: 20px;">+ Добавить день</button>
+
+                        <!-- Раскрывающийся блок: Академка -->
+                        <details id="academka-block" style="border:1px solid var(--border-color); border-radius:8px; margin: 0 0 20px 0; overflow:hidden;">
+                            <summary style="cursor:pointer; padding:15px; background:var(--input-bg); font-weight:bold; color:var(--admin-color);">🎓 Дополнение к отчету (Академка)</summary>
+                            <div style="padding:15px; border-top:1px solid var(--border-color);">
+                                <p style="color:var(--text-muted); font-size:13px; margin-top:0;">Добавляйте разделы (например «7.1. Проверка лидеров гос.»), а внутри каждого — записи со ссылкой, тайм-кодом и комментарием. Текст соберется автоматически в предпросмотре.</p>
+                                <div id="academka-sections"></div>
+                                <button type="button" class="btn-secondary" onclick="addAcademkaSection()">+ Добавить раздел</button>
+                            </div>
+                        </details>
+
+                        <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <label>Дополнительно: Скриншоты (опционально)</label>
+                            <input type="file" id="cur-report-files" multiple accept="image/*">
+                        </div>
+
+                        <button type="submit" class="btn-success" style="font-size: 16px; padding: 15px;">Отправить готовый отчет</button>
+                    </form>
+                </div>
+
+                <!-- Правая часть: Предпросмотр -->
+                <div class="constructor-preview">
+                    <h3>Предпросмотр</h3>
+                    <pre id="cur-report-preview-text">Заполните форму слева, чтобы увидеть результат...</pre>
+                </div>
+            </div>
         </div>
 
         <!-- Вкладка: Админ-панель -->
@@ -617,7 +691,7 @@
                 firebaseDB.ref(`reports/${id}`).update(updates).then(resolve).catch(reject);
             } else {
                 let reports = JSON.parse(localStorage.getItem('reportsDB') || '[]');
-                reports = reports.map(r => r.id === id ? { ...r, ...updates } : r);
+                reports = reports.map(r => String(r.id) === String(id) ? { ...r, ...updates } : r);
                 localStorage.setItem('reportsDB', JSON.stringify(reports));
                 cachedReports = reports;
                 window.dispatchEvent(new CustomEvent('reportsUpdated', { detail: reports }));
@@ -888,7 +962,7 @@
                 document.getElementById('nav-admin').style.display = 'flex';
                 badge.style.display = 'inline-block';
                 
-                if (roleInfo.level >= 3) {
+    if (roleInfo.level >= 3) {
                     document.getElementById('subtab-users-btn').style.display = 'inline-block';
                 } else {
                     document.getElementById('subtab-users-btn').style.display = 'none';
@@ -900,6 +974,10 @@
                 document.getElementById('nav-admin').style.display = 'none';
                 badge.style.display = 'none';
             }
+
+            // Страница отчёта куратора (академка) — доступна Куратору и выше
+            document.getElementById('nav-curator-report').style.display = (roleInfo.level >= 3) ? 'flex' : 'none';
+            document.getElementById('cur-report-nickname').value = currentUser.nickname;
 
             // Обновляем статус подключения
             if (useFirebase) {
@@ -1013,15 +1091,21 @@
     function switchMainTab(tab) {
         document.getElementById('nav-constructor').classList.toggle('active', tab === 'constructor');
         document.getElementById('nav-history').classList.toggle('active', tab === 'history');
+        document.getElementById('nav-tasks').classList.toggle('active', tab === 'tasks');
+        document.getElementById('nav-curator-report').classList.toggle('active', tab === 'curatorReport');
         document.getElementById('nav-admin').classList.toggle('active', tab === 'admin');
-        
+
         document.getElementById('tab-constructor').style.display = tab === 'constructor' ? 'block' : 'none';
         document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+        document.getElementById('tab-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
+        document.getElementById('tab-curator-report').style.display = tab === 'curatorReport' ? 'block' : 'none';
         document.getElementById('tab-admin').style.display = tab === 'admin' ? 'block' : 'none';
-        
+
         if (tab === 'history') renderUserHistory();
-        if (tab === 'admin') { 
-            switchAdminSubTab('reports'); 
+        if (tab === 'tasks') { startTasksSubscription(); renderTasks(); }
+        if (tab === 'curatorReport') updateCurPreview();
+        if (tab === 'admin') {
+            switchAdminSubTab('reports');
             // Скрываем бейдж при открытии админки
             document.getElementById('admin-notif-badge').style.display = 'none';
         }
@@ -1080,7 +1164,7 @@
     }
 
     function updateDayNumbers() {
-        const blocks = document.querySelectorAll('.day-block');
+        const blocks = document.querySelectorAll('#days-container .day-block');
         dayCount = 1;
         blocks.forEach(block => {
             block.querySelector('h4').textContent = `День ${dayCount}`;
@@ -1114,11 +1198,11 @@
         text += `Должность: ${roleName}\n`;
         text += `Никнейм: ${nickname}\n\n`;
 
-        const blocks = document.querySelectorAll('.day-block');
+        const blocks = document.querySelectorAll('#days-container .day-block');
         blocks.forEach((block, index) => {
             const link = block.querySelector('.day-link').value || '...';
             const desc = block.querySelector('.day-desc').value || '...';
-            
+
             text += `День ${index + 1}.\n`;
             text += `Ссылка на запись: ${link}\n`;
             text += `Описание работы:\n${desc}\n\n`;
@@ -1141,7 +1225,7 @@
         const key = getDraftKey();
         if (!key) return;
 
-        const days = Array.from(document.querySelectorAll('.day-block')).map(block => ({
+        const days = Array.from(document.querySelectorAll('#days-container .day-block')).map(block => ({
             link: block.querySelector('.day-link').value,
             desc: block.querySelector('.day-desc').value
         }));
@@ -1177,7 +1261,7 @@
             if (draft.days && draft.days.length > 0) {
                 draft.days.forEach(d => {
                     addDayBlock();
-                    const blocks = document.querySelectorAll('.day-block');
+                    const blocks = document.querySelectorAll('#days-container .day-block');
                     const last = blocks[blocks.length - 1];
                     last.querySelector('.day-link').value = d.link || '';
                     last.querySelector('.day-desc').value = d.desc || '';
@@ -1196,6 +1280,320 @@
         const key = getDraftKey();
         if (key) localStorage.removeItem(key);
     }
+
+    // ==================================================================================
+    //  ОТЧЕТ КУРАТОРА (АКАДЕМКА) — ДНИ И ПРЕДПРОСМОТР
+    // ==================================================================================
+    let curDayCount = 1;
+
+    function addCurDayBlock() {
+        const container = document.getElementById('cur-days-container');
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-block';
+        dayDiv.style.background = 'var(--card-bg)';
+        dayDiv.style.border = '1px solid var(--border-color)';
+        dayDiv.style.padding = '15px';
+        dayDiv.style.borderRadius = '6px';
+        dayDiv.style.marginBottom = '15px';
+
+        dayDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0; color:var(--text-color);">День ${curDayCount}</h4>
+                ${curDayCount > 1 ? `<button type="button" class="btn-danger" style="padding:4px 8px; margin:0;" onclick="this.parentElement.parentElement.remove(); updateCurDayNumbers(); updateCurPreview();">Удалить</button>` : ''}
+            </div>
+            <div class="form-group">
+                <label>Ссылка на запись</label>
+                <input type="text" class="day-link" placeholder="Ссылка на YouTube / Доказательства...">
+            </div>
+            <div class="form-group">
+                <label>Описание работы</label>
+                <textarea class="day-desc" placeholder="Что было сделано..."></textarea>
+            </div>
+        `;
+        container.appendChild(dayDiv);
+        curDayCount++;
+        updateCurDayNumbers();
+        updateCurPreview();
+    }
+
+    function updateCurDayNumbers() {
+        const blocks = document.querySelectorAll('#cur-days-container .day-block');
+        curDayCount = 1;
+        blocks.forEach(block => {
+            block.querySelector('h4').textContent = `День ${curDayCount}`;
+            curDayCount++;
+        });
+    }
+
+    // --- Конструктор дополнительного блока "Академка" ---
+    function addAcademkaSection() {
+        const container = document.getElementById('academka-sections');
+        const secDiv = document.createElement('div');
+        secDiv.className = 'academka-section';
+        secDiv.style.cssText = 'background:var(--card-bg); border:1px solid var(--border-color); padding:15px; border-radius:6px; margin-bottom:15px;';
+        secDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+                <input type="text" class="academka-section-title" placeholder="Например: 7.1. Проверка лидеров гос." style="flex:1;">
+                <button type="button" class="btn-danger" style="width:auto; padding:8px 12px; margin:0;" onclick="this.closest('.academka-section').remove(); updateCurPreview();">✕</button>
+            </div>
+            <div class="academka-entries"></div>
+            <button type="button" class="btn-secondary" style="margin-top:5px;" onclick="addAcademkaEntry(this.previousElementSibling)">+ Добавить запись</button>
+        `;
+        container.appendChild(secDiv);
+        addAcademkaEntry(secDiv.querySelector('.academka-entries'));
+    }
+
+    function addAcademkaEntry(entriesContainer) {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'academka-entry';
+        entryDiv.style.cssText = 'border-top:1px dashed var(--border-color); padding-top:10px; margin-top:10px;';
+        entryDiv.innerHTML = `
+            <div style="display:flex; justify-content:flex-end; margin-bottom:5px;">
+                <button type="button" class="btn-danger" style="width:auto; padding:4px 10px; margin:0; font-size:12px;" onclick="this.closest('.academka-entry').remove(); updateCurPreview();">Удалить запись</button>
+            </div>
+            <div class="form-group">
+                <label>Метка (необязательно)</label>
+                <input type="text" class="academka-entry-label" placeholder="Например: Слежка за стрелой">
+            </div>
+            <div class="form-group">
+                <label>Ссылка</label>
+                <input type="text" class="academka-entry-link" placeholder="Ссылка на видео">
+            </div>
+            <div class="form-group">
+                <label>Тайм-код</label>
+                <input type="text" class="academka-entry-timecode" placeholder="00:00:00">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Комментарий</label>
+                <textarea class="academka-entry-comment" placeholder="Комментарий..."></textarea>
+            </div>
+        `;
+        entriesContainer.appendChild(entryDiv);
+        updateCurPreview();
+    }
+
+    function generateAcademkaText() {
+        const sections = document.querySelectorAll('#academka-sections .academka-section');
+        let text = '';
+        sections.forEach(section => {
+            const title = section.querySelector('.academka-section-title').value.trim();
+            if (!title) return;
+            text += `✅${title}\n`;
+            const entries = section.querySelectorAll('.academka-entry');
+            entries.forEach(entry => {
+                const label = entry.querySelector('.academka-entry-label').value.trim();
+                const link = entry.querySelector('.academka-entry-link').value.trim();
+                const timecode = entry.querySelector('.academka-entry-timecode').value.trim();
+                const comment = entry.querySelector('.academka-entry-comment').value.trim();
+                if (label) text += `🔫${label}🔫\n`;
+                if (link) text += `🔗Ссылка: ${link}🔗\n`;
+                if (timecode) text += `⌛Тайм-код: ${timecode}⌛\n`;
+                if (comment) text += `💬Комментарий💬\n${comment}\n`;
+            });
+        });
+        return text.trim();
+    }
+
+    function updateCurPreview() {
+        if (!currentUser) return;
+        const nickname = document.getElementById('cur-report-nickname').value || currentUser.nickname;
+        const dateStart = document.getElementById('cur-report-date-start').value;
+        const dateEnd = document.getElementById('cur-report-date-end').value;
+        const roleName = ROLE_CONFIG[currentUser.role] ? ROLE_CONFIG[currentUser.role].name : 'Пользователь';
+
+        const todayD = new Date();
+        const todayStr = `${String(todayD.getDate()).padStart(2, '0')}.${String(todayD.getMonth() + 1).padStart(2, '0')}.${todayD.getFullYear()}`;
+
+        let text = `Отчет о выполненной работе\n\n`;
+        text += `С ${formatDate(dateStart)} по ${formatDate(dateEnd)}\n`;
+        text += `---------------------------\n`;
+        text += `Дата записи: ${todayStr}\n`;
+        text += `Должность: ${roleName}\n`;
+        text += `Никнейм: ${nickname}\n\n`;
+
+        const blocks = document.querySelectorAll('#cur-days-container .day-block');
+        blocks.forEach((block, index) => {
+            const link = block.querySelector('.day-link').value || '...';
+            const desc = block.querySelector('.day-desc').value || '...';
+
+            text += `День ${index + 1}.\n`;
+            text += `Ссылка на запись: ${link}\n`;
+            text += `Описание работы:\n${desc}\n\n`;
+        });
+
+        const academkaText = generateAcademkaText();
+        if (academkaText) {
+            text += `${academkaText}\n`;
+        }
+
+        document.getElementById('cur-report-preview-text').textContent = text.trim();
+    }
+
+    document.getElementById('curator-report-form').addEventListener('input', () => { updateCurPreview(); });
+    addCurDayBlock();
+
+    // ==================================================================================
+    //  СЛОЙ ДАННЫХ: ЗАДАНИЯ (Firebase / localStorage)
+    // ==================================================================================
+    let cachedTasks = [];
+
+    function saveTaskToDB(task) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                const newRef = firebaseDB.ref('tasks').push();
+                task.id = newRef.key;
+                newRef.set(task).then(() => resolve(task.id)).catch(reject);
+            } else {
+                task.id = Date.now();
+                const tasks = JSON.parse(localStorage.getItem('tasksDB') || '[]');
+                tasks.push(task);
+                localStorage.setItem('tasksDB', JSON.stringify(tasks));
+                cachedTasks = tasks;
+                window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: tasks }));
+                resolve(task.id);
+            }
+        });
+    }
+
+    let taskListenerActive = false;
+    function subscribeToTasks(callback) {
+        if (useFirebase) {
+            if (taskListenerActive) return;
+            taskListenerActive = true;
+
+            firebaseDB.ref('tasks').on('value', (snapshot) => {
+                const tasks = [];
+                snapshot.forEach(child => tasks.push({ ...child.val(), id: child.key }));
+                cachedTasks = tasks;
+                callback(tasks);
+            }, (error) => {
+                console.error('[Firebase] Ошибка чтения заданий:', error);
+            });
+        } else {
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'tasksDB') {
+                    cachedTasks = JSON.parse(e.newValue || '[]');
+                    callback(cachedTasks);
+                }
+            });
+            window.addEventListener('tasksUpdated', (e) => callback(e.detail));
+            cachedTasks = JSON.parse(localStorage.getItem('tasksDB') || '[]');
+            callback(cachedTasks);
+        }
+    }
+
+    function updateTaskInDB(id, updates) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref(`tasks/${id}`).update(updates).then(resolve).catch(reject);
+            } else {
+                let tasks = JSON.parse(localStorage.getItem('tasksDB') || '[]');
+                tasks = tasks.map(t => String(t.id) === String(id) ? { ...t, ...updates } : t);
+                localStorage.setItem('tasksDB', JSON.stringify(tasks));
+                cachedTasks = tasks;
+                window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: tasks }));
+                resolve();
+            }
+        });
+    }
+
+    function deleteTaskFromDB(id) {
+        return new Promise((resolve, reject) => {
+            if (useFirebase) {
+                firebaseDB.ref(`tasks/${id}`).remove().then(resolve).catch(reject);
+            } else {
+                let tasks = JSON.parse(localStorage.getItem('tasksDB') || '[]').filter(t => String(t.id) !== String(id));
+                localStorage.setItem('tasksDB', JSON.stringify(tasks));
+                cachedTasks = tasks;
+                window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: tasks }));
+                resolve();
+            }
+        });
+    }
+
+    // --- Рендер и управление списком заданий ---
+    let tasksListenerStarted = false;
+    function startTasksSubscription() {
+        if (tasksListenerStarted) return;
+        tasksListenerStarted = true;
+        subscribeToTasks((tasks) => {
+            if (document.getElementById('tab-tasks') && document.getElementById('tab-tasks').style.display !== 'none') {
+                renderTasks();
+            }
+        });
+    }
+
+    function renderTasks() {
+        if (!currentUser) return;
+        const list = document.getElementById('tasks-list');
+        const roleInfo = ROLE_CONFIG[currentUser.role];
+        const canManage = roleInfo && roleInfo.level > 0;
+
+        document.getElementById('tasks-admin-controls').style.display = canManage ? 'block' : 'none';
+
+        if (cachedTasks.length === 0) {
+            list.innerHTML = '<p style="color:var(--text-muted);">Заданий пока нет.</p>';
+            return;
+        }
+
+        const sorted = cachedTasks.slice().sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+        list.innerHTML = sorted.map(t => {
+            const done = !!(t.completedBy && t.completedBy[currentUser.login]);
+            return `
+            <div class="report-card" style="display:flex; align-items:center; gap:15px;">
+                <label class="switch" style="flex-shrink:0;" title="${done ? 'Выполнено' : 'Не выполнено'}">
+                    <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)">
+                    <span class="slider"></span>
+                </label>
+                <div style="flex:1; ${done ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${t.text}</div>
+                ${canManage ? `<button class="btn-danger" style="width:auto; padding:6px 12px; margin:0;" onclick="deleteTask('${t.id}')">Удалить</button>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    window.addTask = async function() {
+        const input = document.getElementById('new-task-text');
+        const text = input.value.trim();
+        if (!text) return;
+        const task = { text, createdAt: Date.now(), createdBy: currentUser.nickname, completedBy: {} };
+        try {
+            await saveTaskToDB(task);
+            input.value = '';
+            if (!useFirebase) renderTasks();
+        } catch (e) {
+            console.error('Ошибка добавления задания:', e);
+            alert('Ошибка при добавлении задания');
+        }
+    };
+
+    window.toggleTask = async function(id, checked) {
+        const task = cachedTasks.find(t => String(t.id) === String(id));
+        if (!task) return;
+        const completedBy = { ...(task.completedBy || {}) };
+        if (checked) completedBy[currentUser.login] = true;
+        else delete completedBy[currentUser.login];
+        try {
+            await updateTaskInDB(task.id, { completedBy });
+            if (!useFirebase) renderTasks();
+        } catch (e) {
+            console.error('Ошибка обновления задания:', e);
+            alert('Ошибка при обновлении задания');
+        }
+    };
+
+    window.deleteTask = async function(id) {
+        if (!confirm('Удалить это задание?')) return;
+        const task = cachedTasks.find(t => String(t.id) === String(id));
+        if (!task) return;
+        try {
+            await deleteTaskFromDB(task.id);
+            if (!useFirebase) renderTasks();
+        } catch (e) {
+            console.error('Ошибка удаления задания:', e);
+            alert('Ошибка при удалении задания');
+        }
+    };
 
     // ==================================================================================
     //  ОТПРАВКА ОТЧЕТА
@@ -1237,9 +1635,48 @@
             document.getElementById('days-container').innerHTML = '';
             addDayBlock();
             switchMainTab('history');
-        } catch (e) { 
+        } catch (e) {
             console.error('Ошибка отправки отчёта:', e);
-            alert('Превышен лимит памяти (попробуйте загрузить скриншоты меньшего размера).'); 
+            alert('Превышен лимит памяти (попробуйте загрузить скриншоты меньшего размера).');
+        }
+    });
+
+    // --- Отправка отчёта куратора (академка) ---
+    document.getElementById('curator-report-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const content = document.getElementById('cur-report-preview-text').textContent;
+
+        const fileInput = document.getElementById('cur-report-files');
+        let filesData = [];
+        if (fileInput.files.length > 0) {
+            try { filesData = await Promise.all(Array.from(fileInput.files).map(fileToBase64)); }
+            catch (err) { return alert('Ошибка при чтении файлов.'); }
+        }
+
+        const report = {
+            author: document.getElementById('cur-report-nickname').value,
+            time: new Date().toLocaleString('ru-RU'),
+            content: content,
+            status: 'pending',
+            adminComment: '',
+            files: filesData,
+            reportType: 'curator'
+        };
+
+        try {
+            await saveReportToDB(report);
+            alert('✅ Отчет куратора отправлен! Администратор увидит его автоматически.');
+            document.getElementById('curator-report-form').reset();
+            document.getElementById('cur-days-container').innerHTML = '';
+            curDayCount = 1;
+            addCurDayBlock();
+            document.getElementById('academka-sections').innerHTML = '';
+            document.getElementById('cur-report-nickname').value = currentUser.nickname;
+            switchMainTab('history');
+        } catch (e) {
+            console.error('Ошибка отправки отчёта куратора:', e);
+            alert('Превышен лимит памяти (попробуйте загрузить скриншоты меньшего размера).');
         }
     });
 
