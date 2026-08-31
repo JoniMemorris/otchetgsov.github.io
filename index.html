@@ -988,6 +988,7 @@
 
             // Восстанавливаем несохранённый черновик отчета (если он остался с прошлой сессии)
             restoreDraft();
+            restoreCurDraft();
 
             switchMainTab('constructor');
         } else {
@@ -1285,6 +1286,9 @@
     //  ОТЧЕТ КУРАТОРА (АКАДЕМКА) — ДНИ И ПРЕДПРОСМОТР
     // ==================================================================================
     let curDayCount = 1;
+    // Флаг подавляет автосохранение черновика, пока мы сами его восстанавливаем из localStorage
+    // (иначе промежуточные, ещё не заполненные блоки перезаписали бы сохранённый черновик).
+    let restoringCurDraft = false;
 
     function addCurDayBlock() {
         const container = document.getElementById('cur-days-container');
@@ -1299,7 +1303,7 @@
         dayDiv.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h4 style="margin:0; color:var(--text-color);">День ${curDayCount}</h4>
-                ${curDayCount > 1 ? `<button type="button" class="btn-danger" style="padding:4px 8px; margin:0;" onclick="this.parentElement.parentElement.remove(); updateCurDayNumbers(); updateCurPreview();">Удалить</button>` : ''}
+                ${curDayCount > 1 ? `<button type="button" class="btn-danger" style="padding:4px 8px; margin:0;" onclick="this.parentElement.parentElement.remove(); updateCurDayNumbers(); updateCurPreview(); saveCurDraft();">Удалить</button>` : ''}
             </div>
             <div class="form-group">
                 <label>Ссылка на запись</label>
@@ -1314,6 +1318,7 @@
         curDayCount++;
         updateCurDayNumbers();
         updateCurPreview();
+        saveCurDraft();
     }
 
     function updateCurDayNumbers() {
@@ -1334,7 +1339,7 @@
         secDiv.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
                 <input type="text" class="academka-section-title" placeholder="Например: 7.1. Проверка лидеров гос." style="flex:1;">
-                <button type="button" class="btn-danger" style="width:auto; padding:8px 12px; margin:0;" onclick="this.closest('.academka-section').remove(); updateCurPreview();">✕</button>
+                <button type="button" class="btn-danger" style="width:auto; padding:8px 12px; margin:0;" onclick="this.closest('.academka-section').remove(); updateCurPreview(); saveCurDraft();">✕</button>
             </div>
             <div class="academka-entries"></div>
             <button type="button" class="btn-secondary" style="margin-top:5px;" onclick="addAcademkaEntry(this.previousElementSibling)">+ Добавить запись</button>
@@ -1349,7 +1354,7 @@
         entryDiv.style.cssText = 'border-top:1px dashed var(--border-color); padding-top:10px; margin-top:10px;';
         entryDiv.innerHTML = `
             <div style="display:flex; justify-content:flex-end; margin-bottom:5px;">
-                <button type="button" class="btn-danger" style="width:auto; padding:4px 10px; margin:0; font-size:12px;" onclick="this.closest('.academka-entry').remove(); updateCurPreview();">Удалить запись</button>
+                <button type="button" class="btn-danger" style="width:auto; padding:4px 10px; margin:0; font-size:12px;" onclick="this.closest('.academka-entry').remove(); updateCurPreview(); saveCurDraft();">Удалить запись</button>
             </div>
             <div class="form-group">
                 <label>Метка (необязательно)</label>
@@ -1370,6 +1375,7 @@
         `;
         entriesContainer.appendChild(entryDiv);
         updateCurPreview();
+        saveCurDraft();
     }
 
     function generateAcademkaText() {
@@ -1429,8 +1435,115 @@
         document.getElementById('cur-report-preview-text').textContent = text.trim();
     }
 
-    document.getElementById('curator-report-form').addEventListener('input', () => { updateCurPreview(); });
-    addCurDayBlock();
+    // ==================================================================================
+    //  ЧЕРНОВИК ОТЧЕТА КУРАТОРА (АКАДЕМКА) — сохранение при выходе / перезагрузке страницы
+    // ==================================================================================
+    function getCurDraftKey() {
+        return currentUser ? `curatorReportDraft_${currentUser.login}` : null;
+    }
+
+    function saveCurDraft() {
+        if (restoringCurDraft) return;
+        const key = getCurDraftKey();
+        if (!key) return;
+
+        const days = Array.from(document.querySelectorAll('#cur-days-container .day-block')).map(block => ({
+            link: block.querySelector('.day-link').value,
+            desc: block.querySelector('.day-desc').value
+        }));
+
+        const sections = Array.from(document.querySelectorAll('#academka-sections .academka-section')).map(section => ({
+            title: section.querySelector('.academka-section-title').value,
+            entries: Array.from(section.querySelectorAll('.academka-entry')).map(entry => ({
+                label: entry.querySelector('.academka-entry-label').value,
+                link: entry.querySelector('.academka-entry-link').value,
+                timecode: entry.querySelector('.academka-entry-timecode').value,
+                comment: entry.querySelector('.academka-entry-comment').value
+            }))
+        }));
+
+        const draft = {
+            nickname: document.getElementById('cur-report-nickname').value,
+            dateStart: document.getElementById('cur-report-date-start').value,
+            dateEnd: document.getElementById('cur-report-date-end').value,
+            days,
+            sections
+        };
+
+        localStorage.setItem(key, JSON.stringify(draft));
+    }
+
+    function restoreCurDraft() {
+        const key = getCurDraftKey();
+        if (!key) return;
+
+        const raw = localStorage.getItem(key);
+        if (!raw) { addCurDayBlock(); return; }
+
+        restoringCurDraft = true;
+        try {
+            const draft = JSON.parse(raw);
+
+            document.getElementById('cur-report-nickname').value = draft.nickname || currentUser.nickname;
+            document.getElementById('cur-report-date-start').value = draft.dateStart || '';
+            document.getElementById('cur-report-date-end').value = draft.dateEnd || '';
+
+            const daysContainer = document.getElementById('cur-days-container');
+            daysContainer.innerHTML = '';
+            curDayCount = 1;
+
+            if (draft.days && draft.days.length > 0) {
+                draft.days.forEach(dItem => {
+                    addCurDayBlock();
+                    const blocks = document.querySelectorAll('#cur-days-container .day-block');
+                    const last = blocks[blocks.length - 1];
+                    last.querySelector('.day-link').value = dItem.link || '';
+                    last.querySelector('.day-desc').value = dItem.desc || '';
+                });
+            } else {
+                addCurDayBlock();
+            }
+
+            const sectionsContainer = document.getElementById('academka-sections');
+            sectionsContainer.innerHTML = '';
+
+            if (draft.sections && draft.sections.length > 0) {
+                draft.sections.forEach(s => {
+                    addAcademkaSection(); // создаёт секцию с одной пустой записью по умолчанию
+                    const sections = document.querySelectorAll('#academka-sections .academka-section');
+                    const lastSection = sections[sections.length - 1];
+                    lastSection.querySelector('.academka-section-title').value = s.title || '';
+
+                    const entriesContainer = lastSection.querySelector('.academka-entries');
+                    entriesContainer.innerHTML = '';
+
+                    const entriesToRestore = (s.entries && s.entries.length > 0) ? s.entries : [{}];
+                    entriesToRestore.forEach(en => {
+                        addAcademkaEntry(entriesContainer);
+                        const entries = entriesContainer.querySelectorAll('.academka-entry');
+                        const lastEntry = entries[entries.length - 1];
+                        lastEntry.querySelector('.academka-entry-label').value = en.label || '';
+                        lastEntry.querySelector('.academka-entry-link').value = en.link || '';
+                        lastEntry.querySelector('.academka-entry-timecode').value = en.timecode || '';
+                        lastEntry.querySelector('.academka-entry-comment').value = en.comment || '';
+                    });
+                });
+            }
+
+            updateCurPreview();
+        } catch (e) {
+            console.error('Ошибка восстановления черновика отчета куратора:', e);
+        } finally {
+            restoringCurDraft = false;
+        }
+    }
+
+    function clearCurDraft() {
+        const key = getCurDraftKey();
+        if (key) localStorage.removeItem(key);
+    }
+
+    document.getElementById('curator-report-form').addEventListener('input', () => { updateCurPreview(); saveCurDraft(); });
 
     // ==================================================================================
     //  СЛОЙ ДАННЫХ: ЗАДАНИЯ (Firebase / localStorage)
@@ -1673,6 +1786,7 @@
             addCurDayBlock();
             document.getElementById('academka-sections').innerHTML = '';
             document.getElementById('cur-report-nickname').value = currentUser.nickname;
+            clearCurDraft(); // сбрасываем черновик в самом конце, чтобы addCurDayBlock() выше его не пересоздал
             switchMainTab('history');
         } catch (e) {
             console.error('Ошибка отправки отчёта куратора:', e);
